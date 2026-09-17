@@ -14,6 +14,7 @@
 use std::collections::BTreeMap;
 
 use regex::Regex;
+use rust_i18n::t;
 use serde::Deserialize;
 use serde_json::{Map, Value};
 
@@ -47,11 +48,11 @@ impl TriggerSpec {
             TriggerSpec::Pattern(pattern) => (pattern.as_str(), Map::new()),
             TriggerSpec::WithArgs { pattern, args } => (pattern.as_str(), args.clone()),
         };
-        let context = |e: String| format!("Trigger \"{pattern}\": {e}");
+        let context = |e: String| t!("triggers.error", pattern = pattern, error = e).to_string();
 
         for key in fixed_args.keys() {
             if !params.contains_key(key) {
-                return Err(context(format!("\"args\" enthält unbekannten Parameter \"{key}\".")));
+                return Err(context(t!("triggers.unknown_arg", name = key).into()));
             }
         }
 
@@ -62,19 +63,21 @@ impl TriggerSpec {
         };
         let (body, min_literals) = parser.sequence(&[]).map_err(context)?;
         if parser.pos != parser.chars.len() {
-            return Err(context(format!("unerwartetes \"{}\".", parser.chars[parser.pos])));
+            return Err(context(
+                t!("triggers.unexpected", char = parser.chars[parser.pos]).into(),
+            ));
         }
         for name in &parser.captures {
             if !params.contains_key(name) {
-                return Err(context(format!("{{{name}}} ist kein definierter Parameter.")));
+                return Err(context(t!("triggers.unknown_param", name = name).into()));
             }
         }
         if min_literals == 0 {
-            return Err(context("braucht mindestens ein festes Wort.".into()));
+            return Err(context(t!("triggers.needs_literal").into()));
         }
 
         let regex = Regex::new(&format!(r"(?i)^\s*{body}\s*[.!?]*\s*$"))
-            .map_err(|e| context(format!("ungültiges Muster ({e}).")))?;
+            .map_err(|e| context(t!("triggers.invalid_regex", error = e).into()))?;
 
         Ok(Trigger {
             regex,
@@ -172,15 +175,15 @@ impl Parser {
                     let name: String = self.chars[start..self.pos].iter().collect();
                     self.expect('}')?;
                     if name.is_empty() {
-                        return Err("leerer Platzhalter {}.".into());
+                        return Err(t!("triggers.empty_capture").into());
                     }
                     if self.captures.contains(&name) {
-                        return Err(format!("{{{name}}} kommt doppelt vor."));
+                        return Err(t!("triggers.duplicate_capture", name = name).into());
                     }
                     out.push_str(&format!("(?P<{name}>.+?)"));
                     self.captures.push(name);
                 }
-                ')' | ']' | '|' | '}' => return Err(format!("unerwartetes \"{c}\".")),
+                ')' | ']' | '|' | '}' => return Err(t!("triggers.unexpected", char = c).into()),
                 _ => {
                     self.pos += 1;
                     min_literals += 1;
@@ -204,7 +207,7 @@ impl Parser {
             self.pos += 1;
             Ok(())
         } else {
-            Err(format!("\"{c}\" fehlt."))
+            Err(t!("triggers.missing_char", char = c).into())
         }
     }
 }

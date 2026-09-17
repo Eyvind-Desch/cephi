@@ -1,0 +1,191 @@
+{
+  "_version": 1,
+  "agent": {
+    "busy": "A request is already running.",
+    "too_many_rounds": "Stopped after %{rounds} tool rounds without a final answer.",
+    "unknown_tool": "Unknown tool \"%{name}\".",
+    "denied": "The user declined to run this.",
+    "truncated": "… (truncated)"
+  },
+  "app": {
+    "open_folder_failed": "Could not open the folder: %{error}"
+  },
+  "args": {
+    "not_object": "Arguments must be a JSON object.",
+    "missing_required": "Required parameter \"%{name}\" is missing.",
+    "not_allowed": "\"%{name}\" must be one of: %{options}.",
+    "wrong_type": "\"%{name}\" must be of type %{kind}, got: %{value}."
+  },
+  "audio": {
+    "set_failed": "Could not set the volume: %{error}",
+    "mute_failed": "Could not change mute: %{error}",
+    "read_failed": "Could not read the volume: %{error}",
+    "devices_unavailable": "Audio devices are not available: %{error}",
+    "no_output_device": "No audio output device found.",
+    "control_unavailable": "Volume control is not available: %{error}",
+    "state": "Volume %{percent} %",
+    "state_muted": "Volume %{percent} % (muted)"
+  },
+  "clipboard": {
+    "unavailable": "Clipboard is not available: %{error}",
+    "no_text": "The clipboard contains no text: %{error}",
+    "empty": "(clipboard is empty)",
+    "write_failed": "Could not write to the clipboard: %{error}",
+    "copied": "Copied text to the clipboard."
+  },
+  "config": {
+    "file_unreadable": "File not readable: %{error}",
+    "folder_unreadable": "Folder not readable: %{error}",
+    "invalid_json": "Invalid JSON: %{error}",
+    "empty_text": "\"%{field}\" must not be empty."
+  },
+  "executor": {
+    "preview_open": "Open: %{url}",
+    "preview_launch": "Start: %{command}",
+    "preview_script": "%{values}\n\nScript:\n%{script}",
+    "preview_builtin": "Built-in function: %{id}",
+    "invalid_url": "Invalid URL \"%{url}\": %{error}",
+    "scheme_not_allowed": "The scheme \"%{scheme}:\" is not allowed for this tool.",
+    "open_failed": "Could not open: %{error}",
+    "opened": "Opened: %{url}",
+    "launch_failed": "Could not start \"%{program}\": %{error}",
+    "launched": "Started: %{program}",
+    "powershell_start_failed": "Could not start PowerShell: %{error}",
+    "powershell_failed": "PowerShell error: %{error}",
+    "timeout": "Timed out after %{seconds} s.",
+    "no_output": "(no output)",
+    "exit_code": "Exit code %{code}:\n%{details}",
+    "request_failed": "Request failed: %{error}",
+    "response_unreadable": "Could not read the response: %{error}"
+  },
+  "external": {
+    "invalid_link": "Invalid link.",
+    "web_only": "Only web links can be opened."
+  },
+  "hotkey": {
+    "reset_failed": "Could not reset hotkeys: %{error}",
+    "register_failed": "Could not register the hotkey \"%{hotkey}\" (%{error}). Is it used by another app?"
+  },
+  "launcher": {
+    "index_failed": "Could not read the list of installed apps: %{error}",
+    "launched": "Started: %{name}",
+    "not_found": "No installed app matches \"%{name}\".",
+    "ambiguous": "No app clearly matches \"%{name}\". Similar: %{suggestions}."
+  },
+  "llm": {
+    "unreachable": "Ollama is not reachable at %{url}. Is Ollama running?",
+    "api_error": "Ollama: %{details}",
+    "invalid_response": "Invalid response from Ollama: %{details}",
+    "cancelled": "Cancelled"
+  },
+  "media": {
+    "unknown_action": "Unknown media action \"%{action}\".",
+    "play_pause": "Toggled playback.",
+    "next": "Next track.",
+    "previous": "Previous track.",
+    "level_missing": "set_volume needs \"level\" (0–100).",
+    "level_out_of_range": "Volume must be between 0 and 100, not %{level}."
+  },
+  "radio": {
+    "bluetooth": "Bluetooth",
+    "wifi": "Wi-Fi",
+    "unknown_device": "Unknown radio \"%{device}\" (possible: bluetooth, wifi).",
+    "unknown_command": "Unknown command \"%{command}\" (possible: on, off, toggle, status).",
+    "windows_error": "Windows error: %{error}",
+    "access_denied": "Windows does not allow access to radios. Check Settings → Privacy & security → Radios.",
+    "no_adapter": "No %{device} adapter found.",
+    "hardware_disabled": "%{device} is disabled by hardware or airplane mode and cannot be switched.",
+    "status": "%{device} is %{state}.",
+    "already": "%{device} was already %{state} (checked).",
+    "switch_denied": "Windows refused to switch %{device}.",
+    "switched": "%{device} is now %{state}.",
+    "switch_failed": "Could not switch %{device}, it is still %{state}.",
+    "state_on": "on",
+    "state_off": "off",
+    "state_disabled": "disabled",
+    "state_unknown": "in an unknown state"
+  },
+  "secret_groups": {
+    "spotify": {
+      "description": "Play songs by command. The API is only used for search, playback happens in the Spotify app.",
+      "client_id_placeholder": "32 characters from the Spotify dashboard",
+      "client_secret_placeholder": "\"View client secret\" in the dashboard"
+    },
+    "custom": {
+      "title": "Custom tools",
+      "description": "Keys your tools use via {{secret:…}}.",
+      "placeholder": "Paste value"
+    }
+  },
+  "secrets": {
+    "invalid_name": "Invalid key name \"%{name}\": only a-z, 0-9 and _, starting with a letter.",
+    "missing": "Key \"%{name}\" is missing. Add it in Orbit under \"Keys\".",
+    "read_failed": "Could not read the credential (error %{code}).",
+    "not_text": "The stored key is not valid text.",
+    "empty": "The key must not be empty.",
+    "too_long": "The key is too long.",
+    "save_failed": "Could not save the key (error %{code}).",
+    "delete_failed": "Could not delete the key (error %{code})."
+  },
+  "settings": {
+    "no_profiles": "At least one profile is required in \"profiles\".",
+    "profile_incomplete": "profiles[%{index}]: \"id\" and \"model\" must not be empty.",
+    "duplicate_profile": "profiles: duplicate id \"%{id}\".",
+    "unknown_default_profile": "defaultProfile \"%{id}\" does not exist in \"profiles\".",
+    "invalid_ollama_url": "ollama.baseUrl \"%{url}\" is not a valid URL.",
+    "max_tool_rounds": "agent.maxToolRounds must be at least 1."
+  },
+  "spotify": {
+    "unknown_kind": "Unknown Spotify type \"%{kind}\".",
+    "connection_ok": "Connection to Spotify works.",
+    "empty_query": "What should I search for on Spotify?",
+    "invalid_response": "Invalid response from Spotify: %{error}",
+    "open_failed": "Could not open Spotify: %{error}",
+    "playing": "Playing on Spotify: %{title}",
+    "opened_album": "Opened album on Spotify: %{title}",
+    "opened_artist": "Opened artist on Spotify: %{title}",
+    "opened_playlist": "Opened playlist on Spotify: %{title}",
+    "unreachable": "Spotify is not reachable: %{error}",
+    "search_failed": "Spotify search failed (HTTP %{status}): %{details}",
+    "nothing_found": "Nothing found on Spotify for \"%{query}\".",
+    "not_configured": "Spotify is not set up yet: add the Client ID and Client Secret in Orbit under \"Keys\".",
+    "credentials_rejected": "Spotify rejected the credentials. Check the Client ID and Client Secret.",
+    "auth_failed": "Spotify sign-in failed (HTTP %{status})."
+  },
+  "templates": {
+    "unclosed": "Unclosed placeholder in \"%{template}\".",
+    "empty": "Empty placeholder in \"%{template}\".",
+    "unknown_filter": "Unknown filter \"%{filter}\" (allowed: raw, url, json).",
+    "unknown_param": "Placeholder {{%{name}}} does not refer to a defined parameter.",
+    "header_newline": "Parameter \"%{name}\" contains line breaks (not allowed in headers)."
+  },
+  "tools": {
+    "invalid_manifest": "Invalid tool: %{error}",
+    "duplicate_name": "Tool name \"%{name}\" is already used in %{source}.",
+    "invalid_name": "\"name\" \"%{name}\" is invalid: only a-z, 0-9 and _, starting with a letter (2–64 characters).",
+    "empty_description": "\"description\" must not be empty: the model chooses tools based on it.",
+    "parameters_not_object": "\"parameters.type\" must be \"object\".",
+    "invalid_param_name": "Parameter \"%{name}\" is invalid: only letters, digits and _ are allowed.",
+    "required_unknown": "\"required\" contains \"%{name}\", but that parameter is not defined.",
+    "powershell_placeholders": "PowerShell scripts do not support {{placeholders}}. Use $env:ORBIT_ARG_<NAME> instead (safe against code injection).",
+    "http_url_scheme": "\"action.url\" must start with http:// or https://.",
+    "builtin_missing_param": "Builtin \"%{builtin}\" requires the parameter \"%{name}\"."
+  },
+  "tray": {
+    "show": "Open Orbit",
+    "open_config": "Open configuration",
+    "reload": "Reload configuration",
+    "quit": "Quit"
+  },
+  "triggers": {
+    "error": "Trigger \"%{pattern}\": %{error}",
+    "unknown_arg": "\"args\" contains the unknown parameter \"%{name}\".",
+    "unexpected": "unexpected \"%{char}\".",
+    "unknown_param": "{%{name}} is not a defined parameter.",
+    "needs_literal": "needs at least one fixed word.",
+    "invalid_regex": "invalid pattern (%{error}).",
+    "empty_capture": "empty placeholder {}.",
+    "duplicate_capture": "{%{name}} appears twice.",
+    "missing_char": "\"%{char}\" is missing."
+  }
+}

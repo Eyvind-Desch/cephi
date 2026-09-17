@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { FolderCog, KeyRound, Minimize2, MoreHorizontal, Pin, RefreshCw, SquarePen } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { api } from "../../lib/ipc";
 import { useChat } from "../../store/chat";
 import { useUi } from "../../store/ui";
@@ -9,6 +10,7 @@ import { OrbitMark } from "../ui/OrbitMark";
 import { ProfileSwitch } from "./ProfileSwitch";
 
 export function Header() {
+  const { t } = useTranslation();
   const running = useChat((s) => s.running);
   const reset = useChat((s) => s.reset);
   const pinned = useUi((s) => s.pinned);
@@ -20,24 +22,28 @@ export function Header() {
 
   const entries: MenuEntry[] = [
     {
-      label: "Neuer Chat",
+      label: t("menu.newChat"),
       icon: SquarePen,
-      shortcut: "Strg+N",
+      shortcut: t("menu.newChatShortcut"),
       onSelect: () => {
         setView("chat");
         void reset();
       },
     },
-    { label: "Anpinnen", icon: Pin, checked: pinned, onSelect: togglePinned },
+    { label: t("menu.pin"), icon: Pin, checked: pinned, onSelect: togglePinned },
     { kind: "separator" },
     {
-      label: "Schlüssel & API-Keys",
+      label: t("menu.keys"),
       icon: KeyRound,
       disabled: view === "keys",
       onSelect: () => setView("keys"),
     },
-    { label: "Konfigurationsordner", icon: FolderCog, onSelect: () => void api.configOpenFolder() },
-    { label: "Konfiguration neu laden", icon: RefreshCw, onSelect: () => void api.configReload().then(applyConfig) },
+    { label: t("menu.configFolder"), icon: FolderCog, onSelect: () => void api.configOpenFolder() },
+    {
+      label: t("menu.reloadConfig"),
+      icon: RefreshCw,
+      onSelect: () => void api.configReload().then(applyConfig),
+    },
   ];
 
   return (
@@ -45,7 +51,7 @@ export function Header() {
       <OrbitMark size={22} active={running} />
       <span className="mr-1.5 text-[14px] font-semibold tracking-tight">Orbit</span>
       {pinned && (
-        <span title="Angepinnt: bleibt offen" className="text-accent">
+        <span title={t("header.pinned")} className="text-accent">
           <Pin size={13} className="fill-current" />
         </span>
       )}
@@ -56,7 +62,7 @@ export function Header() {
         trigger={({ open, toggle, id }) => (
           <IconButton
             icon={MoreHorizontal}
-            label="Menü"
+            label={t("header.menu")}
             aria-haspopup="menu"
             aria-expanded={open}
             aria-controls={id}
@@ -65,7 +71,7 @@ export function Header() {
           />
         )}
       />
-      <IconButton icon={Minimize2} label="Verkleinern (Strg+E)" onClick={() => setMode("compact")} />
+      <IconButton icon={Minimize2} label={t("header.collapse")} onClick={() => setMode("compact")} />
     </header>
   );
 }

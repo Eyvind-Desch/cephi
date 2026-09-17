@@ -3,10 +3,13 @@ use serde::Serialize;
 use super::{Config, Diagnostic};
 use crate::tools::Permission;
 
-/// Read-only view of the configuration sent to the frontend.
+/// Read-only view of the configuration sent to the frontend. Texts are already resolved for the
+/// active language.
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ConfigSnapshot {
+    /// Active UI language (`settings.language` resolved, e.g. `system` → `de`).
+    pub language: String,
     pub config_dir: String,
     pub hotkey: String,
     pub default_profile: String,
@@ -38,7 +41,9 @@ pub struct ToolInfo {
 impl ConfigSnapshot {
     pub fn build(config: &Config, config_dir: String, extra: Option<Diagnostic>) -> Self {
         let settings = &config.settings;
+        let locale = rust_i18n::locale();
         Self {
+            language: locale.to_string(),
             config_dir,
             hotkey: settings.hotkey.clone(),
             default_profile: settings.default_profile.clone(),
@@ -47,7 +52,7 @@ impl ConfigSnapshot {
                 .iter()
                 .map(|p| ProfileInfo {
                     id: p.id.clone(),
-                    label: p.label.clone(),
+                    label: p.label.resolve(&locale).to_string(),
                     model: p.model.clone(),
                     tools: p.tools,
                 })
@@ -57,7 +62,7 @@ impl ConfigSnapshot {
                 .iter()
                 .map(|t| ToolInfo {
                     name: t.manifest.name.clone(),
-                    title: t.title().to_string(),
+                    title: t.title(),
                     description: t.manifest.description.clone(),
                     permission: t.manifest.permission,
                     kind: t.manifest.action.kind(),

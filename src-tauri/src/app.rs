@@ -2,6 +2,7 @@
 
 use std::time::Duration;
 
+use rust_i18n::t;
 use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_opener::OpenerExt;
 
@@ -27,12 +28,12 @@ pub fn setup(app: &AppHandle) -> AppResult<()> {
         .user_agent(concat!("Orbit/", env!("CARGO_PKG_VERSION")))
         .connect_timeout(Duration::from_secs(5))
         .build()
-        .map_err(|e| AppError::msg(format!("HTTP-Client: {e}")))?;
+        .map_err(|e| AppError::msg(format!("failed to create HTTP client: {e}")))?;
 
     let cache_dir = app
         .path()
         .app_cache_dir()
-        .map_err(|e| AppError::msg(format!("Cache-Ordner nicht gefunden: {e}")))?;
+        .map_err(|e| AppError::msg(format!("cache directory not found: {e}")))?;
     let launcher = AppIndex::load(cache_dir.join("app-index.json"));
 
     app.manage(AppState::new(paths, config, http, launcher));
@@ -84,10 +85,17 @@ pub fn reload_config(app: &AppHandle) -> ConfigSnapshot {
     let previous = state.config();
     let next = config::load(&state.paths, Some(&previous.settings));
     let hotkey_changed = previous.settings.hotkey != next.settings.hotkey;
+    let language_changed = previous.settings.language != next.settings.language;
     state.replace_config(next);
 
-    if hotkey_changed {
+    if hotkey_changed || language_changed {
+        // Also re-registers on language change so a hotkey error message is re-localized.
         register_hotkey(app);
+    }
+    if language_changed {
+        if let Err(e) = tray::refresh_menu(app) {
+            log::error!("refresh tray menu: {e}");
+        }
     }
 
     let snapshot = snapshot(app);
@@ -129,9 +137,7 @@ pub async fn update_secret(state: &AppState, name: &str, value: Option<&str>) ->
 pub async fn test_secret_group(state: &AppState, group_id: &str) -> AppResult<String> {
     match group_id {
         "spotify" => state.spotify.test_connection(&state.http).await.map_err(AppError::msg),
-        other => Err(AppError::msg(format!(
-            "Für \"{other}\" gibt es keinen Verbindungstest."
-        ))),
+        other => Err(AppError::msg(format!("no connection test for \"{other}\""))),
     }
 }
 
@@ -139,7 +145,7 @@ pub fn open_config_folder(app: &AppHandle) -> AppResult<()> {
     let root = app.state::<AppState>().paths.root.clone();
     app.opener()
         .open_path(root.to_string_lossy(), None::<&str>)
-        .map_err(|e| AppError::msg(format!("Ordner konnte nicht geöffnet werden: {e}")))
+        .map_err(|e| AppError::msg(t!("app.open_folder_failed", error = e)))
 }
 
 fn register_hotkey(app: &AppHandle) {

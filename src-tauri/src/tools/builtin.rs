@@ -1,5 +1,6 @@
 //! Tools implemented in Rust, referenced from manifests via `{"type": "builtin", "id": "…"}`.
 
+use rust_i18n::t;
 use serde::Deserialize;
 use tauri::Manager;
 
@@ -82,9 +83,9 @@ impl Builtin {
                 blocking(|| {
                     let text = clipboard()?
                         .get_text()
-                        .map_err(|e| format!("Zwischenablage enthält keinen Text: {e}"))?;
+                        .map_err(|e| t!("clipboard.no_text", error = e).to_string())?;
                     Ok(if text.is_empty() {
-                        "(Zwischenablage ist leer)".into()
+                        t!("clipboard.empty").into()
                     } else {
                         text
                     })
@@ -96,8 +97,8 @@ impl Builtin {
                 blocking(move || {
                     clipboard()?
                         .set_text(text)
-                        .map_err(|e| format!("Schreiben fehlgeschlagen: {e}"))?;
-                    Ok("Text in die Zwischenablage kopiert.".into())
+                        .map_err(|e| t!("clipboard.write_failed", error = e).to_string())?;
+                    Ok(t!("clipboard.copied").into())
                 })
                 .await
             }
@@ -140,17 +141,14 @@ async fn open_app(ctx: &ExecContext<'_>, name: &str) -> Result<String, String> {
     match app {
         Some(app) => {
             launcher.launch(&app)?;
-            Ok(format!("Gestartet: {}", app.name))
+            Ok(t!("launcher.launched", name = app.name).into())
         }
         None => {
             let suggestions: Vec<String> = launcher.search(name, 3).into_iter().map(|(_, a)| a.name).collect();
             Err(if suggestions.is_empty() {
-                format!("Keine installierte App passt zu \"{name}\".")
+                t!("launcher.not_found", name = name).into()
             } else {
-                format!(
-                    "Keine App passt eindeutig zu \"{name}\". Ähnlich: {}.",
-                    suggestions.join(", ")
-                )
+                t!("launcher.ambiguous", name = name, suggestions = suggestions.join(", ")).into()
             })
         }
     }
@@ -161,7 +159,7 @@ fn str_arg<'a>(args: &'a Args, name: &str) -> &'a str {
 }
 
 fn clipboard() -> Result<arboard::Clipboard, String> {
-    arboard::Clipboard::new().map_err(|e| format!("Zwischenablage nicht verfügbar: {e}"))
+    arboard::Clipboard::new().map_err(|e| t!("clipboard.unavailable", error = e).to_string())
 }
 
 async fn blocking<F>(f: F) -> Result<String, String>
@@ -170,5 +168,5 @@ where
 {
     tauri::async_runtime::spawn_blocking(f)
         .await
-        .map_err(|e| format!("Interner Fehler: {e}"))?
+        .map_err(|e| format!("internal error: {e}"))?
 }

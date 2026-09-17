@@ -1,56 +1,60 @@
 //! Known services and their keys, so the keys view can group them with labels and help.
 //!
-//! To add a service (e.g. an AI provider), add a [`GroupSpec`] to [`GROUPS`]. Secrets used by
-//! tools but not listed here appear in the "Eigene Tools" group.
+//! To add a service (e.g. an AI provider), add a [`GroupSpec`] in [`known_groups`] and its texts
+//! to the locale files. Secrets used by tools but not listed here appear in the "custom" group.
 
 use std::collections::BTreeMap;
 
+use rust_i18n::t;
 use serde::Serialize;
 
 use super::store;
 
 struct SecretSpec {
     name: &'static str,
-    label: &'static str,
+    label: String,
     /// Hidden input (secrets) vs. plain input (IDs).
     sensitive: bool,
-    placeholder: &'static str,
+    placeholder: String,
 }
 
 struct GroupSpec {
     id: &'static str,
-    title: &'static str,
-    description: &'static str,
+    title: String,
+    description: String,
     /// Icon name understood by the frontend.
     icon: &'static str,
     docs_url: Option<&'static str>,
-    /// Whether "Verbindung testen" is supported (see `app::test_secret_group`).
+    /// Whether "test connection" is supported (see `app::test_secret_group`).
     testable: bool,
-    secrets: &'static [SecretSpec],
+    secrets: Vec<SecretSpec>,
 }
 
-const GROUPS: &[GroupSpec] = &[GroupSpec {
-    id: "spotify",
-    title: "Spotify",
-    description: "Songs per Befehl abspielen. Die API wird nur zum Suchen genutzt, gespielt wird in der Spotify-App.",
-    icon: "music",
-    docs_url: Some("https://developer.spotify.com/dashboard"),
-    testable: true,
-    secrets: &[
-        SecretSpec {
-            name: "spotify_client_id",
-            label: "Client ID",
-            sensitive: false,
-            placeholder: "32 Zeichen aus dem Spotify-Dashboard",
-        },
-        SecretSpec {
-            name: "spotify_client_secret",
-            label: "Client Secret",
-            sensitive: true,
-            placeholder: "„View client secret“ im Dashboard",
-        },
-    ],
-}];
+/// Built at call time so texts follow the active language.
+fn known_groups() -> Vec<GroupSpec> {
+    vec![GroupSpec {
+        id: "spotify",
+        title: "Spotify".into(),
+        description: t!("secret_groups.spotify.description").into(),
+        icon: "music",
+        docs_url: Some("https://developer.spotify.com/dashboard"),
+        testable: true,
+        secrets: vec![
+            SecretSpec {
+                name: "spotify_client_id",
+                label: "Client ID".into(),
+                sensitive: false,
+                placeholder: t!("secret_groups.spotify.client_id_placeholder").into(),
+            },
+            SecretSpec {
+                name: "spotify_client_secret",
+                label: "Client Secret".into(),
+                sensitive: true,
+                placeholder: t!("secret_groups.spotify.client_secret_placeholder").into(),
+            },
+        ],
+    }]
+}
 
 const CUSTOM_GROUP_ID: &str = "custom";
 
@@ -86,17 +90,33 @@ pub fn overview(usage: &BTreeMap<String, Vec<String>>) -> Vec<SecretGroupInfo> {
 }
 
 fn overview_with(usage: &BTreeMap<String, Vec<String>>, is_set: impl Fn(&str) -> bool) -> Vec<SecretGroupInfo> {
-    let mut groups: Vec<SecretGroupInfo> = GROUPS
+    let known = known_groups();
+    let is_known = |name: &str| known.iter().any(|g| g.secrets.iter().any(|s| s.name == name));
+
+    let custom: Vec<SecretInfo> = usage
         .iter()
+        .filter(|(name, _)| !is_known(name))
+        .map(|(name, used_by)| SecretInfo {
+            name: name.clone(),
+            label: name.clone(),
+            sensitive: true,
+            placeholder: t!("secret_groups.custom.placeholder").into(),
+            is_set: is_set(name),
+            used_by: used_by.clone(),
+        })
+        .collect();
+
+    let mut groups: Vec<SecretGroupInfo> = known
+        .into_iter()
         .filter_map(|group| {
             let secrets: Vec<SecretInfo> = group
                 .secrets
-                .iter()
+                .into_iter()
                 .map(|spec| SecretInfo {
                     name: spec.name.into(),
-                    label: spec.label.into(),
+                    label: spec.label,
                     sensitive: spec.sensitive,
-                    placeholder: spec.placeholder.into(),
+                    placeholder: spec.placeholder,
                     is_set: is_set(spec.name),
                     used_by: usage.get(spec.name).cloned().unwrap_or_default(),
                 })
@@ -104,8 +124,8 @@ fn overview_with(usage: &BTreeMap<String, Vec<String>>, is_set: impl Fn(&str) ->
             let relevant = secrets.iter().any(|s| s.is_set || !s.used_by.is_empty());
             relevant.then(|| SecretGroupInfo {
                 id: group.id.into(),
-                title: group.title.into(),
-                description: group.description.into(),
+                title: group.title,
+                description: group.description,
                 icon: group.icon.into(),
                 docs_url: group.docs_url.map(Into::into),
                 testable: group.testable,
@@ -114,24 +134,11 @@ fn overview_with(usage: &BTreeMap<String, Vec<String>>, is_set: impl Fn(&str) ->
         })
         .collect();
 
-    let custom: Vec<SecretInfo> = usage
-        .iter()
-        .filter(|(name, _)| !GROUPS.iter().any(|g| g.secrets.iter().any(|s| s.name == name.as_str())))
-        .map(|(name, used_by)| SecretInfo {
-            name: name.clone(),
-            label: name.clone(),
-            sensitive: true,
-            placeholder: "Wert einfügen".into(),
-            is_set: is_set(name),
-            used_by: used_by.clone(),
-        })
-        .collect();
-
     if !custom.is_empty() {
         groups.push(SecretGroupInfo {
             id: CUSTOM_GROUP_ID.into(),
-            title: "Eigene Tools".into(),
-            description: "Schlüssel, die deine Tools über {{secret:…}} verwenden.".into(),
+            title: t!("secret_groups.custom.title").into(),
+            description: t!("secret_groups.custom.description").into(),
             icon: "wrench".into(),
             docs_url: None,
             testable: false,
@@ -159,7 +166,7 @@ mod tests {
             &usage(&[
                 ("spotify_client_id", "Spotify"),
                 ("spotify_client_secret", "Spotify"),
-                ("deepl_key", "Übersetzen"),
+                ("deepl_key", "Translate"),
             ]),
             |name| name == "spotify_client_id",
         );

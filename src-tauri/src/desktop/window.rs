@@ -45,7 +45,7 @@ impl WindowController {
 
 fn main_window(app: &AppHandle) -> AppResult<WebviewWindow> {
     app.get_webview_window(MAIN_LABEL)
-        .ok_or_else(|| AppError::msg("Hauptfenster nicht gefunden."))
+        .ok_or_else(|| AppError::msg("main window not found"))
 }
 
 pub fn show(app: &AppHandle) -> AppResult<()> {

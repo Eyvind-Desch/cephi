@@ -1,34 +1,49 @@
+use rust_i18n::t;
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
-use tauri::AppHandle;
+use tauri::{AppHandle, Wry};
 
 use super::window;
 use crate::error::{AppError, AppResult};
 
+const TRAY_ID: &str = "orbit";
 const SHOW: &str = "show";
 const OPEN_CONFIG: &str = "open-config";
 const RELOAD: &str = "reload";
 const QUIT: &str = "quit";
 
-pub fn create(app: &AppHandle) -> AppResult<()> {
-    let menu = Menu::with_items(
+fn build_menu(app: &AppHandle) -> AppResult<Menu<Wry>> {
+    let item = |id: &str, label: std::borrow::Cow<'_, str>| MenuItem::with_id(app, id, label, true, None::<&str>);
+    Ok(Menu::with_items(
         app,
         &[
-            &MenuItem::with_id(app, SHOW, "Orbit öffnen", true, None::<&str>)?,
+            &item(SHOW, t!("tray.show"))?,
             &PredefinedMenuItem::separator(app)?,
-            &MenuItem::with_id(app, OPEN_CONFIG, "Konfiguration öffnen", true, None::<&str>)?,
-            &MenuItem::with_id(app, RELOAD, "Konfiguration neu laden", true, None::<&str>)?,
+            &item(OPEN_CONFIG, t!("tray.open_config"))?,
+            &item(RELOAD, t!("tray.reload"))?,
             &PredefinedMenuItem::separator(app)?,
-            &MenuItem::with_id(app, QUIT, "Beenden", true, None::<&str>)?,
+            &item(QUIT, t!("tray.quit"))?,
         ],
-    )?;
+    )?)
+}
+
+/// Rebuilds the menu texts, e.g. after the language changed.
+pub fn refresh_menu(app: &AppHandle) -> AppResult<()> {
+    if let Some(tray) = app.tray_by_id(TRAY_ID) {
+        tray.set_menu(Some(build_menu(app)?))?;
+    }
+    Ok(())
+}
+
+pub fn create(app: &AppHandle) -> AppResult<()> {
+    let menu = build_menu(app)?;
 
     let icon = app
         .default_window_icon()
         .cloned()
-        .ok_or_else(|| AppError::msg("App-Icon fehlt."))?;
+        .ok_or_else(|| AppError::msg("app icon missing"))?;
 
-    TrayIconBuilder::with_id("orbit")
+    TrayIconBuilder::with_id(TRAY_ID)
         .icon(icon)
         .tooltip("Orbit")
         .menu(&menu)

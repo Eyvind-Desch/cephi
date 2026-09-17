@@ -1,6 +1,7 @@
 import { AlertCircle, Check, CircleSlash, Copy } from "lucide-react";
 import { motion } from "motion/react";
 import { memo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { AssistantMessage, Message } from "../../store/chatModel";
 import { Markdown } from "./Markdown";
 import { ToolCard } from "./ToolCard";
@@ -10,6 +11,8 @@ import { ToolCard } from "./ToolCard";
  * so all other messages skip re-rendering.
  */
 export const MessageView = memo(function MessageView({ message }: { message: Message }) {
+  const { t } = useTranslation();
+
   if (message.role === "user") {
     return (
       <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="flex justify-end">
@@ -33,7 +36,7 @@ export const MessageView = memo(function MessageView({ message }: { message: Mes
 
       {message.status === "cancelled" && (
         <p className="flex items-center gap-1.5 text-[12px] text-subtle select-none">
-          <CircleSlash size={13} /> Abgebrochen
+          <CircleSlash size={13} /> {t("chat.cancelled")}
         </p>
       )}
 
@@ -57,6 +60,7 @@ function plainText(message: AssistantMessage) {
 }
 
 function CopyButton({ text }: { text: string }) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   return (
     <button
@@ -69,14 +73,15 @@ function CopyButton({ text }: { text: string }) {
       className="-mt-1 flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[12px] text-subtle opacity-0 transition-opacity select-none group-hover:opacity-100 hover:text-fg focus-visible:opacity-100"
     >
       {copied ? <Check size={13} className="text-success" /> : <Copy size={13} />}
-      {copied ? "Kopiert" : "Kopieren"}
+      {copied ? t("common.copied") : t("common.copy")}
     </button>
   );
 }
 
 function TypingIndicator() {
+  const { t } = useTranslation();
   return (
-    <div className="flex h-6 items-center gap-1 select-none" aria-label="Orbit denkt nach">
+    <div className="flex h-6 items-center gap-1 select-none" aria-label={t("chat.thinking")}>
       {[0, 1, 2].map((i) => (
         <motion.span
           key={i}

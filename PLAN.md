@@ -1,131 +1,131 @@
 # Orbit – Plan
 
-Immer verfügbarer Desktop-Assistent für Windows: KI fragen, im Web suchen und Dinge am PC erledigen,
-ohne ein extra Fenster zu öffnen. Läuft komplett lokal mit Ollama.
+Always-available desktop assistant for Windows: ask AI, search the web, and get things done on your PC,
+without opening an extra window. Runs entirely locally with Ollama.
 
-## Entscheidungen
+## Decisions
 
-| Thema | Entscheidung | Warum |
+| Topic | Decision | Why |
 |---|---|---|
-| App-Framework | **Tauri 2** (Rust + React/TS) | ~10 MB, wenig RAM, WebView2 ist in Windows schon drin, Mica/Tray/Hotkey als Plugins. Eigene UI ohne Grenzen. |
-| Nicht: PowerToys-Erweiterung (C#) | – | Die Command Palette gibt Listen-UI vor: kein freies Chat-Panel, kein eingebettetes Google, kein eigenes Design. Als *zusätzlicher* Einstieg später denkbar. |
-| UI | React + TypeScript + Tailwind + Framer Motion | Modern, schnelle Iteration, flüssige Animationen |
-| KI | Ollama (`localhost:11434`) | Modelle schon vorhanden |
-| Websuche | **SearXNG** (Docker), DuckDuckGo als Notlösung | Siehe unten |
-| Tools/Aktionen | Eingebaute Tools + **MCP-Client** (Rust, `rmcp`) | Aktionen wie „öffne Spotify“ plus beliebige MCP-Server |
+| App framework | **Tauri 2** (Rust + React/TS) | ~10 MB, low RAM, WebView2 is already built into Windows, Mica/tray/hotkey available as plugins. Custom UI without limits. |
+| Not: PowerToys extension (C#) | – | The Command Palette dictates a list UI: no free-form chat panel, no embedded Google, no custom design. Conceivable later as an *additional* entry point. |
+| UI | React + TypeScript + Tailwind + Framer Motion | Modern, fast iteration, smooth animations |
+| AI | Ollama (`localhost:11434`) | Models already available |
+| Web search | **SearXNG** (Docker), DuckDuckGo as fallback | See below |
+| Tools/actions | Built-in tools + **MCP client** (Rust, `rmcp`) | Actions like "open Spotify" plus arbitrary MCP servers |
 
 ### SearXNG vs. DuckDuckGo
 
-- **DuckDuckGo** hat keine offizielle Such-API. Man liest die HTML-Seite aus: das wird schnell
-  gebremst (Rate-Limit/CAPTCHA), liefert nur eine Quelle und kann jederzeit kaputtgehen.
-- **SearXNG** läuft lokal in Docker, fragt Google, Bing, Brave, DuckDuckGo, Wikipedia, GitHub usw.
-  gleichzeitig ab, hat eine saubere JSON-API, kein Konto, kein Key, keine Kosten, kein Tracking.
-  → **Deutlich besser.** Docker wird später auch für andere Projekte nützlich.
-- DuckDuckGo bleibt als Notlösung, wenn der SearXNG-Container nicht läuft.
+- **DuckDuckGo** has no official search API. You scrape the HTML page, which quickly gets
+  throttled (rate limiting/CAPTCHA), only provides one source, and can break at any time.
+- **SearXNG** runs locally in Docker, queries Google, Bing, Brave, DuckDuckGo, Wikipedia, GitHub, etc.
+  simultaneously, has a clean JSON API, no account, no key, no cost, no tracking.
+  → **Clearly better.** Docker will also be useful for other projects later.
+- DuckDuckGo remains as a fallback if the SearXNG container isn't running.
 
 ## UX
 
 ```
- versteckt ──Hotkey──▶  kompakt (Leiste unten rechts)  ──Tab/Klick──▶  groß (Panel)
-  (Tray-Icon)          ┌──────────────────────────┐          ┌─────────────┬──────────────┐
-                       │ ◯ Frag mich was…      ⏎  │          │ Chat        │ Web / Google │
-                       └──────────────────────────┘          │ + Quellen   │ (Webview)    │
-                                                             └─────────────┴──────────────┘
+ hidden ──hotkey──▶  compact (bar, bottom right)  ──Tab/click──▶  large (panel)
+ (tray icon)         ┌──────────────────────────┐          ┌─────────────┬──────────────┐
+                      │ ◯ Ask me something…    ⏎ │          │ Chat        │ Web / Google │
+                      └──────────────────────────┘          │ + sources   │ (Webview)    │
+                                                              └─────────────┴──────────────┘
 ```
 
-- Globaler Hotkey `Ctrl+Alt+Space`, einstellbar (nicht `Ctrl+Space`: kollidiert mit IntelliSense in VS Code)
-- `Esc` versteckt; Klick nach außen blendet aus, außer das Fenster ist angepinnt
-- Mica/Acryl-Hintergrund, Hell/Dunkel folgt dem System, abgerundete Ecken, weiche Übergänge
-- Antworten live gestreamt, Markdown mit Code-Highlighting, Kopieren-Button
-- Tray-Icon, Autostart
+- Global hotkey `Ctrl+Alt+Space`, configurable (not `Ctrl+Space`: conflicts with IntelliSense in VS Code)
+- `Esc` hides it; clicking outside hides it too, unless the window is pinned
+- Mica/acrylic background, light/dark follows the system, rounded corners, smooth transitions
+- Responses streamed live, Markdown with code highlighting, copy button
+- Tray icon, autostart
 
-### Eingabe: ein Feld für alles
+### Input: one field for everything
 
-| Eingabe | Was passiert |
+| Input | What happens |
 |---|---|
-| `öffne spotify`, `spotify` | **Schnellweg ohne KI:** unscharfe Suche über Startmenü-Apps, startet sofort |
-| `g katzen` | Google im Web-Panel |
-| `? wie wird das wetter morgen` | KI mit Websuche → Antwort mit Quellen-Karten |
-| alles andere | KI-Chat; die KI darf Tools aufrufen |
-| `/` | Befehlsliste (Modell wechseln, neuer Chat, Einstellungen …) |
+| `öffne spotify` / "open spotify", `spotify` | **Quick action, no AI:** fuzzy search over Start menu apps, launches instantly |
+| `g katzen` / "g cats" | Google in the web panel |
+| `? wie wird das wetter morgen` / "? what will the weather be like tomorrow" | AI with web search → answer with source cards |
+| everything else | AI chat; the AI may call tools |
+| `/` | Command list (switch model, new chat, settings, …) |
 
-## Architektur
+## Architecture
 
 ```
 ┌──────────────── Frontend (React/TS, WebView2) ────────────────┐
-│ Compact-Bar · Chat-Panel · Web-Panel · Einstellungen          │
+│ Compact bar · Chat panel · Web panel · Settings                │
 └──────────────── Tauri IPC (commands + events) ────────────────┘
-┌──────────────────────── Rust-Core ────────────────────────────┐
-│ window     Hotkey, Tray, Zustände, Mica, Always-on-top        │
-│ llm        Ollama-Client (Streaming, Tool-Calls)              │
-│ agent      Schleife: Modell → Tool-Call → Ergebnis → Modell   │
-│ tools      Registry: eingebaute Tools + MCP-Tools             │
-│ mcp        MCP-Client (rmcp), startet Server aus mcp.json     │
-│ launcher   Index: Startmenü-.lnk + Store-Apps, Fuzzy-Suche    │
-│ search     SearXNG-Client, DDG-Notlösung, Seiten → Text       │
-│ store      Einstellungen + Chatverlauf (SQLite)               │
+┌──────────────────────── Rust core ─────────────────────────────┐
+│ window     hotkey, tray, state, Mica, always-on-top             │
+│ llm        Ollama client (streaming, tool calls)                │
+│ agent      loop: model → tool call → result → model             │
+│ tools      registry: built-in tools + MCP tools                 │
+│ mcp        MCP client (rmcp), starts servers from mcp.json      │
+│ launcher   index: Start menu .lnk + Store apps, fuzzy search     │
+│ search     SearXNG client, DDG fallback, pages → text            │
+│ store      settings + chat history (SQLite)                     │
 └───────────────────────────────────────────────────────────────┘
         │                    │                     │
-   Ollama :11434      SearXNG :8888 (Docker)   MCP-Server (stdio/http)
+   Ollama :11434      SearXNG :8888 (Docker)   MCP server (stdio/http)
 ```
 
-## Tools / Aktionen
+## Tools / Actions
 
-Tools sind **JSON-Dateien** in `%APPDATA%\Orbit\tools\` mit JSON-Schema (Autovervollständigung im Editor)
-und Hot-Reload. Aktionstypen: `open_url`, `launch`, `powershell`, `http`, `builtin`. Details: [docs/TOOLS.md](docs/TOOLS.md).
+Tools are **JSON files** in `%APPDATA%\Orbit\tools\` with a JSON schema (editor autocompletion)
+and hot reload. Action types: `open_url`, `launch`, `powershell`, `http`, `builtin`. Details: [docs/TOOLS.md](docs/TOOLS.md).
 
-Mitgeliefert: `google_search`, `youtube_search`, `open_website`, `weather`, `datetime`,
+Shipped: `google_search`, `youtube_search`, `open_website`, `weather`, `datetime`,
 `clipboard_read`, `clipboard_write`, `open_explorer`, `open_settings`, `system_info`,
 `lock_pc` (confirm), `run_powershell` (confirm).
 
-Geplant: `open_app` (Launcher-Index), `web_search` + `fetch_page` (SearXNG), `find_files`.
+Planned: `open_app` (launcher index), `web_search` + `fetch_page` (SearXNG), `find_files`.
 
-**Sicherheitsstufen:** `auto` / `confirm` (Standard), pro Tool, später auch für MCP-Tools.
+**Permission levels:** `auto` / `confirm` (default), per tool, later also for MCP tools.
 
-**MCP:** `mcp.json` im gleichen Format wie Claude Desktop (`mcpServers`), damit vorhandene
-Server-Konfigurationen direkt funktionieren.
+**MCP:** `mcp.json` in the same format as Claude Desktop (`mcpServers`), so existing
+server configurations work directly.
 
-### Modelle
+### Models
 
-| Aufgabe | Modell |
+| Task | Model |
 |---|---|
-| Schnelle Antworten | `assistant-fast` (qwen2.5 3B) |
-| Tools & Websuche | `assistant` (qwen3 4B) – kann besser mit Tools umgehen |
-| Gründlich | `assistant-big` (gemma4 26B), per Schalter |
+| Fast answers | `assistant-fast` (qwen2.5 3B) |
+| Tools & web search | `assistant` (qwen3 4B) – handles tools better |
+| Thorough | `assistant-big` (gemma4 26B), via toggle |
 
-Kleine Modelle werden mit vielen Tools unzuverlässig: pro Anfrage nur die passenden ~8 Tools
-mitschicken. Eindeutige Befehle („öffne X“) laufen über den Schnellweg ohne KI.
+Small models become unreliable with many tools: send only the ~8 matching tools per
+request. Unambiguous commands ("open X") run through the quick action path without AI.
 
-## Etappen
+## Stages
 
-1. ✅ **MVP** – Tauri-Gerüst, Hotkey, Tray, kompakte Leiste ↔ großes Panel, Ollama-Chat mit Streaming,
-   Modell-Profile, Mica, Hell/Dunkel
-2. ✅ **Aktionen** – JSON-Tool-System mit Schema, Validierung, Hot-Reload, Tool-Calling-Schleife,
-   Bestätigungsdialoge · Schnellweg-Trigger ohne KI · App-Launcher · Spotify (Web-API-Suche + URI) ·
-   Medientasten · Schlüssel-Tresor (Windows Credential Manager) · Modell-Preload
-2b. **Modell-Anbieter** – `providers` in `settings.json`: Ollama, Anthropic, Gemini, OpenAI-kompatibel;
-   Profile verweisen auf einen Anbieter; API-Keys über den Schlüssel-Tresor
-3. **Web** – Entschieden: *beides*. Ergebnis-Karten sofort (SearXNG) + KI-Kurzfassung nur aus den
-   Auszügen (schnell), dazu ein Google-Tab im Panel
-4. **MCP** – `mcp.json`, Tools aus MCP-Servern
-5. **Feinschliff** – Einstellungs-UI, Verlauf speichern, Code-Highlighting, Autostart, Installer
-6. **Extras** – markierten Text übernehmen, Screenshot fragen (Bild-Modell), Sprache
+1. ✅ **MVP** – Tauri scaffold, hotkey, tray, compact bar ↔ large panel, Ollama chat with streaming,
+   model profiles, Mica, light/dark
+2. ✅ **Actions** – JSON tool system with schema, validation, hot reload, tool-calling loop,
+   confirmation dialogs · quick-action triggers without AI · app launcher · Spotify (Web API search + URI) ·
+   media keys · key vault (Windows Credential Manager) · model preload · i18n: English source, German translation
+2b. **Model providers** – `providers` in `settings.json`: Ollama, Anthropic, Gemini, OpenAI-compatible;
+   profiles reference a provider; API keys via the key vault
+3. **Web** – Decided: *both*. Result cards immediately (SearXNG) + AI summary from the
+   excerpts only (fast), plus a Google tab in the panel
+4. **MCP** – `mcp.json`, tools from MCP servers
+5. **Polish** – settings UI, save history, code highlighting, autostart, installer
+6. **Extras** – pick up selected text, ask about a screenshot (vision model), voice
 
-## Arbeitsweise
+## Approach
 
-Jede Funktion wird erst **alltagstauglich** gemacht (Nutzung findet die echten Probleme), bevor die
-nächste Etappe beginnt. Was nicht stört, landet im Backlog statt im nächsten Commit.
+Every feature is first made **fit for daily use** (real-world use finds the actual problems) before the
+next stage begins. Whatever isn't a nuisance goes into the backlog instead of the next commit.
 
-### Backlog (Feinschliff)
+### Backlog (polish)
 
-- [ ] Beim Start aus dem Terminal bleibt das Fenster verborgen (Windows-Vordergrundsperre) → Hotkey nötig
-- [ ] Code-Highlighting in Antworten
-- [ ] Chatverlauf speichern
-- [ ] Lautstärke-Anzeige (kurzes Overlay) nach „lauter/leiser“
-- [ ] Bei Alben/Playlists prüfen, ob Spotify automatisch abspielt
+- [ ] When launched from the terminal, the window stays hidden (Windows foreground lock) → hotkey needed
+- [ ] Code highlighting in responses
+- [ ] Save chat history
+- [ ] Volume indicator (brief overlay) after "louder/quieter"
+- [ ] Check whether Spotify auto-plays albums/playlists
 
 ## Setup
 
 - [x] Git, Node LTS, Rustup, VS C++ Build Tools (winget)
-- [x] Projekt-Gerüst: `create-tauri-app` (React + TS)
-- [ ] Docker Desktop (ab Etappe 3)
+- [x] Project scaffold: `create-tauri-app` (React + TS)
+- [ ] Docker Desktop (from stage 3 onward)

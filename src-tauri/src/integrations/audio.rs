@@ -1,7 +1,8 @@
 //! System volume of the default output device via Windows Core Audio.
 //!
-//! Unlike media keys (fixed 2 % steps), this sets exact levels: "Lautstärke auf 30 %", "24 lauter".
+//! Unlike media keys (fixed 2 % steps), this sets exact levels: "volume to 30", "24 louder".
 
+use rust_i18n::t;
 use windows::Win32::Media::Audio::Endpoints::IAudioEndpointVolume;
 use windows::Win32::Media::Audio::{eConsole, eRender, IMMDeviceEnumerator, MMDeviceEnumerator};
 use windows::Win32::System::Com::{CoCreateInstance, CoInitializeEx, CLSCTX_ALL, COINIT_MULTITHREADED};
@@ -25,7 +26,7 @@ pub fn set(percent: i32) -> Result<VolumeState, String> {
     unsafe {
         endpoint
             .SetMasterVolumeLevelScalar(level, std::ptr::null())
-            .map_err(|e| format!("Lautstärke konnte nicht gesetzt werden: {e}"))?;
+            .map_err(|e| t!("audio.set_failed", error = e).to_string())?;
         // Changing the volume should be audible.
         let _ = endpoint.SetMute(false, std::ptr::null());
     }
@@ -45,7 +46,7 @@ pub fn set_muted(muted: Option<bool>) -> Result<VolumeState, String> {
     unsafe {
         endpoint
             .SetMute(muted, std::ptr::null())
-            .map_err(|e| format!("Stummschaltung fehlgeschlagen: {e}"))?;
+            .map_err(|e| t!("audio.mute_failed", error = e).to_string())?;
     }
     read(&endpoint)
 }
@@ -55,7 +56,7 @@ fn read(endpoint: &IAudioEndpointVolume) -> Result<VolumeState, String> {
     unsafe {
         let level = endpoint
             .GetMasterVolumeLevelScalar()
-            .map_err(|e| format!("Lautstärke nicht lesbar: {e}"))?;
+            .map_err(|e| t!("audio.read_failed", error = e).to_string())?;
         let muted = endpoint.GetMute().map(|m| m.as_bool()).unwrap_or(false);
         Ok(VolumeState {
             percent: (level * 100.0).round() as u8,
@@ -70,21 +71,21 @@ fn endpoint() -> Result<IAudioEndpointVolume, String> {
     unsafe {
         let _ = CoInitializeEx(None, COINIT_MULTITHREADED);
         let enumerator: IMMDeviceEnumerator = CoCreateInstance(&MMDeviceEnumerator, None, CLSCTX_ALL)
-            .map_err(|e| format!("Audiogeräte nicht verfügbar: {e}"))?;
+            .map_err(|e| t!("audio.devices_unavailable", error = e).to_string())?;
         let device = enumerator
             .GetDefaultAudioEndpoint(eRender, eConsole)
-            .map_err(|_| "Kein Audio-Ausgabegerät gefunden.".to_string())?;
+            .map_err(|_| t!("audio.no_output_device").to_string())?;
         device
             .Activate::<IAudioEndpointVolume>(CLSCTX_ALL, None)
-            .map_err(|e| format!("Lautstärkeregelung nicht verfügbar: {e}"))
+            .map_err(|e| t!("audio.control_unavailable", error = e).to_string())
     }
 }
 
 pub fn describe(state: VolumeState) -> String {
     if state.muted {
-        format!("Lautstärke {} % (stumm)", state.percent)
+        t!("audio.state_muted", percent = state.percent).into()
     } else {
-        format!("Lautstärke {} %", state.percent)
+        t!("audio.state", percent = state.percent).into()
     }
 }
 

@@ -1,3 +1,4 @@
+use rust_i18n::t;
 use tauri::AppHandle;
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
 
@@ -8,7 +9,7 @@ pub fn register(app: &AppHandle, hotkey: &str) -> Result<(), String> {
     let shortcuts = app.global_shortcut();
     shortcuts
         .unregister_all()
-        .map_err(|e| format!("Hotkeys konnten nicht zurückgesetzt werden: {e}"))?;
+        .map_err(|e| t!("hotkey.reset_failed", error = e).to_string())?;
 
     shortcuts
         .on_shortcut(hotkey, |app, _shortcut, event| {
@@ -18,9 +19,7 @@ pub fn register(app: &AppHandle, hotkey: &str) -> Result<(), String> {
                 }
             }
         })
-        .map_err(|e| {
-            format!("Hotkey \"{hotkey}\" konnte nicht registriert werden ({e}). Evtl. von einer anderen App belegt?")
-        })?;
+        .map_err(|e| t!("hotkey.register_failed", hotkey = hotkey, error = e).to_string())?;
 
     log::info!("hotkey registered: {hotkey}");
     Ok(())

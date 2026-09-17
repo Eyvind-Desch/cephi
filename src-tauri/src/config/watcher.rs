@@ -27,12 +27,12 @@ pub fn start(app: &AppHandle) -> AppResult<()> {
             });
         }
     })
-    .map_err(|e| AppError::msg(format!("Dateiüberwachung konnte nicht starten: {e}")))?;
+    .map_err(|e| AppError::msg(format!("failed to start file watcher: {e}")))?;
 
     debouncer
         .watcher()
         .watch(&state.paths.root, RecursiveMode::Recursive)
-        .map_err(|e| AppError::msg(format!("Konfigurationsordner nicht überwachbar: {e}")))?;
+        .map_err(|e| AppError::msg(format!("failed to watch config folder: {e}")))?;
 
     app.manage(WatcherGuard(debouncer));
     Ok(())

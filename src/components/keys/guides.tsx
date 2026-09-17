@@ -1,23 +1,27 @@
 import { Check, Copy } from "lucide-react";
 import { useState, type ComponentType, type ReactNode } from "react";
+import { Trans, useTranslation } from "react-i18next";
 
 /** Step-by-step help per service, keyed by group id (`secrets/catalog.rs`). */
 export const guides: Record<string, ComponentType> = {
   spotify: SpotifyGuide,
 };
 
+const SPOTIFY_REDIRECT_URI = "http://127.0.0.1:43821/callback";
+
 function SpotifyGuide() {
+  const { t } = useTranslation();
+  const components = { b: <b />, uri: <CopyValue value={SPOTIFY_REDIRECT_URI} /> };
   return (
-    <Guide title="So bekommst du die Schlüssel (2 Minuten, Premium nötig)">
+    <Guide title={t("keysGuide.spotify.title")}>
       <li>
-        Im <b>Spotify Developer Dashboard</b> (Button unten) mit deinem Premium-Konto anmelden.
+        <Trans i18nKey="keysGuide.spotify.step1" components={components} />
       </li>
       <li>
-        <b>Create app</b>: Name „Orbit“, Redirect URI <CopyValue value="http://127.0.0.1:43821/callback" />, bei APIs{" "}
-        <b>Web API</b> anhaken, speichern.
+        <Trans i18nKey="keysGuide.spotify.step2" components={components} />
       </li>
       <li>
-        In der App unter <b>Settings</b> Client ID und Client Secret kopieren und hier einfügen.
+        <Trans i18nKey="keysGuide.spotify.step3" components={components} />
       </li>
     </Guide>
   );
@@ -38,13 +42,14 @@ function Guide({ title, children }: { title: string; children: ReactNode }) {
 
 /** Inline code with a copy button. */
 function CopyValue({ value }: { value: string }) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   return (
     <span className="inline-flex items-center gap-1 rounded-md border border-line bg-raised py-px pr-0.5 pl-1.5 align-middle">
       <code className="font-mono text-[11.5px] text-fg">{value}</code>
       <button
         type="button"
-        title="Kopieren"
+        title={t("common.copy")}
         onClick={async () => {
           await navigator.clipboard.writeText(value);
           setCopied(true);

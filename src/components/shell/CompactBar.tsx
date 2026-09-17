@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { AlertTriangle, CheckCircle2, Maximize2, XCircle } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { onWindowShown } from "../../lib/ipc";
 import { useChat } from "../../store/chat";
 import { useUi, type Flash } from "../../store/ui";
@@ -11,6 +12,7 @@ import { OrbitMark } from "../ui/OrbitMark";
 
 /** Compact mode: a single input line, Spotlight-style. */
 export function CompactBar() {
+  const { t } = useTranslation();
   const running = useChat((s) => s.running);
   const setMode = useUi((s) => s.setMode);
   const flash = useUi((s) => s.flash);
@@ -37,7 +39,7 @@ export function CompactBar() {
       {problemCount > 0 && (
         <IconButton
           icon={AlertTriangle}
-          label={`${problemCount} Konfigurationsproblem(e) – Details im Panel`}
+          label={t("compact.problems", { count: problemCount })}
           className="text-warning"
           onClick={() => setMode("expanded")}
         />
@@ -47,7 +49,7 @@ export function CompactBar() {
           {profile.label}
         </span>
       )}
-      <IconButton icon={Maximize2} label="Erweitern (Strg+E)" onClick={() => setMode("expanded")} />
+      <IconButton icon={Maximize2} label={t("compact.expand")} onClick={() => setMode("expanded")} />
     </div>
   );
 }

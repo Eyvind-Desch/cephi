@@ -3,6 +3,7 @@ use std::process::Stdio;
 use std::sync::OnceLock;
 use std::time::Duration;
 
+use rust_i18n::t;
 use tauri::AppHandle;
 use tauri_plugin_opener::OpenerExt;
 
@@ -81,7 +82,7 @@ pub fn accepts_fast_path(ctx: &ExecContext<'_>, tool: &Tool, args: &Args) -> boo
 pub fn preview(tool: &Tool, args: &Args) -> String {
     let render = |text: &str, context| template::render(text, context, args, Secrets::Mask).unwrap_or_else(|e| e);
     match &tool.manifest.action {
-        Action::OpenUrl { url } => format!("Öffnen: {}", render(url, Context::Url)),
+        Action::OpenUrl { url } => t!("executor.preview_open", url = render(url, Context::Url)).into(),
         Action::Launch {
             program, args: argv, ..
         } => {
@@ -90,9 +91,8 @@ pub fn preview(tool: &Tool, args: &Args) -> String {
                 .map(|a| render(a, Context::Arg))
                 .filter(|a| !a.is_empty())
                 .collect();
-            format!("Starten: {} {}", render(program, Context::Arg), rendered.join(" "))
-                .trim_end()
-                .to_string()
+            let command = format!("{} {}", render(program, Context::Arg), rendered.join(" "));
+            t!("executor.preview_launch", command = command.trim_end()).into()
         }
         // Model-controlled values first (what the user actually has to judge), then the fixed script.
         Action::Powershell { script, .. } => {
@@ -100,11 +100,16 @@ pub fn preview(tool: &Tool, args: &Args) -> String {
             if values.is_empty() {
                 script.trim().to_string()
             } else {
-                format!("{}\n\nSkript:\n{}", values.join("\n"), script.trim())
+                t!(
+                    "executor.preview_script",
+                    values = values.join("\n"),
+                    script = script.trim()
+                )
+                .into()
             }
         }
         Action::Http { method, url, .. } => format!("{} {}", method.as_str(), render(url, Context::Url)),
-        Action::Builtin { id } => format!("Interne Funktion: {}", id.as_str()),
+        Action::Builtin { id } => t!("executor.preview_builtin", id = id.as_str()).into(),
     }
 }
 
@@ -112,7 +117,8 @@ fn open_url(ctx: &ExecContext<'_>, url_template: &str, args: &Args) -> Result<St
     let rendered = template::render(url_template, Context::Url, args, Secrets::Resolve)?;
     // Messages go to the model and the UI, so they use the masked URL.
     let shown = template::render(url_template, Context::Url, args, Secrets::Mask)?;
-    let parsed = url::Url::parse(&rendered).map_err(|e| format!("Ungültige URL \"{shown}\": {e}"))?;
+    let parsed =
+        url::Url::parse(&rendered).map_err(|e| t!("executor.invalid_url", url = shown, error = e).to_string())?;
 
     // A fixed scheme in the template (e.g. "ms-settings:") is trusted. Otherwise the model
     // controls the scheme, so only web URLs are allowed (no file:, javascript:, …).
@@ -124,17 +130,14 @@ fn open_url(ctx: &ExecContext<'_>, url_template: &str, args: &Args) -> Result<St
         None => matches!(parsed.scheme(), "http" | "https"),
     };
     if !allowed {
-        return Err(format!(
-            "Schema \"{}:\" ist für dieses Tool nicht erlaubt.",
-            parsed.scheme()
-        ));
+        return Err(t!("executor.scheme_not_allowed", scheme = parsed.scheme()).into());
     }
 
     ctx.app
         .opener()
         .open_url(parsed.as_str(), None::<&str>)
-        .map_err(|e| format!("Konnte nicht geöffnet werden: {e}"))?;
-    Ok(format!("Geöffnet: {shown}"))
+        .map_err(|e| t!("executor.open_failed", error = e).to_string())?;
+    Ok(t!("executor.opened", url = shown).into())
 }
 
 fn launch(program: &str, argv: &[String], cwd: Option<&str>, args: &Args) -> Result<String, String> {
@@ -163,8 +166,8 @@ fn launch(program: &str, argv: &[String], cwd: Option<&str>, args: &Args) -> Res
     }
     command
         .spawn()
-        .map_err(|e| format!("\"{program}\" konnte nicht gestartet werden: {e}"))?;
-    Ok(format!("Gestartet: {program}"))
+        .map_err(|e| t!("executor.launch_failed", program = program, error = e).to_string())?;
+    Ok(t!("executor.launched", program = program).into())
 }
 
 async fn powershell(script: &str, args: &Args, timeout_secs: Option<u64>) -> Result<String, String> {
@@ -194,27 +197,29 @@ async fn powershell(script: &str, args: &Args, timeout_secs: Option<u64>) -> Res
 
     let child = command
         .spawn()
-        .map_err(|e| format!("PowerShell konnte nicht gestartet werden: {e}"))?;
+        .map_err(|e| t!("executor.powershell_start_failed", error = e).to_string())?;
     let timeout = Duration::from_secs(timeout_secs.unwrap_or(DEFAULT_TIMEOUT_SECS));
     let output = tokio::time::timeout(timeout, child.wait_with_output())
         .await
-        .map_err(|_| format!("Zeitüberschreitung nach {} s.", timeout.as_secs()))?
-        .map_err(|e| format!("PowerShell-Fehler: {e}"))?;
+        .map_err(|_| t!("executor.timeout", seconds = timeout.as_secs()).to_string())?
+        .map_err(|e| t!("executor.powershell_failed", error = e).to_string())?;
 
     let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
     let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
     if output.status.success() {
         Ok(if stdout.is_empty() {
-            "(keine Ausgabe)".into()
+            t!("executor.no_output").into()
         } else {
             stdout
         })
     } else {
-        Err(format!(
-            "Exit-Code {}:\n{}",
-            output.status.code().unwrap_or(-1),
-            if stderr.is_empty() { stdout } else { stderr }
-        ))
+        let details = if stderr.is_empty() { stdout } else { stderr };
+        Err(t!(
+            "executor.exit_code",
+            code = output.status.code().unwrap_or(-1),
+            details = details
+        )
+        .into())
     }
 }
 
@@ -248,12 +253,12 @@ async fn http(
     let response = request
         .send()
         .await
-        .map_err(|e| format!("Anfrage fehlgeschlagen: {}", e.without_url()))?;
+        .map_err(|e| t!("executor.request_failed", error = e.without_url()).to_string())?;
     let status = response.status();
     let text = response
         .text()
         .await
-        .map_err(|e| format!("Antwort nicht lesbar: {e}"))?;
+        .map_err(|e| t!("executor.response_unreadable", error = e).to_string())?;
     if status.is_success() {
         Ok(text)
     } else {

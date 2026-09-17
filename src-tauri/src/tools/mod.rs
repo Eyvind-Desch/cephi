@@ -8,11 +8,13 @@
 mod args;
 mod builtin;
 mod executor;
+mod localized;
 mod manifest;
 mod registry;
 mod template;
 mod trigger;
 
 pub use executor::{accepts_fast_path, execute, preview, ExecContext, ToolOutput};
+pub use localized::LocalizedText;
 pub use manifest::Permission;
 pub use registry::ToolRegistry;

@@ -1,9 +1,13 @@
+// Loads `locales/*.json` at compile time; missing translations fall back to English.
+rust_i18n::i18n!("locales", fallback = "en");
+
 mod agent;
 mod app;
 mod commands;
 mod config;
 mod desktop;
 mod error;
+mod i18n;
 mod integrations;
 mod launcher;
 mod llm;

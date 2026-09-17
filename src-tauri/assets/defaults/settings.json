@@ -1,18 +1,19 @@
 {
   "$schema": "./schemas/settings.schema.json",
+  "language": "system",
   "hotkey": "Ctrl+Alt+Space",
   "defaultProfile": "fast",
   "profiles": [
-    { "id": "fast", "label": "Schnell", "model": "assistant-fast:latest" },
+    { "id": "fast", "label": { "en": "Fast", "de": "Schnell" }, "model": "assistant-fast:latest" },
     { "id": "smart", "label": "Smart", "model": "assistant:latest", "think": false },
-    { "id": "deep", "label": "Gründlich", "model": "assistant-big:latest" }
+    { "id": "deep", "label": { "en": "Thorough", "de": "Gründlich" }, "model": "assistant-big:latest" }
   ],
   "ollama": {
     "baseUrl": "http://localhost:11434",
     "keepAlive": "10m"
   },
   "agent": {
-    "systemPrompt": "Du bist Orbit, ein Desktop-Assistent unter Windows. Antworte knapp und in der Sprache des Nutzers.\nRegeln:\n- Über den PC weißt du nur, was dir Tools melden. Behaupte nie, etwas geprüft, eingeschaltet oder erledigt zu haben, ohne dass ein Tool-Ergebnis in diesem Gespräch das belegt.\n- Gibt es kein passendes Tool, sag ehrlich, dass du das nicht kannst, und schlage vor, wie der Nutzer es selbst erledigt.\n- Widerspricht der Nutzer, prüfe den Zustand erneut mit einem Tool, statt auf deiner Aussage zu beharren.\n- Erfinde keine Tool-Ergebnisse.",
+    "systemPrompt": "You are Orbit, a desktop assistant on Windows. Answer briefly and in the user's language.\nRules:\n- You only know about the PC what tools report. Never claim to have checked, switched on or done something unless a tool result in this conversation proves it.\n- If no tool fits, say honestly that you cannot do it and suggest how the user can do it themselves.\n- If the user disagrees, check the state again with a tool instead of insisting on your statement.\n- Never invent tool results.",
     "maxToolRounds": 6,
     "maxToolOutputChars": 8000,
     "confirmTimeoutSecs": 120

@@ -1,17 +1,14 @@
 import { motion } from "motion/react";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { useChat } from "../../store/chat";
 import { useUi } from "../../store/ui";
 import { OrbitMark } from "../ui/OrbitMark";
 
-const SUGGESTIONS = [
-  "Spiele Another Love von Tom Odell auf Spotify",
-  "Öffne den Rechner",
-  "Wie ist das Wetter in Berlin?",
-  "Wie viel Arbeitsspeicher ist frei?",
-];
+const SUGGESTIONS = ["spotify", "calculator", "weather", "memory"] as const;
 
 export function EmptyState() {
+  const { t } = useTranslation();
   const send = useChat((s) => s.send);
   const hotkey = useUi((s) => s.config?.hotkey);
   const toolCount = useUi((s) => s.config?.tools.length ?? 0);
@@ -22,25 +19,34 @@ export function EmptyState() {
         <OrbitMark size={56} />
       </motion.div>
       <div className="space-y-1.5">
-        <h1 className="text-[18px] font-semibold">Wie kann ich helfen?</h1>
+        <h1 className="text-[18px] font-semibold">{t("emptyState.title")}</h1>
         <p className="text-[13px] text-muted">
-          {toolCount} Tools bereit{hotkey && <> · <Kbd>{hotkey}</Kbd> blendet mich ein und aus</>}
+          {t("emptyState.toolsReady", { count: toolCount })}
+          {hotkey && (
+            <>
+              {" · "}
+              <Kbd>{hotkey}</Kbd> {t("emptyState.hotkeyHint")}
+            </>
+          )}
         </p>
       </div>
       <div className="flex w-full flex-col gap-2">
-        {SUGGESTIONS.map((suggestion, i) => (
-          <motion.button
-            key={suggestion}
-            type="button"
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 * i }}
-            onClick={() => void send(suggestion)}
-            className="rounded-xl border border-line bg-raised px-3.5 py-2.5 text-left text-[13px] text-muted transition-colors hover:border-accent/40 hover:text-fg"
-          >
-            {suggestion}
-          </motion.button>
-        ))}
+        {SUGGESTIONS.map((key, i) => {
+          const suggestion = t(`emptyState.suggestions.${key}`);
+          return (
+            <motion.button
+              key={key}
+              type="button"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 * i }}
+              onClick={() => void send(suggestion)}
+              className="rounded-xl border border-line bg-raised px-3.5 py-2.5 text-left text-[13px] text-muted transition-colors hover:border-accent/40 hover:text-fg"
+            >
+              {suggestion}
+            </motion.button>
+          );
+        })}
       </div>
     </div>
   );

@@ -12,6 +12,8 @@ use tokio::sync::oneshot;
 use tokio_util::sync::CancellationToken;
 
 use crate::config::Config;
+use rust_i18n::t;
+
 use crate::error::{AppError, AppResult};
 use crate::llm::{ChatMessage, ChatRequest, FunctionCall, LlmError, ModelOptions, OllamaClient, ToolCall};
 use crate::state::AppState;
@@ -57,7 +59,7 @@ impl AgentController {
     fn begin_run(&self) -> AppResult<CancellationToken> {
         let mut active = self.active_run.lock().expect("run lock poisoned");
         if active.is_some() {
-            return Err(AppError::msg("Es läuft bereits eine Anfrage."));
+            return Err(AppError::msg(t!("agent.busy")));
         }
         let token = CancellationToken::new();
         *active = Some(token.clone());
@@ -200,10 +202,8 @@ impl Run<'_> {
             }
         }
 
-        Err(format!(
-            "Abbruch nach {} Tool-Runden ohne abschließende Antwort.",
-            settings.agent.max_tool_rounds
-        ))
+        let rounds = settings.agent.max_tool_rounds;
+        Err(t!("agent.too_many_rounds", rounds = rounds).into())
     }
 
     /// The first trigger match whose arguments are valid and whose tool accepts the fast path.
@@ -243,14 +243,14 @@ impl Run<'_> {
         self.emit(AgentEvent::ToolCall {
             call_id: call_id.clone(),
             name: name.clone(),
-            title: tool.map_or(name.as_str(), |t| t.title()).to_string(),
+            title: tool.map_or_else(|| name.clone(), |t| t.title()),
             args: call.function.arguments.clone(),
             fast,
         });
 
         let started = Instant::now();
         let output = match tool {
-            None => ToolOutput::error(format!("Unbekanntes Tool \"{name}\".")),
+            None => ToolOutput::error(t!("agent.unknown_tool", name = name)),
             Some(tool) => match tool.normalize_args(&call.function.arguments) {
                 Err(message) => ToolOutput::error(message),
                 Ok(args) => {
@@ -259,7 +259,7 @@ impl Run<'_> {
                     if approved {
                         tools::execute(&self.exec_context(), tool, &args).await
                     } else {
-                        ToolOutput::error("Der Nutzer hat die Ausführung abgelehnt.")
+                        ToolOutput::error(t!("agent.denied"))
                     }
                 }
             },
@@ -316,9 +316,10 @@ impl Run<'_> {
     }
 
     fn system_prompt(&self) -> String {
+        // Model-facing, so English like the default prompt.
         let now = chrono::Local::now().format("%A, %Y-%m-%d %H:%M");
         format!(
-            "{}\n\nAktuelles Datum und Uhrzeit: {now}.",
+            "{}\n\nCurrent date and time: {now}.",
             self.config.settings.agent.system_prompt
         )
     }
@@ -327,18 +328,20 @@ impl Run<'_> {
 fn truncate(mut text: String, max_chars: usize) -> String {
     if let Some((index, _)) = text.char_indices().nth(max_chars) {
         text.truncate(index);
-        text.push_str("\n… (gekürzt)");
+        text.push('\n');
+        text.push_str(&t!("agent.truncated"));
     }
     text
 }
 
 #[cfg(test)]
 mod tests {
-    use super::truncate;
+    use super::*;
 
     #[test]
     fn truncates_on_char_boundary() {
+        // Multi-byte characters on purpose.
         assert_eq!(truncate("äöü".into(), 10), "äöü");
-        assert_eq!(truncate("äöüß".into(), 2), "äö\n… (gekürzt)");
+        assert_eq!(truncate("äöüß".into(), 2), format!("äö\n{}", t!("agent.truncated")));
     }
 }

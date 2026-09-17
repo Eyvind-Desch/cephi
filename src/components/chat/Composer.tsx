@@ -1,5 +1,6 @@
 import { ArrowUp, Square } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { onWindowShown } from "../../lib/ipc";
 import { useChat } from "../../store/chat";
 import { IconButton } from "../ui/IconButton";
@@ -12,6 +13,7 @@ interface ComposerProps {
 const MAX_HEIGHT_PX = 160;
 
 export function Composer({ compact = false }: ComposerProps) {
+  const { t } = useTranslation();
   const [text, setText] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const running = useChat((s) => s.running);
@@ -52,7 +54,7 @@ export function Composer({ compact = false }: ComposerProps) {
         value={text}
         rows={1}
         spellCheck={false}
-        placeholder={running ? "Orbit arbeitet…" : "Frag mich was…"}
+        placeholder={running ? t("composer.placeholderRunning") : t("composer.placeholder")}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
@@ -67,9 +69,15 @@ export function Composer({ compact = false }: ComposerProps) {
         }
       />
       {running ? (
-        <IconButton icon={Square} label="Stoppen" onClick={cancel} className="text-danger" />
+        <IconButton icon={Square} label={t("composer.stop")} onClick={cancel} className="text-danger" />
       ) : (
-        <IconButton icon={ArrowUp} label="Senden (Enter)" variant="accent" onClick={submit} disabled={!text.trim()} />
+        <IconButton
+          icon={ArrowUp}
+          label={t("composer.send")}
+          variant="accent"
+          onClick={submit}
+          disabled={!text.trim()}
+        />
       )}
     </div>
   );

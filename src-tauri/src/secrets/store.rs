@@ -3,6 +3,7 @@
 
 use std::ptr;
 
+use rust_i18n::t;
 use windows_sys::Win32::Foundation::{GetLastError, ERROR_NOT_FOUND, FILETIME};
 use windows_sys::Win32::Security::Credentials::{
     CredDeleteW, CredFree, CredReadW, CredWriteW, CREDENTIALW, CRED_PERSIST_LOCAL_MACHINE, CRED_TYPE_GENERIC,
@@ -33,25 +34,23 @@ pub fn get(name: &str) -> Result<Option<String>, String> {
         if CredReadW(target.as_ptr(), CRED_TYPE_GENERIC, 0, &mut credential) == 0 {
             return match GetLastError() {
                 ERROR_NOT_FOUND => Ok(None),
-                code => Err(format!("Anmeldeinformation nicht lesbar (Fehler {code}).")),
+                code => Err(t!("secrets.read_failed", code = code).into()),
             };
         }
         let blob = std::slice::from_raw_parts((*credential).CredentialBlob, (*credential).CredentialBlobSize as usize);
         let value = String::from_utf8(blob.to_vec());
         CredFree(credential.cast());
-        value
-            .map(Some)
-            .map_err(|_| "Gespeicherter Schlüssel ist kein gültiger Text.".into())
+        value.map(Some).map_err(|_| t!("secrets.not_text").into())
     }
 }
 
 pub fn set(name: &str, value: &str) -> Result<(), String> {
     let value = value.trim();
     if value.is_empty() {
-        return Err("Der Schlüssel darf nicht leer sein.".into());
+        return Err(t!("secrets.empty").into());
     }
     if value.len() > MAX_SECRET_BYTES {
-        return Err("Der Schlüssel ist zu lang.".into());
+        return Err(t!("secrets.too_long").into());
     }
 
     let mut target = wide(&target_name(name)?);
@@ -79,7 +78,7 @@ pub fn set(name: &str, value: &str) -> Result<(), String> {
     // SAFETY: all pointers in `credential` reference live buffers for the duration of the call.
     if unsafe { CredWriteW(&credential, 0) } == 0 {
         let code = unsafe { GetLastError() };
-        return Err(format!("Schlüssel konnte nicht gespeichert werden (Fehler {code})."));
+        return Err(t!("secrets.save_failed", code = code).into());
     }
     Ok(())
 }
@@ -91,7 +90,7 @@ pub fn delete(name: &str) -> Result<(), String> {
         if CredDeleteW(target.as_ptr(), CRED_TYPE_GENERIC, 0) == 0 {
             let code = GetLastError();
             if code != ERROR_NOT_FOUND {
-                return Err(format!("Schlüssel konnte nicht gelöscht werden (Fehler {code})."));
+                return Err(t!("secrets.delete_failed", code = code).into());
             }
         }
     }
@@ -102,7 +101,7 @@ fn target_name(name: &str) -> Result<String, String> {
     if is_valid_name(name) {
         Ok(format!("{TARGET_PREFIX}{name}"))
     } else {
-        Err(format!("Ungültiger Schlüsselname \"{name}\"."))
+        Err(t!("secrets.invalid_name", name = name).into())
     }
 }
 
@@ -118,8 +117,9 @@ mod tests {
     fn roundtrip_in_credential_manager() {
         // Unique name: the test touches the real Credential Manager, runs must not interfere.
         let name = &format!("orbit_test_{}", uuid::Uuid::new_v4().simple());
-        set(name, "  wert-äöü  ").unwrap();
-        assert_eq!(get(name).unwrap().as_deref(), Some("wert-äöü"));
+        // Non-ASCII on purpose: the blob must round-trip as UTF-8.
+        set(name, "  value-äöü  ").unwrap();
+        assert_eq!(get(name).unwrap().as_deref(), Some("value-äöü"));
         delete(name).unwrap();
         assert_eq!(get(name).unwrap(), None);
         delete(name).unwrap(); // deleting twice is fine

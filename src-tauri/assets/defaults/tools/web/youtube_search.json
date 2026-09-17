@@ -1,20 +1,21 @@
 {
   "$schema": "../../schemas/tool.schema.json",
   "name": "youtube_search",
-  "title": "YouTube-Suche",
-  "description": "Sucht Videos auf YouTube und öffnet die Ergebnisse im Browser.",
+  "title": { "en": "YouTube search", "de": "YouTube-Suche" },
+  "description": "Searches for videos on YouTube and opens the results in the browser.",
   "permission": "auto",
   "parameters": {
     "type": "object",
     "properties": {
-      "query": { "type": "string", "description": "Wonach auf YouTube gesucht werden soll" }
+      "query": { "type": "string", "description": "What to search for on YouTube" }
     },
     "required": ["query"]
   },
   "triggers": [
     "yt {query}",
-    "(suche|such) {query} (auf|bei|in) youtube",
-    "(suche|such) (auf|bei|in) youtube nach {query}"
+    "(suche|such|search) {query} (auf|bei|in|on) youtube",
+    "(suche|such) (auf|bei|in) youtube nach {query}",
+    "search youtube for {query}"
   ],
   "action": {
     "type": "open_url",

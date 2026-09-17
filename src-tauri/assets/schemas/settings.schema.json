@@ -1,24 +1,29 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "orbit://schemas/settings.schema.json",
-  "title": "Orbit Einstellungen",
-  "description": "%APPDATA%\\Orbit\\settings.json – Änderungen werden sofort übernommen. Fehlende Werte nutzen Standardwerte.",
+  "title": "Orbit settings",
+  "description": "%APPDATA%\\Orbit\\settings.json – changes apply immediately. Missing values use defaults.",
   "type": "object",
   "additionalProperties": false,
   "properties": {
     "$schema": { "type": "string" },
+    "language": {
+      "description": "UI and message language. system = Windows display language.",
+      "enum": ["system", "en", "de"],
+      "default": "system"
+    },
     "hotkey": {
-      "description": "Globales Tastenkürzel zum Ein-/Ausblenden, z. B. \"Ctrl+Alt+Space\", \"Alt+O\", \"Ctrl+Shift+K\". Achtung: Ctrl+Space ist in VS Code IntelliSense.",
+      "description": "Global shortcut to show/hide Orbit, e.g. \"Ctrl+Alt+Space\", \"Alt+O\", \"Ctrl+Shift+K\". Note: Ctrl+Space is IntelliSense in VS Code.",
       "type": "string",
       "default": "Ctrl+Alt+Space"
     },
     "defaultProfile": {
-      "description": "id des Profils, das beim Start ausgewählt ist.",
+      "description": "id of the profile selected at startup.",
       "type": "string",
       "default": "fast"
     },
     "profiles": {
-      "description": "Modell-Profile, zwischen denen in der Oberfläche gewechselt werden kann.",
+      "description": "Model profiles that can be switched in the UI.",
       "type": "array",
       "minItems": 1,
       "items": {
@@ -26,12 +31,18 @@
         "additionalProperties": false,
         "required": ["id", "label", "model"],
         "properties": {
-          "id": { "type": "string", "description": "Eindeutige Kennung." },
-          "label": { "type": "string", "description": "Anzeigename." },
-          "model": { "type": "string", "description": "Ollama-Modellname, z. B. \"assistant-fast:latest\" (siehe `ollama list`)." },
-          "tools": { "type": "boolean", "default": true, "description": "Darf das Modell Tools aufrufen?" },
-          "think": { "type": "boolean", "description": "Denkmodus an/aus (nur für Modelle mit 'thinking'). Weglassen = Modellstandard." },
-          "temperature": { "type": "number", "minimum": 0, "maximum": 2, "description": "Kreativität. Weglassen = Modellstandard." }
+          "id": { "type": "string", "description": "Unique identifier." },
+          "label": {
+            "description": "Display name: a plain string or per language, e.g. { \"en\": \"Fast\", \"de\": \"Schnell\" }.",
+            "anyOf": [
+              { "type": "string", "minLength": 1 },
+              { "type": "object", "minProperties": 1, "additionalProperties": { "type": "string", "minLength": 1 } }
+            ]
+          },
+          "model": { "type": "string", "description": "Ollama model name, e.g. \"assistant-fast:latest\" (see `ollama list`)." },
+          "tools": { "type": "boolean", "default": true, "description": "May the model call tools?" },
+          "think": { "type": "boolean", "description": "Reasoning mode on/off (only for models with 'thinking'). Omit = model default." },
+          "temperature": { "type": "number", "minimum": 0, "maximum": 2, "description": "Creativity. Omit = model default." }
         }
       }
     },
@@ -40,17 +51,17 @@
       "additionalProperties": false,
       "properties": {
         "baseUrl": { "type": "string", "default": "http://localhost:11434" },
-        "keepAlive": { "type": "string", "default": "10m", "description": "Wie lange das Modell nach einer Anfrage geladen bleibt, z. B. \"10m\", \"1h\", \"-1\" (immer)." }
+        "keepAlive": { "type": "string", "default": "10m", "description": "How long the model stays loaded after a request, e.g. \"10m\", \"1h\", \"-1\" (forever)." }
       }
     },
     "agent": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "systemPrompt": { "type": "string", "description": "Grundanweisung für das Modell. Datum und Uhrzeit werden automatisch angehängt." },
-        "maxToolRounds": { "type": "integer", "minimum": 1, "default": 6, "description": "Maximale Anzahl Tool-Runden pro Anfrage." },
-        "maxToolOutputChars": { "type": "integer", "minimum": 100, "default": 8000, "description": "Tool-Ausgaben werden auf diese Länge gekürzt." },
-        "confirmTimeoutSecs": { "type": "integer", "minimum": 5, "default": 120, "description": "Nach dieser Zeit ohne Bestätigung wird ein Tool-Aufruf abgelehnt." }
+        "systemPrompt": { "type": "string", "description": "Base instruction for the model. Date and time are appended automatically." },
+        "maxToolRounds": { "type": "integer", "minimum": 1, "default": 6, "description": "Maximum number of tool rounds per request." },
+        "maxToolOutputChars": { "type": "integer", "minimum": 100, "default": 8000, "description": "Tool outputs are truncated to this length." },
+        "confirmTimeoutSecs": { "type": "integer", "minimum": 5, "default": 120, "description": "Tool calls without confirmation are declined after this time." }
       }
     },
     "window": {
@@ -60,13 +71,13 @@
         "anchor": {
           "enum": ["bottom-right", "bottom-center", "bottom-left", "top-right", "top-center", "top-left"],
           "default": "bottom-right",
-          "description": "Bildschirmecke, an der Orbit erscheint (auf dem Monitor mit dem Mauszeiger)."
+          "description": "Screen corner where Orbit appears (on the monitor with the mouse cursor)."
         },
-        "margin": { "type": "integer", "minimum": 0, "default": 16, "description": "Abstand zum Bildschirmrand in Pixeln." },
-        "hideOnBlur": { "type": "boolean", "default": true, "description": "Ausblenden, wenn woanders hingeklickt wird (außer angepinnt)." },
+        "margin": { "type": "integer", "minimum": 0, "default": 16, "description": "Distance to the screen edge in pixels." },
+        "hideOnBlur": { "type": "boolean", "default": true, "description": "Hide when clicking elsewhere (unless pinned)." },
         "showOnStartup": { "type": "boolean", "default": true },
-        "compact": { "$ref": "#/definitions/size", "description": "Größe der kompakten Leiste." },
-        "expanded": { "$ref": "#/definitions/size", "description": "Größe des großen Panels." }
+        "compact": { "$ref": "#/definitions/size", "description": "Size of the compact bar." },
+        "expanded": { "$ref": "#/definitions/size", "description": "Size of the large panel." }
       }
     }
   },

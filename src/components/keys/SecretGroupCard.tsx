@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { Check, ChevronDown, ExternalLink, KeyRound, Loader2, Music, PlugZap, Wrench, X, type LucideIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api, type SecretGroup } from "../../lib/ipc";
 import { SecretField } from "./SecretField";
 import { guides } from "./guides";
@@ -14,6 +15,7 @@ const brand: Record<string, string> = { spotify: "#1DB954" };
 type TestState = { status: "idle" } | { status: "testing" } | { status: "ok" | "error"; message: string };
 
 export function SecretGroupCard({ group, onChange }: { group: SecretGroup; onChange: () => void }) {
+  const { t } = useTranslation();
   const complete = group.secrets.every((s) => s.isSet);
   const missing = group.secrets.filter((s) => !s.isSet).length;
   const [open, setOpen] = useState(!complete);
@@ -57,7 +59,7 @@ export function SecretGroupCard({ group, onChange }: { group: SecretGroup; onCha
           )}
         >
           {complete ? <Check size={12} /> : null}
-          {complete ? "Eingerichtet" : `${missing} fehlt`}
+          {complete ? t("keys.group.complete") : t("keys.group.missing", { count: missing })}
         </span>
         <ChevronDown size={16} className={clsx("shrink-0 text-subtle transition-transform", open && "rotate-180")} />
       </button>
@@ -89,7 +91,7 @@ export function SecretGroupCard({ group, onChange }: { group: SecretGroup; onCha
                       className="flex items-center gap-1.5 rounded-lg border border-line px-2.5 py-1.5 text-[12.5px] font-medium transition-colors hover:bg-sunken disabled:opacity-40"
                     >
                       {test.status === "testing" ? <Loader2 size={14} className="animate-spin" /> : <PlugZap size={14} />}
-                      Verbindung testen
+                      {t("keys.group.testConnection")}
                     </button>
                   )}
                   {group.docsUrl && (
@@ -98,7 +100,7 @@ export function SecretGroupCard({ group, onChange }: { group: SecretGroup; onCha
                       onClick={() => void api.openExternal(group.docsUrl!)}
                       className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12.5px] font-medium text-muted transition-colors hover:bg-sunken hover:text-fg"
                     >
-                      <ExternalLink size={14} /> Dashboard
+                      <ExternalLink size={14} /> {t("keys.group.dashboard")}
                     </button>
                   )}
                   {(test.status === "ok" || test.status === "error") && (

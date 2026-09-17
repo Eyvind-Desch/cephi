@@ -1,12 +1,14 @@
 import clsx from "clsx";
 import { Check, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api, type SecretInfo } from "../../lib/ipc";
 
-/** How long "Entfernen?" waits for the confirming second click. */
+/** How long "Really remove?" waits for the confirming second click. */
 const CONFIRM_DELETE_MS = 3000;
 
 export function SecretField({ secret, onChange }: { secret: SecretInfo; onChange: () => void }) {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(!secret.isSet);
   const [value, setValue] = useState("");
   const [busy, setBusy] = useState(false);
@@ -76,7 +78,7 @@ export function SecretField({ secret, onChange }: { secret: SecretInfo; onChange
             disabled={busy || !value.trim()}
             className="rounded-lg bg-accent px-3 text-[12.5px] font-medium text-accent-fg transition hover:brightness-110 disabled:opacity-40"
           >
-            Speichern
+            {t("common.save")}
           </button>
           {secret.isSet && (
             <button
@@ -84,7 +86,7 @@ export function SecretField({ secret, onChange }: { secret: SecretInfo; onChange
               onClick={() => setEditing(false)}
               className="rounded-lg px-2 text-[12.5px] text-muted hover:bg-sunken hover:text-fg"
             >
-              Abbrechen
+              {t("common.cancel")}
             </button>
           )}
         </form>
@@ -97,7 +99,7 @@ export function SecretField({ secret, onChange }: { secret: SecretInfo; onChange
             onClick={() => setEditing(true)}
             className="flex items-center gap-1 rounded-md px-2 py-1 text-[12px] text-muted hover:bg-raised hover:text-fg"
           >
-            <Pencil size={12} /> Ändern
+            <Pencil size={12} /> {t("keys.field.change")}
           </button>
           <button
             type="button"
@@ -108,7 +110,7 @@ export function SecretField({ secret, onChange }: { secret: SecretInfo; onChange
               confirmDelete ? "bg-danger/15 text-danger" : "text-muted hover:bg-raised hover:text-danger",
             )}
           >
-            <Trash2 size={12} /> {confirmDelete ? "Wirklich entfernen?" : "Entfernen"}
+            <Trash2 size={12} /> {confirmDelete ? t("keys.field.confirmRemove") : t("keys.field.remove")}
           </button>
         </div>
       )}

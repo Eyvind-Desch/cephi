@@ -1,7 +1,11 @@
 use std::fs;
 use std::path::Path;
 
+use rust_i18n::t;
 use serde::{Deserialize, Serialize};
+
+use crate::i18n::LanguageSetting;
+use crate::tools::LocalizedText;
 
 /// Contents of `settings.json`. Every field is optional in the file; missing values use defaults.
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -9,6 +13,7 @@ use serde::{Deserialize, Serialize};
 pub struct Settings {
     #[serde(rename = "$schema", skip_serializing)]
     pub schema: Option<String>,
+    pub language: LanguageSetting,
     pub hotkey: String,
     pub default_profile: String,
     pub profiles: Vec<Profile>,
@@ -21,7 +26,7 @@ pub struct Settings {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Profile {
     pub id: String,
-    pub label: String,
+    pub label: LocalizedText,
     pub model: String,
     /// Whether the model may call tools.
     #[serde(default = "default_true")]
@@ -89,30 +94,24 @@ impl Settings {
 
     fn validate(&self) -> Result<(), String> {
         if self.profiles.is_empty() {
-            return Err("Mindestens ein Profil in \"profiles\" ist nötig.".into());
+            return Err(t!("settings.no_profiles").into());
         }
-        for (i, profile) in self.profiles.iter().enumerate() {
+        for (index, profile) in self.profiles.iter().enumerate() {
             if profile.id.trim().is_empty() || profile.model.trim().is_empty() {
-                return Err(format!("profiles[{i}]: \"id\" und \"model\" dürfen nicht leer sein."));
+                return Err(t!("settings.profile_incomplete", index = index).into());
             }
-            if self.profiles[..i].iter().any(|p| p.id == profile.id) {
-                return Err(format!("profiles: doppelte id \"{}\".", profile.id));
+            if self.profiles[..index].iter().any(|p| p.id == profile.id) {
+                return Err(t!("settings.duplicate_profile", id = profile.id).into());
             }
         }
         if !self.profiles.iter().any(|p| p.id == self.default_profile) {
-            return Err(format!(
-                "defaultProfile \"{}\" existiert nicht in \"profiles\".",
-                self.default_profile
-            ));
+            return Err(t!("settings.unknown_default_profile", id = self.default_profile).into());
         }
         if url::Url::parse(&self.ollama.base_url).is_err() {
-            return Err(format!(
-                "ollama.baseUrl \"{}\" ist keine gültige URL.",
-                self.ollama.base_url
-            ));
+            return Err(t!("settings.invalid_ollama_url", url = self.ollama.base_url).into());
         }
         if self.agent.max_tool_rounds == 0 {
-            return Err("agent.maxToolRounds muss mindestens 1 sein.".into());
+            return Err(t!("settings.max_tool_rounds").into());
         }
         Ok(())
     }
@@ -122,26 +121,27 @@ pub fn load(path: &Path) -> Result<Settings, String> {
     let text = match fs::read_to_string(path) {
         Ok(text) => text,
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(Settings::default()),
-        Err(e) => return Err(format!("Datei nicht lesbar: {e}")),
+        Err(e) => return Err(t!("config.file_unreadable", error = e).into()),
     };
-    let settings: Settings = serde_json::from_str(&text).map_err(|e| format!("Ungültiges JSON: {e}"))?;
+    let settings: Settings =
+        serde_json::from_str(&text).map_err(|e| t!("config.invalid_json", error = e).to_string())?;
     settings.validate()?;
     Ok(settings)
 }
 
 /// Must match `agent.systemPrompt` in `assets/defaults/settings.json` (checked by a test).
 ///
-/// Small models tend to invent device states ("Bluetooth ist bereits an") and then insist on
-/// them. The prompt makes tool results the only source of truth about the PC.
-pub const DEFAULT_SYSTEM_PROMPT: &str = "Du bist Orbit, ein Desktop-Assistent unter Windows. \
-Antworte knapp und in der Sprache des Nutzers.\n\
-Regeln:\n\
-- Über den PC weißt du nur, was dir Tools melden. Behaupte nie, etwas geprüft, eingeschaltet oder \
-erledigt zu haben, ohne dass ein Tool-Ergebnis in diesem Gespräch das belegt.\n\
-- Gibt es kein passendes Tool, sag ehrlich, dass du das nicht kannst, und schlage vor, wie der Nutzer \
-es selbst erledigt.\n\
-- Widerspricht der Nutzer, prüfe den Zustand erneut mit einem Tool, statt auf deiner Aussage zu beharren.\n\
-- Erfinde keine Tool-Ergebnisse.";
+/// Small models tend to invent device states ("Bluetooth is already on") and then insist on
+/// them. The prompt makes tool results the only source of truth about the PC. Written in English
+/// (models follow English instructions most reliably) and asks for answers in the user's language.
+pub const DEFAULT_SYSTEM_PROMPT: &str = "You are Orbit, a desktop assistant on Windows. \
+Answer briefly and in the user's language.\n\
+Rules:\n\
+- You only know about the PC what tools report. Never claim to have checked, switched on or done \
+something unless a tool result in this conversation proves it.\n\
+- If no tool fits, say honestly that you cannot do it and suggest how the user can do it themselves.\n\
+- If the user disagrees, check the state again with a tool instead of insisting on your statement.\n\
+- Never invent tool results.";
 
 fn default_true() -> bool {
     true
@@ -151,13 +151,14 @@ impl Default for Settings {
     fn default() -> Self {
         Self {
             schema: None,
+            language: LanguageSetting::System,
             // Not Ctrl+Space: that is IntelliSense in VS Code and many IDEs.
             hotkey: "Ctrl+Alt+Space".into(),
             default_profile: "fast".into(),
             profiles: vec![
                 Profile {
                     id: "fast".into(),
-                    label: "Schnell".into(),
+                    label: LocalizedText::translated(&[("en", "Fast"), ("de", "Schnell")]),
                     model: "assistant-fast:latest".into(),
                     tools: true,
                     think: None,
@@ -165,7 +166,7 @@ impl Default for Settings {
                 },
                 Profile {
                     id: "smart".into(),
-                    label: "Smart".into(),
+                    label: LocalizedText::plain("Smart"),
                     model: "assistant:latest".into(),
                     tools: true,
                     think: Some(false),
@@ -173,7 +174,7 @@ impl Default for Settings {
                 },
                 Profile {
                     id: "deep".into(),
-                    label: "Gründlich".into(),
+                    label: LocalizedText::translated(&[("en", "Thorough"), ("de", "Gründlich")]),
                     model: "assistant-big:latest".into(),
                     tools: true,
                     think: None,

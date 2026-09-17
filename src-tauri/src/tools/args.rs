@@ -2,6 +2,7 @@
 
 use std::collections::BTreeMap;
 
+use rust_i18n::t;
 use serde_json::{Number, Value};
 
 use super::manifest::{ParamType, Parameters};
@@ -20,9 +21,9 @@ pub fn normalize(params: &Parameters, raw: &Value) -> Result<Args, String> {
         Value::String(s) if s.trim().is_empty() => Default::default(),
         Value::String(s) => match serde_json::from_str::<Value>(s) {
             Ok(Value::Object(map)) => map,
-            _ => return Err("Argumente müssen ein JSON-Objekt sein.".into()),
+            _ => return Err(t!("args.not_object").into()),
         },
-        _ => return Err("Argumente müssen ein JSON-Objekt sein.".into()),
+        _ => return Err(t!("args.not_object").into()),
     };
 
     let mut args = Args::new();
@@ -31,7 +32,7 @@ pub fn normalize(params: &Parameters, raw: &Value) -> Result<Args, String> {
             Some(Value::Null) | None => match &spec.default {
                 Some(default) => default.clone(),
                 None if params.required.contains(name) => {
-                    return Err(format!("Pflichtparameter \"{name}\" fehlt."));
+                    return Err(t!("args.missing_required", name = name).into());
                 }
                 None => continue,
             },
@@ -41,7 +42,7 @@ pub fn normalize(params: &Parameters, raw: &Value) -> Result<Args, String> {
         if let Some(allowed) = &spec.allowed {
             if !allowed.contains(&value) {
                 let options = allowed.iter().map(Value::to_string).collect::<Vec<_>>().join(", ");
-                return Err(format!("\"{name}\" muss einer dieser Werte sein: {options}."));
+                return Err(t!("args.not_allowed", name = name, options = options).into());
             }
         }
         args.insert(name.clone(), value);
@@ -50,7 +51,10 @@ pub fn normalize(params: &Parameters, raw: &Value) -> Result<Args, String> {
 }
 
 fn coerce(name: &str, kind: ParamType, value: &Value) -> Result<Value, String> {
-    let fail = || format!("\"{name}\" muss vom Typ {kind:?} sein, erhalten: {value}.").to_lowercase();
+    let fail = || {
+        let kind = format!("{kind:?}").to_lowercase();
+        t!("args.wrong_type", name = name, kind = kind, value = value).to_string()
+    };
     match (kind, value) {
         (ParamType::String, Value::String(_)) => Ok(value.clone()),
         (ParamType::String, Value::Number(_) | Value::Bool(_)) => Ok(Value::String(value.to_string())),

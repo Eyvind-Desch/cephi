@@ -13,6 +13,7 @@
 
 use std::collections::BTreeMap;
 
+use rust_i18n::t;
 use serde_json::Value;
 
 use super::args::Args;
@@ -70,14 +71,14 @@ fn parse(template: &str, context: Context) -> Result<Vec<Segment<'_>>, String> {
         let after = &rest[start + 2..];
         let end = after
             .find("}}")
-            .ok_or_else(|| format!("Nicht geschlossener Platzhalter in \"{template}\"."))?;
+            .ok_or_else(|| t!("templates.unclosed", template = template).to_string())?;
         let inner = &after[..end];
         let (name, filter) = match inner.split_once('|') {
             Some((name, filter)) => (name.trim(), parse_filter(filter.trim())?),
             None => (inner.trim(), context.default_filter()),
         };
         if name.is_empty() {
-            return Err(format!("Leerer Platzhalter in \"{template}\"."));
+            return Err(t!("templates.empty", template = template).into());
         }
         segments.push(Segment::Placeholder { name, filter });
         rest = &after[end + 2..];
@@ -91,7 +92,7 @@ fn parse_filter(filter: &str) -> Result<Filter, String> {
         "raw" => Ok(Filter::Raw),
         "url" => Ok(Filter::Url),
         "json" => Ok(Filter::Json),
-        other => Err(format!("Unbekannter Filter \"{other}\" (erlaubt: raw, url, json).")),
+        other => Err(t!("templates.unknown_filter", filter = other).into()),
     }
 }
 
@@ -102,14 +103,10 @@ pub fn check(template: &str, context: Context, params: &BTreeMap<String, ParamSp
         if let Segment::Placeholder { name, .. } = segment {
             if let Some(secret) = name.strip_prefix(SECRET_PREFIX) {
                 if !secrets::is_valid_name(secret) {
-                    return Err(format!(
-                        "Schlüsselname \"{secret}\" ist ungültig: nur a-z, 0-9 und _, beginnend mit einem Buchstaben."
-                    ));
+                    return Err(t!("secrets.invalid_name", name = secret).into());
                 }
             } else if !params.contains_key(name) {
-                return Err(format!(
-                    "Platzhalter {{{{{name}}}}} verweist auf keinen definierten Parameter."
-                ));
+                return Err(t!("templates.unknown_param", name = name).into());
             }
         }
     }
@@ -143,9 +140,9 @@ pub fn render(template: &str, context: Context, args: &Args, secrets_mode: Secre
                     Some(secret) => {
                         secret_value = Value::String(match secrets_mode {
                             Secrets::Mask => MASK.to_string(),
-                            Secrets::Resolve => secrets::get(secret)?.ok_or_else(|| {
-                                format!("Schlüssel \"{secret}\" fehlt. In Orbit unter „Schlüssel“ hinterlegen.")
-                            })?,
+                            Secrets::Resolve => {
+                                secrets::get(secret)?.ok_or_else(|| t!("secrets.missing", name = secret).to_string())?
+                            }
                         });
                         Some(&secret_value)
                     }
@@ -157,9 +154,7 @@ pub fn render(template: &str, context: Context, args: &Args, secrets_mode: Secre
                     Filter::Json => serde_json::to_string(value.unwrap_or(&Value::Null)).unwrap_or_default(),
                 };
                 if context == Context::Header && rendered.contains(['\r', '\n']) {
-                    return Err(format!(
-                        "Parameter \"{name}\" enthält Zeilenumbrüche (nicht erlaubt in Headern)."
-                    ));
+                    return Err(t!("templates.header_newline", name = name).into());
                 }
                 out.push_str(&rendered);
             }
@@ -239,7 +234,7 @@ mod tests {
         );
         assert!(render_resolved(&template, Context::Header, &Args::new())
             .unwrap_err()
-            .contains("fehlt"));
+            .contains(&name));
 
         secrets::set(&name, "abc123").unwrap();
         let resolved = render_resolved(&template, Context::Header, &Args::new());

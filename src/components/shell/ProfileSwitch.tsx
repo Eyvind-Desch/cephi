@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { useTranslation } from "react-i18next";
 import type { ProfileInfo } from "../../lib/ipc";
 import { useChat } from "../../store/chat";
 import { useUi } from "../../store/ui";
@@ -7,6 +8,7 @@ const NO_PROFILES: ProfileInfo[] = [];
 
 /** Segmented control for switching the model profile. */
 export function ProfileSwitch() {
+  const { t } = useTranslation();
   const profiles = useUi((s) => s.config?.profiles ?? NO_PROFILES);
   const profileId = useUi((s) => s.profileId);
   const setProfile = useUi((s) => s.setProfile);
@@ -15,7 +17,7 @@ export function ProfileSwitch() {
   if (profiles.length < 2) return null;
 
   return (
-    <div role="radiogroup" aria-label="Modell" className="flex rounded-lg bg-sunken p-0.5">
+    <div role="radiogroup" aria-label={t("profile.label")} className="flex rounded-lg bg-sunken p-0.5">
       {profiles.map((profile) => {
         const selected = profile.id === profileId;
         return (

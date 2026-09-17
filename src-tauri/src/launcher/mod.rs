@@ -11,9 +11,10 @@ use std::process::Stdio;
 use std::sync::{Arc, Mutex, RwLock};
 use std::time::{Duration, Instant};
 
+use rust_i18n::t;
 use serde::{Deserialize, Serialize};
 
-/// Minimum score for the fast path ("öffne X" without the model).
+/// Minimum score for the fast path ("open X" without the model).
 pub const FAST_PATH_MIN_SCORE: u32 = 75;
 /// Minimum score when the model explicitly asks to open an app.
 pub const TOOL_MIN_SCORE: u32 = 45;
@@ -76,10 +77,10 @@ impl AppIndex {
             .kill_on_drop(true)
             .output()
             .await
-            .map_err(|e| format!("App-Liste konnte nicht gelesen werden: {e}"))?;
+            .map_err(|e| t!("launcher.index_failed", error = e).to_string())?;
 
-        let mut apps: Vec<AppEntry> = serde_json::from_slice(&output.stdout)
-            .map_err(|e| format!("App-Liste hat ein unerwartetes Format: {e}"))?;
+        let mut apps: Vec<AppEntry> =
+            serde_json::from_slice(&output.stdout).map_err(|e| t!("launcher.index_failed", error = e).to_string())?;
         apps.retain(|app| !app.name.trim().is_empty() && !app.app_id.trim().is_empty());
         apps.sort_by_key(|app| app.name.to_lowercase());
 
@@ -130,7 +131,7 @@ impl AppIndex {
             .stderr(Stdio::null())
             .spawn()
             .map(|_| ())
-            .map_err(|e| format!("\"{}\" konnte nicht gestartet werden: {e}", app.name))
+            .map_err(|e| t!("executor.launch_failed", program = app.name, error = e).to_string())
     }
 
     fn snapshot(&self) -> Arc<Vec<AppEntry>> {

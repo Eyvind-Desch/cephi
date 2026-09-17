@@ -1,27 +1,29 @@
 {
   "$schema": "../../schemas/tool.schema.json",
   "name": "radio",
-  "title": "Bluetooth & WLAN",
-  "description": "Schaltet Bluetooth oder WLAN an oder aus oder prüft den aktuellen Zustand. Nutze state=status, bevor du etwas über den Zustand behauptest.",
+  "title": { "en": "Bluetooth & Wi-Fi", "de": "Bluetooth & WLAN" },
+  "description": "Turns Bluetooth or Wi-Fi on or off, or checks the current state. Use state=status before claiming anything about the state.",
   "permission": "auto",
   "parameters": {
     "type": "object",
     "properties": {
-      "device": { "type": "string", "description": "bluetooth oder wlan" },
+      "device": { "type": "string", "description": "bluetooth or wifi" },
       "state": {
         "type": "string",
-        "description": "on = einschalten, off = ausschalten, toggle = umschalten, status = Zustand abfragen",
+        "description": "on = turn on, off = turn off, toggle = switch, status = check state",
         "enum": ["on", "off", "toggle", "status"]
       }
     },
     "required": ["device", "state"]
   },
   "triggers": [
-    { "pattern": "[(schalte|schalt|mach|mache|stell)] {device} [jetzt] (an|ein|on)", "args": { "state": "on" } },
-    { "pattern": "[(schalte|schalt|mach|mache|stell)] {device} [jetzt] (aus|off)", "args": { "state": "off" } },
+    { "pattern": "[(schalte|schalt|mach|mache|stell|turn|switch)] {device} [(jetzt|now)] (an|ein|on)", "args": { "state": "on" } },
+    { "pattern": "[(schalte|schalt|mach|mache|stell|turn|switch)] {device} [(jetzt|now)] (aus|off)", "args": { "state": "off" } },
+    { "pattern": "(turn|switch) on {device}", "args": { "state": "on" } },
+    { "pattern": "(turn|switch) off {device}", "args": { "state": "off" } },
     { "pattern": "(aktiviere|enable) {device}", "args": { "state": "on" } },
     { "pattern": "(deaktiviere|disable) {device}", "args": { "state": "off" } },
-    { "pattern": "ist {device} (an|aus|ein|eingeschaltet|ausgeschaltet|on|off)", "args": { "state": "status" } }
+    { "pattern": "(ist|is) {device} (an|aus|ein|eingeschaltet|ausgeschaltet|on|off|enabled|disabled)", "args": { "state": "status" } }
   ],
   "action": {
     "type": "builtin",

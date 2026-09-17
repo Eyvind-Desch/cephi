@@ -36,7 +36,7 @@ impl ConfigPaths {
             None => app
                 .path()
                 .config_dir()
-                .map_err(|e| AppError::msg(format!("Konfigurationsordner nicht gefunden: {e}")))?
+                .map_err(|e| AppError::msg(format!("config directory not found: {e}")))?
                 .join("Orbit"),
         };
         Ok(Self::from_root(root))

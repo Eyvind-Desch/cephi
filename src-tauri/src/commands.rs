@@ -2,6 +2,7 @@
 //!
 //! Mirrored in `src/lib/ipc.ts`.
 
+use rust_i18n::t;
 use tauri::ipc::Channel;
 use tauri::{AppHandle, State};
 use tauri_plugin_opener::OpenerExt;
@@ -100,9 +101,9 @@ pub fn window_set_pinned(state: State<'_, AppState>, pinned: bool) {
 /// Opens a link from a chat message in the default browser. Web URLs only.
 #[tauri::command]
 pub fn open_external(app: AppHandle, url: String) -> AppResult<()> {
-    let parsed = url::Url::parse(&url).map_err(|_| AppError::msg("Ungültiger Link."))?;
+    let parsed = url::Url::parse(&url).map_err(|_| AppError::msg(t!("external.invalid_link")))?;
     if !matches!(parsed.scheme(), "http" | "https" | "mailto") {
-        return Err(AppError::msg("Nur Web-Links können geöffnet werden."));
+        return Err(AppError::msg(t!("external.web_only")));
     }
     app.opener()
         .open_url(parsed.as_str(), None::<&str>)

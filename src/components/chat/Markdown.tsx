@@ -1,10 +1,12 @@
 import { Check, Copy } from "lucide-react";
 import { memo, useRef, useState, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { api } from "../../lib/ipc";
 
 function CodeBlock({ children }: { children?: ReactNode }) {
+  const { t } = useTranslation();
   const ref = useRef<HTMLPreElement>(null);
   const [copied, setCopied] = useState(false);
 
@@ -25,7 +27,7 @@ function CodeBlock({ children }: { children?: ReactNode }) {
       <button
         type="button"
         onClick={copy}
-        title="Kopieren"
+        title={t("common.copy")}
         className="absolute top-2 right-2 grid size-7 place-items-center rounded-md bg-raised text-muted opacity-0 transition-opacity group-hover:opacity-100 hover:text-fg"
       >
         {copied ? <Check size={14} /> : <Copy size={14} />}

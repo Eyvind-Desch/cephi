@@ -5,6 +5,7 @@
 
 use std::time::{Duration, Instant};
 
+use rust_i18n::t;
 use serde::Deserialize;
 use serde_json::Value;
 use tauri::AppHandle;
@@ -38,7 +39,7 @@ impl SearchKind {
             "album" => Ok(Self::Album),
             "artist" => Ok(Self::Artist),
             "playlist" => Ok(Self::Playlist),
-            other => Err(format!("Unbekannter Spotify-Typ \"{other}\".")),
+            other => Err(t!("spotify.unknown_kind", kind = other).into()),
         }
     }
 
@@ -72,7 +73,7 @@ impl SpotifyClient {
     pub async fn test_connection(&self, http: &reqwest::Client) -> Result<String, String> {
         self.invalidate().await;
         self.access_token(http).await?;
-        Ok("Verbindung zu Spotify funktioniert.".into())
+        Ok(t!("spotify.connection_ok").into())
     }
 
     /// Forgets the cached token, e.g. after the credentials changed.
@@ -99,14 +100,16 @@ impl SpotifyClient {
     ) -> Result<String, String> {
         let query = query.trim();
         if query.is_empty() {
-            return Err("Wonach soll ich in Spotify suchen?".into());
+            return Err(t!("spotify.empty_query").into());
         }
 
         let item = self.search_first(http, query, kind).await?;
-        let uri = item["uri"].as_str().ok_or("Spotify-Antwort ohne URI.")?;
+        let uri = item["uri"]
+            .as_str()
+            .ok_or_else(|| t!("spotify.invalid_response", error = "missing uri").to_string())?;
         app.opener()
             .open_url(uri, None::<&str>)
-            .map_err(|e| format!("Spotify konnte nicht geöffnet werden: {e}"))?;
+            .map_err(|e| t!("spotify.open_failed", error = e).to_string())?;
 
         let name = item["name"].as_str().unwrap_or(query);
         let by = item["artists"]
@@ -126,8 +129,10 @@ impl SpotifyClient {
             None => name.to_string(),
         };
         Ok(match kind {
-            SearchKind::Track => format!("Spielt in Spotify: {title}"),
-            _ => format!("In Spotify geöffnet ({}): {title}", kind.as_str()),
+            SearchKind::Track => t!("spotify.playing", title = title).into(),
+            SearchKind::Album => t!("spotify.opened_album", title = title).into(),
+            SearchKind::Artist => t!("spotify.opened_artist", title = title).into(),
+            SearchKind::Playlist => t!("spotify.opened_playlist", title = title).into(),
         })
     }
 
@@ -142,7 +147,7 @@ impl SpotifyClient {
                 .timeout(REQUEST_TIMEOUT)
                 .send()
                 .await
-                .map_err(|e| format!("Spotify nicht erreichbar: {e}"))?;
+                .map_err(|e| t!("spotify.unreachable", error = e).to_string())?;
 
             if response.status() == reqwest::StatusCode::UNAUTHORIZED && !retried {
                 *self.token.lock().await = None;
@@ -152,18 +157,18 @@ impl SpotifyClient {
             if !response.status().is_success() {
                 let status = response.status();
                 let body = response.text().await.unwrap_or_default();
-                return Err(format!("Spotify-Suche fehlgeschlagen (HTTP {status}): {body}"));
+                return Err(t!("spotify.search_failed", status = status, details = body).into());
             }
 
             let body: Value = response
                 .json()
                 .await
-                .map_err(|e| format!("Spotify-Antwort unlesbar: {e}"))?;
+                .map_err(|e| t!("spotify.invalid_response", error = e).to_string())?;
             // Playlist results may contain `null` entries.
             return body[format!("{}s", kind.as_str())]["items"]
                 .as_array()
                 .and_then(|items| items.iter().find(|item| item["uri"].is_string()).cloned())
-                .ok_or_else(|| format!("Nichts gefunden in Spotify für \"{query}\"."));
+                .ok_or_else(|| t!("spotify.nothing_found", query = query).to_string());
         }
     }
 
@@ -178,11 +183,7 @@ impl SpotifyClient {
         let (Some(client_id), Some(client_secret)) =
             (secrets::get(CLIENT_ID_SECRET)?, secrets::get(CLIENT_SECRET_SECRET)?)
         else {
-            return Err(
-                "Spotify ist noch nicht eingerichtet: Client-ID und Client-Secret in Orbit unter \
-                „Schlüssel“ hinterlegen (Anleitung: docs/SPOTIFY.md)."
-                    .into(),
-            );
+            return Err(t!("spotify.not_configured").into());
         };
 
         let response = http
@@ -192,15 +193,15 @@ impl SpotifyClient {
             .timeout(REQUEST_TIMEOUT)
             .send()
             .await
-            .map_err(|e| format!("Spotify nicht erreichbar: {e}"))?;
+            .map_err(|e| t!("spotify.unreachable", error = e).to_string())?;
 
         if !response.status().is_success() {
             let status = response.status();
             return Err(
                 if status == reqwest::StatusCode::BAD_REQUEST || status == reqwest::StatusCode::UNAUTHORIZED {
-                    "Spotify lehnt die Zugangsdaten ab. Client-ID und Client-Secret prüfen.".into()
+                    t!("spotify.credentials_rejected").into()
                 } else {
-                    format!("Spotify-Anmeldung fehlgeschlagen (HTTP {status}).")
+                    t!("spotify.auth_failed", status = status).into()
                 },
             );
         }
@@ -208,7 +209,7 @@ impl SpotifyClient {
         let token: TokenResponse = response
             .json()
             .await
-            .map_err(|e| format!("Spotify-Token unlesbar: {e}"))?;
+            .map_err(|e| t!("spotify.invalid_response", error = e).to_string())?;
         let expires = Instant::now() + Duration::from_secs(token.expires_in).saturating_sub(TOKEN_SAFETY_MARGIN);
         *cached = Some((token.access_token.clone(), expires));
         Ok(token.access_token)

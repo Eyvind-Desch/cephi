@@ -1,12 +1,12 @@
 {
   "$schema": "../../schemas/tool.schema.json",
   "name": "system_info",
-  "title": "Systeminfo",
-  "description": "Liefert CPU-Auslastung, freien Arbeitsspeicher, Speicherplatz der Laufwerke und die Betriebszeit des PCs.",
+  "title": { "en": "System info", "de": "Systeminfo" },
+  "description": "Returns CPU load, free memory (RAM), free disk space per drive and the PC's uptime.",
   "permission": "auto",
   "action": {
     "type": "powershell",
     "timeoutSecs": 15,
-    "script": "$os = Get-CimInstance Win32_OperatingSystem\n$cpu = (Get-CimInstance Win32_Processor | Measure-Object -Property LoadPercentage -Average).Average\n$uptime = (Get-Date) - $os.LastBootUpTime\n\"CPU-Auslastung: $cpu %\"\n\"RAM: {0:N1} GB frei von {1:N1} GB\" -f ($os.FreePhysicalMemory / 1MB), ($os.TotalVisibleMemorySize / 1MB)\n\"Betriebszeit: {0} Tage {1} Std\" -f $uptime.Days, $uptime.Hours\nGet-PSDrive -PSProvider FileSystem | Where-Object Used -ne $null | ForEach-Object { \"Laufwerk {0}: {1:N0} GB frei von {2:N0} GB\" -f $_.Name, ($_.Free / 1GB), (($_.Used + $_.Free) / 1GB) }"
+    "script": "$os = Get-CimInstance Win32_OperatingSystem\n$cpu = (Get-CimInstance Win32_Processor | Measure-Object -Property LoadPercentage -Average).Average\n$uptime = (Get-Date) - $os.LastBootUpTime\n\"CPU load: $cpu %\"\n\"RAM: {0:N1} GB free of {1:N1} GB\" -f ($os.FreePhysicalMemory / 1MB), ($os.TotalVisibleMemorySize / 1MB)\n\"Uptime: {0} days {1} h\" -f $uptime.Days, $uptime.Hours\nGet-PSDrive -PSProvider FileSystem | Where-Object Used -ne $null | ForEach-Object { \"Drive {0}: {1:N0} GB free of {2:N0} GB\" -f $_.Name, ($_.Free / 1GB), (($_.Used + $_.Free) / 1GB) }"
   }
 }

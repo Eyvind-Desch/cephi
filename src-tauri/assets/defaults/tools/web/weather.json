@@ -1,20 +1,20 @@
 {
   "$schema": "../../schemas/tool.schema.json",
   "name": "weather",
-  "title": "Wetter",
-  "description": "Liefert das aktuelle Wetter und die Vorhersage für einen Ort.",
+  "title": { "en": "Weather", "de": "Wetter" },
+  "description": "Returns the current weather for a location.",
   "permission": "auto",
   "parameters": {
     "type": "object",
     "properties": {
-      "location": { "type": "string", "description": "Stadt oder Ort, z. B. Berlin" }
+      "location": { "type": "string", "description": "City or place, e.g. Berlin" }
     },
     "required": ["location"]
   },
   "action": {
     "type": "http",
     "method": "GET",
-    "url": "https://wttr.in/{{location}}?format=%l:+%c+%t+(gefühlt+%f),+Wind+%w,+Luftfeuchte+%h&lang=de",
+    "url": "https://wttr.in/{{location}}?format=%l:+%c+%t+(feels+like+%f),+wind+%w,+humidity+%h",
     "timeoutSecs": 10
   }
 }

@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { setLanguage } from "../i18n";
 import { api, type ConfigSnapshot, type WindowMode } from "../lib/ipc";
 
 export type PanelView = "chat" | "keys";
@@ -60,6 +61,7 @@ export const useUi = create<UiState>()((set, get) => ({
   },
 
   applyConfig: (config) => {
+    setLanguage(config.language);
     const current = get().profileId;
     const stillExists = config.profiles.some((p) => p.id === current);
     set({ config, profileId: stillExists ? current : config.defaultProfile });

@@ -1,17 +1,17 @@
 {
   "$schema": "../../schemas/tool.schema.json",
   "name": "google_search",
-  "title": "Google-Suche",
-  "description": "Öffnet eine Google-Suche im Browser. Nutze dies, wenn der Nutzer etwas googeln oder im Web nachsehen möchte.",
+  "title": { "en": "Google search", "de": "Google-Suche" },
+  "description": "Opens a Google search in the browser. Use this when the user wants to google something or look something up on the web.",
   "permission": "auto",
   "parameters": {
     "type": "object",
     "properties": {
-      "query": { "type": "string", "description": "Der Suchbegriff" }
+      "query": { "type": "string", "description": "The search term" }
     },
     "required": ["query"]
   },
-  "triggers": ["g {query}", "(google|googel|google mal) nach {query}"],
+  "triggers": ["g {query}", "(google|googel|google mal) nach {query}", "(google|search google) for {query}"],
   "action": {
     "type": "open_url",
     "url": "https://www.google.com/search?q={{query}}"

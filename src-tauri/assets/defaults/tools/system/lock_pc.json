@@ -1,8 +1,8 @@
 {
   "$schema": "../../schemas/tool.schema.json",
   "name": "lock_pc",
-  "title": "PC sperren",
-  "description": "Sperrt den Windows-Bildschirm.",
+  "title": { "en": "Lock PC", "de": "PC sperren" },
+  "description": "Locks the Windows screen.",
   "permission": "confirm",
   "action": {
     "type": "launch",

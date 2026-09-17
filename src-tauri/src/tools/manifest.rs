@@ -1,9 +1,11 @@
 use std::collections::BTreeMap;
 
+use rust_i18n::t;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use super::builtin::Builtin;
+use super::localized::LocalizedText;
 use super::template::{self, Context};
 use super::trigger::{Trigger, TriggerSpec};
 
@@ -16,8 +18,10 @@ pub struct ToolManifest {
     #[allow(dead_code)]
     pub schema: Option<String>,
     pub name: String,
+    /// Display name, plain or per language: `{ "en": "Weather", "de": "Wetter" }`.
     #[serde(default)]
-    pub title: Option<String>,
+    pub title: Option<LocalizedText>,
+    /// For the model; English recommended (small models select tools more reliably).
     pub description: String,
     #[serde(default = "default_true")]
     pub enabled: bool,
@@ -148,15 +152,13 @@ impl ToolManifest {
     /// Semantic checks that the JSON schema alone cannot express.
     pub fn validate(&self) -> Result<(), String> {
         if !is_valid_tool_name(&self.name) {
-            return Err(format!(
-                "\"name\" \"{}\" ist ungültig: nur a-z, 0-9 und _, beginnend mit einem Buchstaben (2–64 Zeichen).",
-                self.name
-            ));
+            return Err(t!("tools.invalid_name", name = self.name).into());
         }
         if self.description.trim().is_empty() {
-            return Err(
-                "\"description\" darf nicht leer sein – das Modell entscheidet anhand dieser Beschreibung.".into(),
-            );
+            return Err(t!("tools.empty_description").into());
+        }
+        if let Some(title) = &self.title {
+            title.validate("title")?;
         }
         self.validate_parameters()?;
         self.validate_action()?;
@@ -195,20 +197,16 @@ impl ToolManifest {
     fn validate_parameters(&self) -> Result<(), String> {
         let params = &self.parameters;
         if params.kind != "object" {
-            return Err("\"parameters.type\" muss \"object\" sein.".into());
+            return Err(t!("tools.parameters_not_object").into());
         }
         for name in params.properties.keys() {
             if !is_valid_param_name(name) {
-                return Err(format!(
-                    "Parameter \"{name}\" ist ungültig: nur Buchstaben, Ziffern und _ erlaubt."
-                ));
+                return Err(t!("tools.invalid_param_name", name = name).into());
             }
         }
         for name in &params.required {
             if !params.properties.contains_key(name) {
-                return Err(format!(
-                    "\"required\" enthält \"{name}\", der Parameter ist aber nicht definiert."
-                ));
+                return Err(t!("tools.required_unknown", name = name).into());
             }
         }
         Ok(())
@@ -226,16 +224,14 @@ impl ToolManifest {
             }
             Action::Powershell { script, .. } => {
                 if script.contains("{{") {
-                    return Err("PowerShell-Skripte unterstützen keine {{Platzhalter}}. \
-                        Nutze stattdessen $env:ORBIT_ARG_<NAME> (sicher gegen Code-Injection)."
-                        .into());
+                    return Err(t!("tools.powershell_placeholders").into());
                 }
                 Ok(())
             }
             Action::Http { url, headers, body, .. } => {
                 let lower = url.to_ascii_lowercase();
                 if !(lower.starts_with("http://") || lower.starts_with("https://")) {
-                    return Err("\"action.url\" muss mit http:// oder https:// beginnen.".into());
+                    return Err(t!("tools.http_url_scheme").into());
                 }
                 known(url, Context::Url)?;
                 headers.values().try_for_each(|h| known(h, Context::Header))?;
@@ -244,10 +240,7 @@ impl ToolManifest {
             Action::Builtin { id } => {
                 for required in id.required_params() {
                     if !self.parameters.properties.contains_key(*required) {
-                        return Err(format!(
-                            "Builtin \"{}\" braucht den Parameter \"{required}\".",
-                            id.as_str()
-                        ));
+                        return Err(t!("tools.builtin_missing_param", builtin = id.as_str(), name = required).into());
                     }
                 }
                 Ok(())
@@ -307,7 +300,7 @@ mod tests {
     #[test]
     fn minimal_tool_parses_with_safe_defaults() {
         let tool = parse(
-            r#"{ "name": "hello", "description": "Sagt hallo", "action": { "type": "open_url", "url": "https://example.com" } }"#,
+            r#"{ "name": "hello", "description": "Says hello", "action": { "type": "open_url", "url": "https://example.com" } }"#,
         )
         .unwrap();
         assert!(tool.enabled);
@@ -363,7 +356,7 @@ mod tests {
     #[test]
     fn invalid_trigger_is_reported() {
         let err = parse(
-            r#"{ "name": "t1", "description": "x", "triggers": ["öffne {nope}"],
+            r#"{ "name": "t1", "description": "x", "triggers": ["open {nope}"],
                  "action": { "type": "builtin", "id": "datetime" } }"#,
         )
         .unwrap_err();

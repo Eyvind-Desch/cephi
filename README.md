@@ -1,7 +1,7 @@
 # Orbit
 
-> Immer verfügbarer Desktop-Assistent für Windows: KI fragen, im Web suchen und Dinge am PC erledigen.
-> Läuft lokal mit Ollama.
+> Always-available desktop assistant for Windows: ask AI, search the web, and get things done on your PC.
+> Runs locally with Ollama.
 
 - **Category:** tools
 - **Created:** 2026-09-16
@@ -9,62 +9,65 @@
 
 ## Why
 
-Nicht mehr extra ein Browserfenster öffnen, um etwas zu suchen oder die KI zu fragen.
-Ein Hotkey, ein Eingabefeld: Antwort, Suche oder Aktion („öffne die Bluetooth-Einstellungen“).
+No need to open a separate browser window just to search for something or ask the AI.
+One hotkey, one input field: answer, search, or action ("öffne die Bluetooth-Einstellungen" / "open Bluetooth settings").
 
-## Bedienung
+## Usage
 
-| Taste | Aktion |
+| Key | Action |
 |---|---|
-| `Strg+Alt+Leertaste` | Orbit ein-/ausblenden (einstellbar in `settings.json`) |
-| `Enter` / `Shift+Enter` | Senden / neue Zeile |
-| `Strg+E` | Kompakte Leiste ↔ großes Panel |
-| `Strg+N` | Neuer Chat |
-| `Esc` | Ausblenden |
+| `Ctrl+Alt+Space` | Show/hide Orbit (configurable in `settings.json`) |
+| `Enter` / `Shift+Enter` | Send / new line |
+| `Ctrl+E` | Compact bar ↔ large panel |
+| `Ctrl+N` | New chat |
+| `Esc` | Hide |
 
-Klick außerhalb blendet Orbit aus, außer es ist angepinnt (⋯-Menü). Tray-Icon: öffnen, Konfiguration, beenden.
+Clicking outside hides Orbit, unless it's pinned (⋯ menu). Tray icon: open, configuration, quit.
 
-### Schnellwege (ohne KI, sofort)
+### Quick actions (no AI, instant)
 
-| Eingabe | Aktion |
+| Input | Action |
 |---|---|
-| `öffne discord`, `starte den rechner` | App starten |
-| `spiele another love von tom odell auf spotify` | Song abspielen ([Einrichtung](docs/SPOTIFY.md)) |
-| `pause`, `nächster song`, `stumm`, `ton an` | Wiedergabe |
-| `lautstärke auf 30`, `mach 24 lauter`, `mach es leiser` | Lautstärke (exakt) |
-| `g suchbegriff`, `yt suchbegriff` | Google / YouTube |
+| `öffne discord` / "open discord", `starte den rechner` / "launch calculator" | Launch app |
+| `spiele another love von tom odell auf spotify` / "play another love by tom odell on spotify" | Play song ([setup](docs/SPOTIFY.md)) |
+| `pause` / "pause", `nächster song` / "next song", `stumm` / "mute", `ton an` / "unmute" | Playback |
+| `lautstärke auf 30` / "volume to 30", `mach 24 lauter` / "turn it up by 24", `mach es leiser` / "turn it down" | Volume (exact) |
+| `g search term`, `yt search term` | Google / YouTube |
 
-Alles andere geht an die KI, die dieselben Tools aufrufen kann. Eigene Schnellwege: `triggers` in den
-Tool-JSONs ([docs/TOOLS.md](docs/TOOLS.md)). API-Keys: ⋯ → *Schlüssel & API-Keys*.
+Everything else goes to the AI, which can call the same tools. Custom quick actions: `triggers` in the
+tool JSON files ([docs/TOOLS.md](docs/TOOLS.md)). API keys: ⋯ → *Keys & API Keys*.
 
-## Konfiguration
+## Configuration
 
-Alles liegt in **`%APPDATA%\Orbit\`** und wird bei Änderungen sofort neu geladen:
+Everything lives in **`%APPDATA%\Orbit\`** and is reloaded immediately on changes:
 
 ```
 Orbit/
-├── settings.json   Hotkey, Modell-Profile, Fenster, Agent
-├── tools/          eigene Tools als JSON → docs/TOOLS.md
-└── schemas/        für Autovervollständigung im Editor (wird automatisch erzeugt)
+├── settings.json   hotkey, model profiles, window, agent
+├── tools/          custom tools as JSON → docs/TOOLS.md
+└── schemas/        for editor autocompletion (generated automatically)
 ```
 
-## Entwicklung
+`settings.json` also has a `"language": "system" | "en" | "de"` field (default `system`, which follows
+the Windows display language). The UI and all messages are localized (English source, German translation).
 
-Voraussetzungen: Node 22+, Rust (MSVC), VS C++ Build Tools, Ollama.
+## Development
+
+Requirements: Node 22+, Rust (MSVC), VS C++ Build Tools, Ollama.
 
 ```powershell
 npm install
-npm run app          # Entwicklungsmodus mit Hot-Reload
-npm run check        # TypeScript + Clippy + Rust-Tests
-npm run app:build    # Installer (NSIS) → src-tauri/target/release/bundle/
+npm run app          # dev mode with hot reload
+npm run check        # TypeScript + Clippy + Rust tests
+npm run app:build    # installer (NSIS) → src-tauri/target/release/bundle/
 ```
 
-Eigener Config-Ordner zum Testen: `$env:ORBIT_CONFIG_DIR = "X:\tmp\orbit-config"`.
+Custom config folder for testing: `$env:ORBIT_CONFIG_DIR = "X:\tmp\orbit-config"`.
 Logs: `%LOCALAPPDATA%\io.github.eyvind-desch.orbit\logs\`.
 
 ## Docs
 
-- [PLAN.md](PLAN.md): Ziele, Entscheidungen, Etappen
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): Aufbau und Datenfluss
-- [docs/TOOLS.md](docs/TOOLS.md): eigene Tools, Schnellwege, API-Keys
-- [docs/SPOTIFY.md](docs/SPOTIFY.md): Spotify einrichten
+- [PLAN.md](PLAN.md): goals, decisions, stages
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): structure and data flow
+- [docs/TOOLS.md](docs/TOOLS.md): custom tools, quick actions, API keys
+- [docs/SPOTIFY.md](docs/SPOTIFY.md): Spotify setup

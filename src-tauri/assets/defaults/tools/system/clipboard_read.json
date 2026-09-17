@@ -1,8 +1,8 @@
 {
   "$schema": "../../schemas/tool.schema.json",
   "name": "clipboard_read",
-  "title": "Zwischenablage lesen",
-  "description": "Liest den Text aus der Zwischenablage, z. B. wenn der Nutzer sagt 'fasse zusammen, was ich kopiert habe'.",
+  "title": { "en": "Read clipboard", "de": "Zwischenablage lesen" },
+  "description": "Reads the text from the clipboard, e.g. when the user says 'summarize what I copied'.",
   "permission": "auto",
   "action": {
     "type": "builtin",

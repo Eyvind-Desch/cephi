@@ -2,18 +2,21 @@ import clsx from "clsx";
 import { Check, ChevronRight, KeyRound, Loader2, ShieldQuestion, Wrench, X, Zap } from "lucide-react";
 import { motion } from "motion/react";
 import { useState, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
+import { formatDuration } from "../../i18n";
 import { useChat } from "../../store/chat";
 import type { ToolPart } from "../../store/chatModel";
 import { useUi } from "../../store/ui";
 
 const statusStyles = {
-  running: { icon: Loader2, className: "text-accent", spin: true, label: "Läuft" },
-  awaiting: { icon: ShieldQuestion, className: "text-warning", spin: false, label: "Wartet auf Freigabe" },
-  ok: { icon: Check, className: "text-success", spin: false, label: "Erledigt" },
-  error: { icon: X, className: "text-danger", spin: false, label: "Fehlgeschlagen" },
+  running: { icon: Loader2, className: "text-accent", spin: true },
+  awaiting: { icon: ShieldQuestion, className: "text-warning", spin: false },
+  ok: { icon: Check, className: "text-success", spin: false },
+  error: { icon: X, className: "text-danger", spin: false },
 } as const;
 
 export function ToolCard({ part }: { part: ToolPart }) {
+  const { t } = useTranslation();
   const confirm = useChat((s) => s.confirm);
   const setView = useUi((s) => s.setView);
   const [open, setOpen] = useState(false);
@@ -38,15 +41,17 @@ export function ToolCard({ part }: { part: ToolPart }) {
         className="flex w-full items-center gap-2.5 px-3 py-2 text-left hover:bg-sunken"
       >
         {part.fast ? (
-          <span title="Schnellweg: direkt ausgeführt, ohne KI">
+          <span title={t("toolCard.fastPath")}>
             <Zap size={14} className="shrink-0 text-accent" />
           </span>
         ) : (
           <Wrench size={14} className="shrink-0 text-subtle" />
         )}
         <span className="min-w-0 flex-1 truncate font-medium">{part.title}</span>
-        {part.durationMs != null && <span className="shrink-0 text-[11.5px] text-subtle">{formatDuration(part.durationMs)}</span>}
-        <span title={status.label} className={clsx("shrink-0", status.className)}>
+        {part.durationMs != null && (
+          <span className="shrink-0 text-[11.5px] text-subtle">{formatDuration(part.durationMs)}</span>
+        )}
+        <span title={t(`toolCard.status.${part.status}`)} className={clsx("shrink-0", status.className)}>
           <StatusIcon size={15} className={clsx(status.spin && "animate-spin")} />
         </span>
         <ChevronRight size={14} className={clsx("shrink-0 text-subtle transition-transform", open && "rotate-90")} />
@@ -54,7 +59,7 @@ export function ToolCard({ part }: { part: ToolPart }) {
 
       {awaiting && (
         <div className="space-y-2.5 border-t border-line px-3 py-2.5">
-          <p className="text-muted">Orbit möchte Folgendes ausführen:</p>
+          <p className="text-muted">{t("toolCard.confirmPrompt")}</p>
           {part.preview && <CodeText>{part.preview}</CodeText>}
           <div className="flex justify-end gap-2">
             <button
@@ -62,7 +67,7 @@ export function ToolCard({ part }: { part: ToolPart }) {
               onClick={() => confirm(part.callId, false)}
               className="rounded-lg px-3 py-1.5 font-medium text-muted hover:bg-sunken hover:text-fg"
             >
-              Ablehnen
+              {t("toolCard.deny")}
             </button>
             <button
               type="button"
@@ -70,7 +75,7 @@ export function ToolCard({ part }: { part: ToolPart }) {
               onClick={() => confirm(part.callId, true)}
               className="rounded-lg bg-accent px-3 py-1.5 font-medium text-accent-fg hover:brightness-110"
             >
-              Ausführen
+              {t("toolCard.run")}
             </button>
           </div>
         </div>
@@ -85,7 +90,7 @@ export function ToolCard({ part }: { part: ToolPart }) {
               onClick={() => setView("keys")}
               className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 font-medium text-accent-fg hover:brightness-110"
             >
-              <KeyRound size={14} /> Schlüssel eintragen
+              <KeyRound size={14} /> {t("toolCard.enterKeys")}
             </button>
           )}
         </div>
@@ -93,16 +98,16 @@ export function ToolCard({ part }: { part: ToolPart }) {
 
       {open && (
         <div className="space-y-2 border-t border-line px-3 py-2.5">
-          <Detail label="Tool">
+          <Detail label={t("toolCard.details.tool")}>
             <span className="font-mono text-[12px]">{part.name}</span>
           </Detail>
           {hasArgs && (
-            <Detail label="Argumente">
+            <Detail label={t("toolCard.details.arguments")}>
               <CodeText>{JSON.stringify(part.args, null, 2)}</CodeText>
             </Detail>
           )}
           {part.output && !failed && (
-            <Detail label="Ergebnis">
+            <Detail label={t("toolCard.details.result")}>
               <CodeText>{part.output}</CodeText>
             </Detail>
           )}
@@ -110,10 +115,6 @@ export function ToolCard({ part }: { part: ToolPart }) {
       )}
     </motion.div>
   );
-}
-
-function formatDuration(ms: number) {
-  return ms < 1000 ? `${ms} ms` : `${(ms / 1000).toFixed(1)} s`;
 }
 
 function Detail({ label, children }: { label: string; children: ReactNode }) {

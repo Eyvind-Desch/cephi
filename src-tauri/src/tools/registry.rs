@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use rust_i18n::t;
 use serde_json::{json, Value};
 
 use super::args::{self, Args};
@@ -17,8 +18,12 @@ pub struct Tool {
 }
 
 impl Tool {
-    pub fn title(&self) -> &str {
-        self.manifest.title.as_deref().unwrap_or(&self.manifest.name)
+    /// Display title in the active language; falls back to the technical name.
+    pub fn title(&self) -> String {
+        match &self.manifest.title {
+            Some(title) => title.resolve(&rust_i18n::locale()).to_string(),
+            None => self.manifest.name.clone(),
+        }
     }
 
     pub fn normalize_args(&self, raw: &Value) -> Result<Args, String> {
@@ -55,7 +60,11 @@ impl ToolRegistry {
         let mut files = Vec::new();
         if let Err(e) = collect_json_files(dir, &mut files) {
             if dir.exists() {
-                diagnostics.push(Diagnostic::for_path(root, dir, format!("Ordner nicht lesbar: {e}")));
+                diagnostics.push(Diagnostic::for_path(
+                    root,
+                    dir,
+                    t!("config.folder_unreadable", error = e),
+                ));
             }
         }
         files.sort();
@@ -73,10 +82,7 @@ impl ToolRegistry {
                         diagnostics.push(Diagnostic::for_path(
                             root,
                             &path,
-                            format!(
-                                "Tool-Name \"{}\" ist bereits in {} vergeben.",
-                                manifest.name, existing.source
-                            ),
+                            t!("tools.duplicate_name", name = manifest.name, source = existing.source),
                         ));
                         continue;
                     }
@@ -125,7 +131,7 @@ impl ToolRegistry {
         let mut usage: BTreeMap<String, Vec<String>> = BTreeMap::new();
         for tool in self.tools.values() {
             for secret in tool.manifest.secrets() {
-                usage.entry(secret).or_default().push(tool.title().to_string());
+                usage.entry(secret).or_default().push(tool.title());
             }
         }
         usage
@@ -133,8 +139,9 @@ impl ToolRegistry {
 }
 
 fn load_file(path: &Path) -> Result<ToolManifest, String> {
-    let text = fs::read_to_string(path).map_err(|e| format!("Datei nicht lesbar: {e}"))?;
-    let manifest: ToolManifest = serde_json::from_str(&text).map_err(|e| format!("Ungültiges Tool: {e}"))?;
+    let text = fs::read_to_string(path).map_err(|e| t!("config.file_unreadable", error = e).to_string())?;
+    let manifest: ToolManifest =
+        serde_json::from_str(&text).map_err(|e| t!("tools.invalid_manifest", error = e).to_string())?;
     manifest.validate()?;
     Ok(manifest)
 }
@@ -195,6 +202,16 @@ mod tests {
             ("schalte bluetooth jetzt an", "radio"),
             ("WLAN aus", "radio"),
             ("ist bluetooth an?", "radio"),
+            // English phrases
+            ("play Mr. Brightside by The Killers on Spotify", "spotify_play"),
+            ("open Discord", "open_app"),
+            ("launch the calculator", "open_app"),
+            ("next track", "media_control"),
+            ("turn it up by 20", "media_control"),
+            ("set the volume to 30", "media_control"),
+            ("turn on bluetooth", "radio"),
+            ("is wifi on?", "radio"),
+            ("search lofi beats on youtube", "youtube_search"),
         ];
         for (input, expected) in cases {
             let (tool, _) = first_match(&registry, input).unwrap_or_else(|| panic!("no match for {input:?}"));
@@ -248,7 +265,7 @@ mod tests {
             ("radio", Some("Bluetooth"), Some("on"))
         );
         // Matches the pattern, but "licht" is no radio: the builtin rejects the fast path (checked in builtin.rs).
-        assert!(crate::integrations::radio::Device::parse("das licht").is_err());
+        assert!(crate::integrations::radio::Device::parse("the light").is_err());
         // "ton an" belongs to media control, which is more specific.
         assert_eq!(first_valid(&registry, "ton an").unwrap().0, "media_control");
     }

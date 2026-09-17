@@ -1,0 +1,191 @@
+{
+  "_version": 1,
+  "agent": {
+    "busy": "Es läuft bereits eine Anfrage.",
+    "too_many_rounds": "Abbruch nach %{rounds} Tool-Runden ohne abschließende Antwort.",
+    "unknown_tool": "Unbekanntes Tool \"%{name}\".",
+    "denied": "Der Nutzer hat die Ausführung abgelehnt.",
+    "truncated": "… (gekürzt)"
+  },
+  "app": {
+    "open_folder_failed": "Ordner konnte nicht geöffnet werden: %{error}"
+  },
+  "args": {
+    "not_object": "Argumente müssen ein JSON-Objekt sein.",
+    "missing_required": "Pflichtparameter \"%{name}\" fehlt.",
+    "not_allowed": "\"%{name}\" muss einer dieser Werte sein: %{options}.",
+    "wrong_type": "\"%{name}\" muss vom Typ %{kind} sein, erhalten: %{value}."
+  },
+  "audio": {
+    "set_failed": "Lautstärke konnte nicht gesetzt werden: %{error}",
+    "mute_failed": "Stummschaltung fehlgeschlagen: %{error}",
+    "read_failed": "Lautstärke nicht lesbar: %{error}",
+    "devices_unavailable": "Audiogeräte nicht verfügbar: %{error}",
+    "no_output_device": "Kein Audio-Ausgabegerät gefunden.",
+    "control_unavailable": "Lautstärkeregelung nicht verfügbar: %{error}",
+    "state": "Lautstärke %{percent} %",
+    "state_muted": "Lautstärke %{percent} % (stumm)"
+  },
+  "clipboard": {
+    "unavailable": "Zwischenablage nicht verfügbar: %{error}",
+    "no_text": "Zwischenablage enthält keinen Text: %{error}",
+    "empty": "(Zwischenablage ist leer)",
+    "write_failed": "Schreiben in die Zwischenablage fehlgeschlagen: %{error}",
+    "copied": "Text in die Zwischenablage kopiert."
+  },
+  "config": {
+    "file_unreadable": "Datei nicht lesbar: %{error}",
+    "folder_unreadable": "Ordner nicht lesbar: %{error}",
+    "invalid_json": "Ungültiges JSON: %{error}",
+    "empty_text": "\"%{field}\" darf nicht leer sein."
+  },
+  "executor": {
+    "preview_open": "Öffnen: %{url}",
+    "preview_launch": "Starten: %{command}",
+    "preview_script": "%{values}\n\nSkript:\n%{script}",
+    "preview_builtin": "Interne Funktion: %{id}",
+    "invalid_url": "Ungültige URL \"%{url}\": %{error}",
+    "scheme_not_allowed": "Das Schema \"%{scheme}:\" ist für dieses Tool nicht erlaubt.",
+    "open_failed": "Konnte nicht geöffnet werden: %{error}",
+    "opened": "Geöffnet: %{url}",
+    "launch_failed": "\"%{program}\" konnte nicht gestartet werden: %{error}",
+    "launched": "Gestartet: %{program}",
+    "powershell_start_failed": "PowerShell konnte nicht gestartet werden: %{error}",
+    "powershell_failed": "PowerShell-Fehler: %{error}",
+    "timeout": "Zeitüberschreitung nach %{seconds} s.",
+    "no_output": "(keine Ausgabe)",
+    "exit_code": "Exit-Code %{code}:\n%{details}",
+    "request_failed": "Anfrage fehlgeschlagen: %{error}",
+    "response_unreadable": "Antwort nicht lesbar: %{error}"
+  },
+  "external": {
+    "invalid_link": "Ungültiger Link.",
+    "web_only": "Nur Web-Links können geöffnet werden."
+  },
+  "hotkey": {
+    "reset_failed": "Hotkeys konnten nicht zurückgesetzt werden: %{error}",
+    "register_failed": "Hotkey \"%{hotkey}\" konnte nicht registriert werden (%{error}). Evtl. von einer anderen App belegt?"
+  },
+  "launcher": {
+    "index_failed": "Liste der installierten Apps nicht lesbar: %{error}",
+    "launched": "Gestartet: %{name}",
+    "not_found": "Keine installierte App passt zu \"%{name}\".",
+    "ambiguous": "Keine App passt eindeutig zu \"%{name}\". Ähnlich: %{suggestions}."
+  },
+  "llm": {
+    "unreachable": "Ollama ist nicht erreichbar unter %{url}. Läuft Ollama?",
+    "api_error": "Ollama: %{details}",
+    "invalid_response": "Ungültige Antwort von Ollama: %{details}",
+    "cancelled": "Abgebrochen"
+  },
+  "media": {
+    "unknown_action": "Unbekannte Medienaktion \"%{action}\".",
+    "play_pause": "Wiedergabe umgeschaltet.",
+    "next": "Nächster Titel.",
+    "previous": "Vorheriger Titel.",
+    "level_missing": "Für set_volume fehlt \"level\" (0–100).",
+    "level_out_of_range": "Lautstärke muss zwischen 0 und 100 liegen, nicht %{level}."
+  },
+  "radio": {
+    "bluetooth": "Bluetooth",
+    "wifi": "WLAN",
+    "unknown_device": "Unbekanntes Funkgerät \"%{device}\" (möglich: bluetooth, wlan).",
+    "unknown_command": "Unbekannter Befehl \"%{command}\" (möglich: on, off, toggle, status).",
+    "windows_error": "Windows-Fehler: %{error}",
+    "access_denied": "Windows erlaubt keinen Zugriff auf Funkgeräte. Einstellungen → Datenschutz und Sicherheit → Funkgeräte prüfen.",
+    "no_adapter": "Kein %{device}-Adapter gefunden.",
+    "hardware_disabled": "%{device} ist per Hardware oder Flugmodus deaktiviert und kann nicht geschaltet werden.",
+    "status": "%{device} ist %{state}.",
+    "already": "%{device} war bereits %{state} (geprüft).",
+    "switch_denied": "Windows hat das Umschalten von %{device} verweigert.",
+    "switched": "%{device} ist jetzt %{state}.",
+    "switch_failed": "%{device} konnte nicht umgeschaltet werden, ist weiterhin %{state}.",
+    "state_on": "an",
+    "state_off": "aus",
+    "state_disabled": "deaktiviert",
+    "state_unknown": "in unbekanntem Zustand"
+  },
+  "secret_groups": {
+    "spotify": {
+      "description": "Songs per Befehl abspielen. Die API wird nur zum Suchen genutzt, gespielt wird in der Spotify-App.",
+      "client_id_placeholder": "32 Zeichen aus dem Spotify-Dashboard",
+      "client_secret_placeholder": "„View client secret“ im Dashboard"
+    },
+    "custom": {
+      "title": "Eigene Tools",
+      "description": "Schlüssel, die deine Tools über {{secret:…}} verwenden.",
+      "placeholder": "Wert einfügen"
+    }
+  },
+  "secrets": {
+    "invalid_name": "Ungültiger Schlüsselname \"%{name}\": nur a-z, 0-9 und _, beginnend mit einem Buchstaben.",
+    "missing": "Schlüssel \"%{name}\" fehlt. In Orbit unter „Schlüssel“ hinterlegen.",
+    "read_failed": "Anmeldeinformation nicht lesbar (Fehler %{code}).",
+    "not_text": "Gespeicherter Schlüssel ist kein gültiger Text.",
+    "empty": "Der Schlüssel darf nicht leer sein.",
+    "too_long": "Der Schlüssel ist zu lang.",
+    "save_failed": "Schlüssel konnte nicht gespeichert werden (Fehler %{code}).",
+    "delete_failed": "Schlüssel konnte nicht gelöscht werden (Fehler %{code})."
+  },
+  "settings": {
+    "no_profiles": "Mindestens ein Profil in \"profiles\" ist nötig.",
+    "profile_incomplete": "profiles[%{index}]: \"id\" und \"model\" dürfen nicht leer sein.",
+    "duplicate_profile": "profiles: doppelte id \"%{id}\".",
+    "unknown_default_profile": "defaultProfile \"%{id}\" existiert nicht in \"profiles\".",
+    "invalid_ollama_url": "ollama.baseUrl \"%{url}\" ist keine gültige URL.",
+    "max_tool_rounds": "agent.maxToolRounds muss mindestens 1 sein."
+  },
+  "spotify": {
+    "unknown_kind": "Unbekannter Spotify-Typ \"%{kind}\".",
+    "connection_ok": "Verbindung zu Spotify funktioniert.",
+    "empty_query": "Wonach soll ich in Spotify suchen?",
+    "invalid_response": "Ungültige Antwort von Spotify: %{error}",
+    "open_failed": "Spotify konnte nicht geöffnet werden: %{error}",
+    "playing": "Spielt in Spotify: %{title}",
+    "opened_album": "Album in Spotify geöffnet: %{title}",
+    "opened_artist": "Künstler in Spotify geöffnet: %{title}",
+    "opened_playlist": "Playlist in Spotify geöffnet: %{title}",
+    "unreachable": "Spotify nicht erreichbar: %{error}",
+    "search_failed": "Spotify-Suche fehlgeschlagen (HTTP %{status}): %{details}",
+    "nothing_found": "Nichts gefunden in Spotify für \"%{query}\".",
+    "not_configured": "Spotify ist noch nicht eingerichtet: Client-ID und Client-Secret in Orbit unter „Schlüssel“ hinterlegen.",
+    "credentials_rejected": "Spotify lehnt die Zugangsdaten ab. Client-ID und Client-Secret prüfen.",
+    "auth_failed": "Spotify-Anmeldung fehlgeschlagen (HTTP %{status})."
+  },
+  "templates": {
+    "unclosed": "Nicht geschlossener Platzhalter in \"%{template}\".",
+    "empty": "Leerer Platzhalter in \"%{template}\".",
+    "unknown_filter": "Unbekannter Filter \"%{filter}\" (erlaubt: raw, url, json).",
+    "unknown_param": "Platzhalter {{%{name}}} verweist auf keinen definierten Parameter.",
+    "header_newline": "Parameter \"%{name}\" enthält Zeilenumbrüche (nicht erlaubt in Headern)."
+  },
+  "tools": {
+    "invalid_manifest": "Ungültiges Tool: %{error}",
+    "duplicate_name": "Tool-Name \"%{name}\" ist bereits in %{source} vergeben.",
+    "invalid_name": "\"name\" \"%{name}\" ist ungültig: nur a-z, 0-9 und _, beginnend mit einem Buchstaben (2–64 Zeichen).",
+    "empty_description": "\"description\" darf nicht leer sein: Das Modell wählt Tools anhand dieser Beschreibung.",
+    "parameters_not_object": "\"parameters.type\" muss \"object\" sein.",
+    "invalid_param_name": "Parameter \"%{name}\" ist ungültig: nur Buchstaben, Ziffern und _ erlaubt.",
+    "required_unknown": "\"required\" enthält \"%{name}\", der Parameter ist aber nicht definiert.",
+    "powershell_placeholders": "PowerShell-Skripte unterstützen keine {{Platzhalter}}. Nutze stattdessen $env:ORBIT_ARG_<NAME> (sicher gegen Code-Injection).",
+    "http_url_scheme": "\"action.url\" muss mit http:// oder https:// beginnen.",
+    "builtin_missing_param": "Builtin \"%{builtin}\" braucht den Parameter \"%{name}\"."
+  },
+  "tray": {
+    "show": "Orbit öffnen",
+    "open_config": "Konfiguration öffnen",
+    "reload": "Konfiguration neu laden",
+    "quit": "Beenden"
+  },
+  "triggers": {
+    "error": "Trigger \"%{pattern}\": %{error}",
+    "unknown_arg": "\"args\" enthält den unbekannten Parameter \"%{name}\".",
+    "unexpected": "unerwartetes \"%{char}\".",
+    "unknown_param": "{%{name}} ist kein definierter Parameter.",
+    "needs_literal": "braucht mindestens ein festes Wort.",
+    "invalid_regex": "ungültiges Muster (%{error}).",
+    "empty_capture": "leerer Platzhalter {}.",
+    "duplicate_capture": "{%{name}} kommt doppelt vor.",
+    "missing_char": "\"%{char}\" fehlt."
+  }
+}

@@ -51,6 +51,8 @@ pub struct Config {
 /// Loads settings and tools from disk.
 ///
 /// If `settings.json` is invalid, `previous` (or the built-in defaults) is used instead.
+/// Also activates the configured language, so all following messages (including the tool
+/// diagnostics collected here) are localized.
 pub fn load(paths: &ConfigPaths, previous: Option<&Settings>) -> Config {
     let mut diagnostics = Vec::new();
 
@@ -61,6 +63,8 @@ pub fn load(paths: &ConfigPaths, previous: Option<&Settings>) -> Config {
             previous.cloned().unwrap_or_default()
         }
     };
+    let locale = crate::i18n::apply(settings.language);
+    log::info!("language: {locale}");
 
     let (tools, tool_diagnostics) = ToolRegistry::load_dir(&paths.root, &paths.tools);
     diagnostics.extend(tool_diagnostics);

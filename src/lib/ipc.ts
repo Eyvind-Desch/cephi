@@ -30,6 +30,8 @@ export interface Diagnostic {
 }
 
 export interface ConfigSnapshot {
+  /** UI language, already resolved by the backend (settings may say "system"). */
+  language: "en" | "de";
   configDir: string;
   hotkey: string;
   defaultProfile: string;

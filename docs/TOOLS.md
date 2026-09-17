@@ -1,30 +1,30 @@
-# Eigene Tools schreiben
+# Writing custom tools
 
-Tools sind JSON-Dateien in **`%APPDATA%\Orbit\tools\`**, eine Datei pro Tool. Unterordner zum Sortieren
-sind erlaubt (`web/`, `system/`, `apps/` …). Orbit lädt Änderungen **sofort**, ein Neustart ist nicht nötig.
+Tools are JSON files in **`%APPDATA%\Orbit\tools\`**, one file per tool. Subfolders for organizing
+are allowed (`web/`, `system/`, `apps/`, …). Orbit loads changes **immediately**; a restart isn't necessary.
 
-> Ordner öffnen: Tray-Icon → *Konfiguration öffnen*, oder das Ordner-Symbol im Panel.
+> Open the folder: tray icon → *Open configuration*, or the folder icon in the panel.
 
-Fehler (ungültiges JSON, unbekannte Felder, Tippfehler in Platzhaltern) erscheinen als gelber Hinweis
-im Panel, mit Dateiname und Grund. Ein kaputtes Tool legt die anderen nicht lahm.
+Errors (invalid JSON, unknown fields, typos in placeholders) appear as a yellow notice
+in the panel, with the file name and reason. A broken tool doesn't take down the others.
 
-## Grundgerüst
+## Basic structure
 
 ```json
 {
   "$schema": "../../schemas/tool.schema.json",
   "name": "github_search",
-  "title": "GitHub-Suche",
-  "description": "Sucht Repositories auf GitHub. Nutze dies, wenn der Nutzer Code oder Projekte auf GitHub finden möchte.",
+  "title": { "en": "GitHub Search", "de": "GitHub-Suche" },
+  "description": "Searches repositories on GitHub. Use this when the user wants to find code or projects on GitHub.",
   "permission": "auto",
   "parameters": {
     "type": "object",
     "properties": {
-      "query": { "type": "string", "description": "Suchbegriff" }
+      "query": { "type": "string", "description": "Search term" }
     },
     "required": ["query"]
   },
-  "triggers": ["gh {query}", "(suche|such) {query} (auf|bei) github"],
+  "triggers": ["gh {query}", "(suche|such|search) {query} (auf|bei|on) github"],
   "action": {
     "type": "open_url",
     "url": "https://github.com/search?type=repositories&q={{query}}"
@@ -32,46 +32,46 @@ im Panel, mit Dateiname und Grund. Ein kaputtes Tool legt die anderen nicht lahm
 }
 ```
 
-**`$schema`** sorgt in VS Code für Autovervollständigung und Fehleranzeige. Der Pfad ist relativ zur Datei:
+**`$schema`** gives you autocompletion and error highlighting in VS Code. The path is relative to the file:
 `tools/x.json` → `../schemas/tool.schema.json`, `tools/web/x.json` → `../../schemas/tool.schema.json`.
 
-| Feld | Pflicht | Bedeutung |
+| Field | Required | Meaning |
 |---|---|---|
-| `name` | ✔ | Technischer Name für das Modell: `a-z`, `0-9`, `_`, eindeutig |
-| `title` |  | Anzeigename in der Oberfläche |
-| `description` | ✔ | **Wann** das Tool benutzt wird. Das Modell entscheidet nur anhand dieses Textes: konkret formulieren! |
-| `enabled` |  | `false` = Tool wird nicht geladen (Standard `true`) |
-| `permission` |  | `auto` = sofort, `confirm` = vorher nachfragen (**Standard**) |
-| `parameters` |  | Was das Modell ausfüllen soll (siehe unten) |
-| `triggers` |  | Sätze, die das Tool **sofort ohne KI** ausführen (siehe Schnellwege) |
-| `action` | ✔ | Was passiert (siehe Aktionstypen) |
+| `name` | ✔ | Technical name for the model: `a-z`, `0-9`, `_`, unique |
+| `title` |  | Display name in the UI. Plain string or localized object: `{ "en": "Weather", "de": "Wetter" }` |
+| `description` | ✔ | **When** the tool is used. The model decides based on this text alone: be specific! Write it in English — small models pick tools more reliably that way. |
+| `enabled` |  | `false` = tool isn't loaded (default `true`) |
+| `permission` |  | `auto` = runs immediately, `confirm` = asks first (**default**) |
+| `parameters` |  | What the model should fill in (see below) |
+| `triggers` |  | Phrases that run the tool **immediately, without AI** (see Quick actions). Can include phrases in multiple languages. |
+| `action` | ✔ | What happens (see Action types) |
 
-## Parameter
+## Parameters
 
 ```json
 "parameters": {
   "type": "object",
   "properties": {
-    "city":  { "type": "string", "description": "Stadtname" },
-    "days":  { "type": "integer", "description": "Anzahl Tage", "default": 1 },
+    "city":  { "type": "string", "description": "City name" },
+    "days":  { "type": "integer", "description": "Number of days", "default": 1 },
     "units": { "type": "string", "enum": ["metric", "imperial"] }
   },
   "required": ["city"]
 }
 ```
 
-- Typen: `string`, `number`, `integer`, `boolean`
-- `description`: hilft dem Modell, den Wert richtig zu füllen
-- `enum`: nur diese Werte sind erlaubt
-- `default`: wird genutzt, wenn das Modell den Parameter weglässt
+- Types: `string`, `number`, `integer`, `boolean`
+- `description`: helps the model fill in the value correctly
+- `enum`: only these values are allowed
+- `default`: used when the model omits the parameter
 
-Orbit prüft die Argumente, bevor etwas ausgeführt wird. Bei Fehlern bekommt das Modell eine Meldung und
-kann es erneut versuchen.
+Orbit validates the arguments before executing anything. On errors, the model gets a message and
+can try again.
 
-## Schnellwege (Trigger)
+## Quick actions (triggers)
 
-Trigger sind Sätze, bei denen Orbit **nicht** das Modell fragt, sondern das Tool direkt ausführt. Das
-dauert Millisekunden statt Sekunden und funktioniert unabhängig davon, wie schlau das Modell ist.
+Triggers are phrases where Orbit **doesn't** ask the model but runs the tool directly. This
+takes milliseconds instead of seconds and works regardless of how smart the model is.
 
 ```json
 "triggers": [
@@ -81,27 +81,27 @@ dauert Millisekunden statt Sekunden und funktioniert unabhängig davon, wie schl
 ]
 ```
 
-| Syntax | Bedeutung | Beispiel |
+| Syntax | Meaning | Example |
 |---|---|---|
-| `{name}` | fängt Text ein → Parameter `name` | `öffne {name}` |
-| `(a\|b)` | eine der Alternativen | `(spiele\|play)` |
+| `{name}` | captures text → parameter `name` | `öffne {name}` |
+| `(a\|b)` | one of the alternatives | `(spiele\|play)` |
 | `[x]` | optional | `[die] [app]` |
-| Leerzeichen | ein oder mehr Leerzeichen | |
+| Space | one or more spaces | |
 
-- Groß-/Kleinschreibung ist egal, `.`, `!`, `?` am Ende werden ignoriert, Anführungszeichen um
-  eingefangene Werte entfernt.
-- Der **ganze** Satz muss passen. „Spiele X auf Spotify“ passt, „Kannst du X auf Spotify spielen?“ nicht:
-  das geht dann ganz normal an die KI (die das Tool trotzdem aufrufen kann).
-- Mit `args` setzt ein Trigger feste Werte, z. B. `"kind": "album"`.
-- Passen mehrere Trigger, gewinnt der **spezifischere** (mehr feste Wörter).
-- Zu allgemeine Trigger wie `{query} spotify` besser vermeiden: sie fangen auch Sätze ab, die etwas
-  anderes meinen.
-- Im Chat erkennst du Schnellwege am ⚡ auf der Tool-Karte.
+- Case doesn't matter, trailing `.`, `!`, `?` are ignored, quotation marks around
+  captured values are stripped.
+- The **entire** sentence must match. "Spiele X auf Spotify" ("Play X on Spotify") matches, but "Kannst du X auf Spotify spielen?" ("Can you play X on Spotify?") doesn't:
+  that then goes to the AI as normal (which can still call the tool).
+- With `args`, a trigger sets fixed values, e.g. `"kind": "album"`.
+- If several triggers match, the **more specific** one wins (more fixed words).
+- Avoid overly generic triggers like `{query} spotify`: they also catch sentences that mean
+  something else.
+- In the chat, you can spot quick actions by the ⚡ on the tool card.
 
-## API-Keys ({{secret:…}})
+## API keys (`{{secret:…}}`)
 
-API-Keys gehören **nicht** in die JSON-Datei. Orbit speichert sie in der Windows-Anmeldeinformationsverwaltung
-und setzt sie über `{{secret:name}}` ein:
+API keys don't belong **in** the JSON file. Orbit stores them in the Windows Credential Manager
+and inserts them via `{{secret:name}}`:
 
 ```json
 "action": {
@@ -112,37 +112,37 @@ und setzt sie über `{{secret:name}}` ein:
 }
 ```
 
-Sobald ein Tool einen Schlüssel verwendet, erscheint er im Panel unter **🔑 Schlüssel**. Dort gibst du den
-Wert einmal ein. Orbit zeigt gespeicherte Werte nie wieder an und maskiert sie in Bestätigungsdialogen.
-Schlüsselnamen: `a-z`, `0-9`, `_`.
+As soon as a tool uses a key, it appears in the panel under **🔑 Keys**. There you enter the
+value once. Orbit never shows stored values again and masks them in confirmation dialogs.
+Key names: `a-z`, `0-9`, `_`.
 
-## Platzhalter
+## Placeholders
 
-In Aktionen werden Parameter mit `{{name}}` eingesetzt. Wie sie maskiert werden, hängt vom Feld ab:
+In actions, parameters are inserted with `{{name}}`. How they're escaped depends on the field:
 
-| Feld | Standard | Beispiel |
+| Field | Default | Example |
 |---|---|---|
-| `open_url.url`, `http.url` | URL-kodiert | `Köln Dom` → `K%C3%B6ln+Dom` |
-| `launch.program/args/cwd` | roh | |
-| `http.headers` | roh (ohne Zeilenumbrüche) | |
-| `http.body` | als JSON-Wert | `Hallo` → `"Hallo"` |
+| `open_url.url`, `http.url` | URL-encoded | `Köln Dom` → `K%C3%B6ln+Dom` |
+| `launch.program/args/cwd` | raw | |
+| `http.headers` | raw (no line breaks) | |
+| `http.body` | as JSON value | `Hello` → `"Hello"` |
 
-Mit einem Filter lässt sich das ändern: `{{name|raw}}`, `{{name|url}}`, `{{name|json}}`.
+This can be changed with a filter: `{{name|raw}}`, `{{name|url}}`, `{{name|json}}`.
 
-## Aktionstypen
+## Action types
 
-### `open_url`: Webseite oder App-Link öffnen
+### `open_url`: open a website or app link
 
 ```json
 "action": { "type": "open_url", "url": "https://github.com/search?q={{query}}" }
 ```
 
-Funktioniert auch mit App-Protokollen: `ms-settings:`, `spotify:`, `steam://`, `mailto:` …
+Also works with app protocols: `ms-settings:`, `spotify:`, `steam://`, `mailto:`, …
 
-**Sicherheit:** Steht das Schema fest im Template (`ms-settings:{{page|raw}}`), ist nur dieses Schema
-erlaubt. Kommt die ganze URL vom Modell (`{{url|raw}}`), sind nur `http`/`https` erlaubt, also kein `file:`.
+**Security:** If the scheme is fixed in the template (`ms-settings:{{page|raw}}`), only that scheme
+is allowed. If the whole URL comes from the model (`{{url|raw}}`), only `http`/`https` are allowed — no `file:`.
 
-### `launch`: Programm starten
+### `launch`: start a program
 
 ```json
 "action": {
@@ -152,12 +152,12 @@ erlaubt. Kommt die ganze URL vom Modell (`{{url|raw}}`), sind nur `http`/`https`
 }
 ```
 
-- Startet direkt **ohne Shell**: keine Befehlsverkettung möglich
-- `%UMGEBUNGSVARIABLEN%` werden ersetzt
-- Argumente, die nach dem Einsetzen leer sind, fallen weg (praktisch für optionale Parameter)
-- `cwd` (optional): Arbeitsverzeichnis
+- Starts directly **without a shell**: no command chaining possible
+- `%ENVIRONMENT_VARIABLES%` are expanded
+- Arguments that are empty after substitution are dropped (handy for optional parameters)
+- `cwd` (optional): working directory
 
-### `powershell`: Skript ausführen, Ausgabe ans Modell
+### `powershell`: run a script, output goes to the model
 
 ```json
 "action": {
@@ -167,14 +167,14 @@ erlaubt. Kommt die ganze URL vom Modell (`{{url|raw}}`), sind nur `http`/`https`
 }
 ```
 
-- Parameter kommen als **Umgebungsvariablen** an: `$env:ORBIT_ARG_<NAME IN GROSSBUCHSTABEN>`
-- `{{Platzhalter}}` sind hier **absichtlich verboten**. So kann das Modell keinen eigenen Code in dein
-  Skript schmuggeln (Code-Injection).
-- Die Ausgabe (stdout) geht an das Modell, Fehler (stderr, Exit-Code ≠ 0) als Fehlermeldung
-- Nutzt PowerShell 7 (`pwsh`), falls installiert, sonst Windows PowerShell
-- Standard-Zeitlimit: 30 s
+- Parameters arrive as **environment variables**: `$env:ORBIT_ARG_<NAME IN UPPERCASE>`
+- `{{placeholders}}` are **deliberately forbidden** here. This way the model can't smuggle its own code into your
+  script (code injection).
+- Output (stdout) goes to the model; errors (stderr, exit code ≠ 0) as an error message
+- Uses PowerShell 7 (`pwsh`) if installed, otherwise Windows PowerShell
+- Default timeout: 30 s
 
-### `http`: Web-API abfragen, Antwort ans Modell
+### `http`: query a web API, response goes to the model
 
 ```json
 "action": {
@@ -187,39 +187,40 @@ erlaubt. Kommt die ganze URL vom Modell (`{{url|raw}}`), sind nur `http`/`https`
 }
 ```
 
-- `method`: `GET` (Standard) oder `POST`
-- `body` wird als `application/json` gesendet; Platzhalter werden automatisch zu JSON-Werten
+- `method`: `GET` (default) or `POST`
+- `body` is sent as `application/json`; placeholders are automatically converted to JSON values
 
-### `builtin`: eingebaute Funktion
+### `builtin`: built-in function
 
 ```json
 "action": { "type": "builtin", "id": "clipboard_read" }
 ```
 
-| id | Parameter | Funktion |
+| id | Parameters | Function |
 |---|---|---|
-| `datetime` | – | Datum, Wochentag, Uhrzeit |
-| `clipboard_read` | – | Text aus der Zwischenablage |
-| `clipboard_write` | `text` | Text in die Zwischenablage |
-| `open_app` | `name` | Installierte App starten (unscharfe Suche über Startmenü- und Store-Apps) |
-| `spotify_play` | `query`, optional `kind` (`track`/`album`/`artist`/`playlist`) | Musik in Spotify abspielen, siehe [SPOTIFY.md](SPOTIFY.md) |
-| `media_control` | `action` (`play_pause`/`next`/`previous`/`set_volume`/`volume_up`/`volume_down`/`mute`/`unmute`), optional `level` (0–100), `amount` | Wiedergabe über Medientasten (jeder Player), Lautstärke exakt über Windows Core Audio |
+| `datetime` | – | Date, weekday, time |
+| `clipboard_read` | – | Text from the clipboard |
+| `clipboard_write` | `text` | Text to the clipboard |
+| `open_app` | `name` | Launch an installed app (fuzzy search over Start menu and Store apps) |
+| `spotify_play` | `query`, optional `kind` (`track`/`album`/`artist`/`playlist`) | Play music on Spotify, see [SPOTIFY.md](SPOTIFY.md) |
+| `media_control` | `action` (`play_pause`/`next`/`previous`/`set_volume`/`volume_up`/`volume_down`/`mute`/`unmute`), optional `level` (0–100), `amount` | Playback via media keys (any player), exact volume via Windows Core Audio |
+| `radio` | `device` (`bluetooth`/`wlan`/`wifi`), `state` (`on`/`off`/`toggle`/`status`) | Turn Bluetooth/Wi-Fi on or off, toggle it, or check its status |
 
-Zahlen-Parameter verstehen auch `30%`, `30 %`, `30 Prozent` und `2,5`.
+Numeric parameters also understand `30%`, `30 %`, `30 Prozent` ("30 percent"), and `2,5` (comma as decimal separator).
 
-`open_app` nimmt den Schnellweg nur, wenn eine App eindeutig passt. Sonst darf die KI übernehmen.
+`open_app` only takes the quick-action path when an app matches unambiguously. Otherwise the AI takes over.
 
-## Tipps für gute Tools
+## Tips for good tools
 
-- **Beschreibung ist alles.** Kleine Modelle wählen Tools nur anhand von `description`. Nenne typische
-  Formulierungen: *„Nutze dies, wenn der Nutzer … möchte“*.
-- **Wenige, klare Parameter.** Lieber zwei spezifische Tools als eins mit fünf optionalen Parametern.
-- **`enum` statt freiem Text**, wo es geht: weniger Fehler.
-- **`confirm` für alles, was etwas verändert** (löschen, senden, herunterfahren, Befehle).
-- Zu viele Tools verwirren kleine Modelle. Deaktiviere, was du nicht brauchst (`"enabled": false`).
+- **Description is everything.** Small models choose tools based on `description` alone. Mention typical
+  phrasings: *"Use this when the user wants to …"*.
+- **Few, clear parameters.** Prefer two specific tools over one with five optional parameters.
+- **`enum` instead of free text** wherever possible: fewer errors.
+- **`confirm` for anything that changes something** (delete, send, shut down, commands).
+- Too many tools confuse small models. Disable what you don't need (`"enabled": false`).
 
-## Tool deaktivieren oder zurücksetzen
+## Disabling or resetting a tool
 
-- Deaktivieren: `"enabled": false`
-- Löschen: Datei entfernen. Gelöschte Standard-Tools kommen **nicht** zurück.
-- Alle Standard-Tools wiederherstellen: Ordner `tools` umbenennen und Orbit neu starten.
+- Disable: `"enabled": false`
+- Delete: remove the file. Deleted default tools do **not** come back.
+- Restore all default tools: rename the `tools` folder and restart Orbit.

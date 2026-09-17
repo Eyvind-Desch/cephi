@@ -1,13 +1,13 @@
 {
   "$schema": "../../schemas/tool.schema.json",
   "name": "open_website",
-  "title": "Webseite öffnen",
-  "description": "Öffnet eine bestimmte Webseite im Browser, z. B. github.com oder https://example.com.",
+  "title": { "en": "Open website", "de": "Webseite öffnen" },
+  "description": "Opens a specific website in the browser, e.g. github.com or https://example.com.",
   "permission": "auto",
   "parameters": {
     "type": "object",
     "properties": {
-      "url": { "type": "string", "description": "Vollständige Adresse inklusive https://" }
+      "url": { "type": "string", "description": "Full address including https://" }
     },
     "required": ["url"]
   },

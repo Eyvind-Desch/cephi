@@ -1,68 +1,68 @@
-# Architektur
+# Architecture
 
-## Überblick
+## Overview
 
 ```
 ┌──────────────────── Frontend: React + TypeScript (WebView2) ────────────────────┐
 │ components/shell   CompactBar · Panel · Header · ProfileSwitch · Diagnostics    │
 │ components/chat    Composer · MessageList · MessageView · ToolCard · Markdown   │
-│ store/             zustand: ui (Modus, Pin, Config) · chat (Nachrichten, Lauf)  │
-│ lib/ipc.ts         typisierte Brücke zu allen Rust-Commands und Events          │
+│ store/             zustand: ui (mode, pin, config) · chat (messages, run)       │
+│ lib/ipc.ts         typed bridge to all Rust commands and events                 │
 └─────────────── invoke() · Channel<AgentEvent> · Events ─────────────────────────┘
 ┌──────────────────────────── Backend: Rust (Tauri 2) ────────────────────────────┐
-│ commands.rs   dünne IPC-Schicht, keine Logik                                    │
-│ app.rs        Start, Config-Reload, Hotkey-Anwendung                            │
-│ state.rs      AppState: Config-Snapshot (Arc, atomar getauscht), HTTP, Agent    │
-│ config/       settings.json + Tools laden, Standarddateien, Schemas, Watcher    │
-│ tools/        Manifest-Format, Validierung, Templates, Ausführung               │
-│ agent/        Schleife Modell → Tools → Modell, Bestätigungen, Abbruch          │
-│ llm/          Ollama-Client (NDJSON-Streaming, Tool-Calls)                      │
-│ desktop/      Fenster-Platzierung, Tray, globaler Hotkey                        │
+│ commands.rs   thin IPC layer, no logic                                          │
+│ app.rs        startup, config reload, hotkey registration                       │
+│ state.rs      AppState: config snapshot (Arc, swapped atomically), HTTP, agent  │
+│ config/       loads settings.json + tools, default files, schemas, watcher      │
+│ tools/        manifest format, validation, templates, execution                 │
+│ agent/        loop: model → tools → model, confirmations, cancellation          │
+│ llm/          Ollama client (NDJSON streaming, tool calls)                      │
+│ desktop/      window placement, tray, global hotkey                             │
 └─────────────────────────────────────────────────────────────────────────────────┘
           │                                    │
     Ollama :11434                   %APPDATA%\Orbit\ (settings.json, tools/)
 ```
 
-## Grundsätze
+## Principles
 
-- **Konfiguration statt Code.** Tools und Profile sind JSON-Dateien mit JSON-Schema. Neue Fähigkeiten
-  brauchen im Normalfall keinen Rust-Code.
-- **Nie hart abstürzen wegen Konfiguration.** Fehler werden als `Diagnostic` gesammelt und im UI
-  angezeigt. Eine kaputte `settings.json` behält die letzten gültigen Einstellungen.
-- **Unveränderliche Snapshots.** `Arc<Config>` wird beim Reload atomar ersetzt; ein laufender
-  Agent-Lauf arbeitet mit seinem Snapshot weiter, ohne Locks über `await` zu halten.
-- **Sicher per Default.** Tools fragen standardmäßig nach (`confirm`). PowerShell bekommt Parameter nur
-  als Umgebungsvariablen, `launch` nutzt keine Shell, `open_url` begrenzt Schemata. Die WebView hat
-  nur `core:default`; jeder Systemzugriff geht über Orbits eigene Commands.
-- **Backend besitzt den Verlauf.** Das Frontend rendert nur Events; der Chatverlauf für das Modell
-  liegt in `AgentController`.
+- **Configuration instead of code.** Tools and profiles are JSON files with a JSON schema. New capabilities
+  normally don't require any Rust code.
+- **Never hard-crash because of configuration.** Errors are collected as `Diagnostic` and shown in the UI.
+  A broken `settings.json` keeps the last valid settings.
+- **Immutable snapshots.** `Arc<Config>` is swapped atomically on reload; a running
+  agent run keeps working with its own snapshot, without holding locks across `await`.
+- **Secure by default.** Tools ask for confirmation by default (`confirm`). PowerShell receives parameters
+  only as environment variables, `launch` doesn't use a shell, `open_url` restricts schemes. The WebView has
+  only `core:default`; every system access goes through Orbit's own commands.
+- **The backend owns history.** The frontend only renders events; the chat history for the model
+  lives in `AgentController`.
 
-## Ablauf einer Anfrage
+## Request flow
 
 ```
 Composer ─ agent_send(text, profileId, channel) ─▶ agent::run
-                                                    │ Verlauf + System-Prompt (mit Datum)
+                                                    │ history + system prompt (with date)
                                                     ▼
-                                          OllamaClient::chat (Stream)
+                                          OllamaClient::chat (stream)
                                      token ──▶ Channel ──▶ UI (live)
                                                     │
-                                     tool_calls?  ──┴── nein ──▶ Done
-                                          │ ja
-                            args::normalize (Typen, Pflicht, enum, default)
+                                     tool_calls?  ──┴── no ──▶ Done
+                                          │ yes
+                            args::normalize (types, required, enum, default)
                                           │
-                          permission = confirm? ──▶ ToolAwaitingConfirmation ──▶ UI-Karte
+                          permission = confirm? ──▶ ToolAwaitingConfirmation ──▶ UI card
                                           │                   agent_confirm(callId, ok)
                                   executor::execute
                                           │
-                               ToolResult ──▶ UI · Ergebnis in den Verlauf ──▶ nächste Runde
+                               ToolResult ──▶ UI · result added to history ──▶ next round
 ```
 
-Abbruch (`agent_cancel`) wirkt über einen `CancellationToken` sowohl auf den Stream als auch auf
-wartende Bestätigungen.
+Cancellation (`agent_cancel`) acts via a `CancellationToken` on both the stream and
+pending confirmations.
 
-## IPC-Verträge
+## IPC contracts
 
-Rust-Typen und ihre TypeScript-Spiegel müssen synchron bleiben:
+Rust types and their TypeScript mirrors must stay in sync:
 
 | Rust | TypeScript |
 |---|---|
@@ -70,12 +70,12 @@ Rust-Typen und ihre TypeScript-Spiegel müssen synchron bleiben:
 | `agent/events.rs` → `AgentEvent` | `AgentEvent` |
 | `config/snapshot.rs` → `ConfigSnapshot` | `ConfigSnapshot` |
 
-Events: `orbit://shown` (Fenster eingeblendet), `orbit://config-changed` (Hot-Reload).
+Events: `orbit://shown` (window shown), `orbit://config-changed` (hot reload).
 
-## Neue Aktionstypen / Builtins
+## New action types / builtins
 
-1. `tools/manifest.rs`: Variante in `Action` (bzw. `Builtin` in `builtin.rs`) + Validierung
-2. `tools/executor.rs`: Ausführung + `preview`
-3. `assets/schemas/tool.schema.json`: Schema ergänzen
-4. `docs/TOOLS.md`: dokumentieren
+1. `tools/manifest.rs`: variant in `Action` (or `Builtin` in `builtin.rs`) + validation
+2. `tools/executor.rs`: execution + `preview`
+3. `assets/schemas/tool.schema.json`: extend the schema
+4. `docs/TOOLS.md`: document it
 5. Test in `manifest.rs`

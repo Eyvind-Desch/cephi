@@ -1,4 +1,5 @@
 use futures_util::StreamExt;
+use rust_i18n::t;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tokio_util::sync::CancellationToken;
@@ -91,18 +92,31 @@ pub struct ModelOptions {
     pub temperature: f32,
 }
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug)]
 pub enum LlmError {
-    #[error("Ollama ist nicht erreichbar unter {0}. Läuft Ollama?")]
     Unreachable(String),
-    #[error("Ollama: {0}")]
     Api(String),
-    #[error("Ungültige Antwort von Ollama: {0}")]
     Protocol(String),
     /// Cancelled by the user; carries the text generated so far.
-    #[error("Abgebrochen")]
-    Cancelled { partial: String },
+    Cancelled {
+        partial: String,
+    },
 }
+
+/// User-facing, localized.
+impl std::fmt::Display for LlmError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let message = match self {
+            LlmError::Unreachable(url) => t!("llm.unreachable", url = url),
+            LlmError::Api(details) => t!("llm.api_error", details = details),
+            LlmError::Protocol(details) => t!("llm.invalid_response", details = details),
+            LlmError::Cancelled { .. } => t!("llm.cancelled"),
+        };
+        f.write_str(&message)
+    }
+}
+
+impl std::error::Error for LlmError {}
 
 #[derive(Deserialize)]
 struct StreamChunk {
@@ -193,7 +207,7 @@ impl OllamaClient {
             }
         }
 
-        Err(LlmError::Protocol("Stream endete unerwartet.".into()))
+        Err(LlmError::Protocol("stream ended unexpectedly".into()))
     }
 
     /// Loads a model into memory without generating anything.

@@ -1,13 +1,13 @@
 {
   "$schema": "../../schemas/tool.schema.json",
   "name": "run_powershell",
-  "title": "PowerShell-Befehl",
-  "description": "Führt einen PowerShell-Befehl aus und gibt die Ausgabe zurück. Nur verwenden, wenn kein spezielleres Tool passt. Der Nutzer muss jeden Befehl bestätigen.",
+  "title": { "en": "PowerShell command", "de": "PowerShell-Befehl" },
+  "description": "Runs a PowerShell command and returns its output. Only use this when no more specific tool fits. The user has to confirm every command.",
   "permission": "confirm",
   "parameters": {
     "type": "object",
     "properties": {
-      "command": { "type": "string", "description": "Der auszuführende PowerShell-Befehl" }
+      "command": { "type": "string", "description": "The PowerShell command to run" }
     },
     "required": ["command"]
   },
