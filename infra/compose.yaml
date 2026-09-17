@@ -1,0 +1,34 @@
+# Local services for Orbit. Both are only reachable from this PC and restart with Docker.
+# Started by start.ps1 (Docker runs in WSL, see docs/SEARCH.md and docs/TRANSLATE.md).
+name: orbit
+
+services:
+  # Web search: queries Google, Bing, Brave, DuckDuckGo, … and returns JSON.
+  searxng:
+    image: searxng/searxng:latest
+    container_name: orbit-searxng
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8888:8080"
+    volumes:
+      - ./searxng/settings.yml:/etc/searxng/settings.yml:ro
+    environment:
+      SEARXNG_BASE_URL: http://127.0.0.1:8888/
+
+  # Offline translation (Argos Translate models, CPU only). Only German and English are loaded.
+  libretranslate:
+    image: libretranslate/libretranslate:latest
+    container_name: orbit-libretranslate
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8890:5000"
+    volumes:
+      # Downloaded language models survive container updates.
+      - libretranslate-models:/home/libretranslate/.local
+    environment:
+      LT_LOAD_ONLY: en,de
+      LT_DISABLE_WEB_UI: "true"
+      LT_THREADS: "2"
+
+volumes:
+  libretranslate-models:

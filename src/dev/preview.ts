@@ -2,7 +2,7 @@
  * Design preview: runs the UI in a normal browser with sample data (dev server only).
  *
  * Open http://localhost:1420/?mode=expanded&view=keys&lang=de
- *   mode: compact | expanded | large   view: chat | keys | web   chat: demo | results   lang: en | de   keys: some
+ *   mode: compact | expanded | large   view: chat | keys | web | translate   chat: demo | results   lang: en | de   keys: some
  *   web: page (web tab with a loaded page)
  *
  * Used to review UI changes (and take headless screenshots) without touching the running app.
@@ -130,6 +130,26 @@ const demoChat: Message[] = [
       },
     ],
   },
+  { id: "7", role: "user", text: "tr nevertheless" },
+  {
+    id: "8",
+    role: "assistant",
+    status: "done",
+    parts: [
+      {
+        kind: "tool",
+        callId: "c4",
+        name: "translate",
+        title: "Übersetzen",
+        args: { text: "nevertheless" },
+        status: "ok",
+        fast: true,
+        output: "dennoch (trotzdem, gleichwohl)",
+        durationMs: 41,
+        display: { kind: "translation", text: "dennoch", alternatives: ["trotzdem", "gleichwohl"], from: "en", to: "de" },
+      },
+    ],
+  },
 ];
 
 function webResult(title: string, url: string, snippet: string) {
@@ -147,6 +167,8 @@ export function installPreview() {
           return secretGroups;
         case "secrets_test":
           return lang === "de" ? "Verbindung funktioniert." : "Connection works.";
+        case "translate":
+          return { text: "dennoch", alternatives: ["trotzdem", "gleichwohl"], from: "en", to: "de" };
         case "web_state":
           return params.get("web") === "page"
             ? { url: "https://www.google.com/search?q=tauri+child+webview", title: "tauri child webview - Google Suche", loading: true }

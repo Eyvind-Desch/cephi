@@ -14,6 +14,7 @@ use super::registry::Tool;
 use super::template::{self, Context, Secrets};
 use crate::desktop::web;
 use crate::search::WebResult;
+use crate::translate::Translation;
 
 const DEFAULT_TIMEOUT_SECS: u64 = 30;
 /// Hides the console window of child processes.
@@ -45,6 +46,7 @@ pub enum ToolDisplay {
     WebPage {
         url: String,
     },
+    Translation(Translation),
 }
 
 /// A successful tool run: text for the model plus optional display data.

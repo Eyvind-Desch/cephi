@@ -6,6 +6,7 @@ import { useChat } from "../../store/chat";
 import { citationSources, hasUnansweredResults, type AssistantMessage, type Message } from "../../store/chatModel";
 import { Markdown } from "./Markdown";
 import { ToolCard } from "./ToolCard";
+import { TranslationCard } from "../translate/TranslationCard";
 import { WebResults } from "./WebResults";
 
 /**
@@ -43,6 +44,7 @@ export const MessageView = memo(function MessageView({ message, isLast }: { mess
           <Fragment key={part.callId}>
             <ToolCard part={part} />
             {part.display?.kind === "webResults" && <WebResults results={part.display.results} />}
+            {part.display?.kind === "translation" && <TranslationCard translation={part.display} />}
           </Fragment>
         ),
       )}

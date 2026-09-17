@@ -1,11 +1,12 @@
 import clsx from "clsx";
-import { Globe, MessageSquare, type LucideIcon } from "lucide-react";
+import { Globe, Languages, MessageSquare, type LucideIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useUi, type PanelView } from "../../store/ui";
 
-const TABS: { view: PanelView; icon: LucideIcon; label: "tabs.chat" | "tabs.web" }[] = [
+const TABS: { view: PanelView; icon: LucideIcon; label: "tabs.chat" | "tabs.web" | "tabs.translate" }[] = [
   { view: "chat", icon: MessageSquare, label: "tabs.chat" },
   { view: "web", icon: Globe, label: "tabs.web" },
+  { view: "translate", icon: Languages, label: "tabs.translate" },
 ];
 
 /** Icon switch between the main views. Sub-views like the keys page select none. */

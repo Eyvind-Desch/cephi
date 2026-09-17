@@ -75,6 +75,11 @@ export const useChat = create<ChatState>()((set, get) => {
           expand();
           return;
         }
+        // Something to read and copy, not just a confirmation: keep it until the next interaction.
+        if (tool.display?.kind === "translation") {
+          showFlash({ ok: true, text: tool.display.text, sticky: true });
+          return;
+        }
         const text = tool.output ?? tool.title;
         showFlash({ ok: true, text });
         if (!pinned) {

@@ -213,6 +213,7 @@ is allowed. If the whole URL comes from the model (`{{url|raw}}`), only `http`/`
 | `spotify_play` | `query`, optional `kind` (`track`/`album`/`artist`/`playlist`) | Play music on Spotify, see [SPOTIFY.md](SPOTIFY.md) |
 | `media_control` | `action` (`play_pause`/`next`/`previous`/`set_volume`/`volume_up`/`volume_down`/`mute`/`unmute`), optional `level` (0–100), `amount` | Playback via media keys (any player), exact volume via Windows Core Audio |
 | `radio` | `device` (`bluetooth`/`wlan`/`wifi`), `state` (`on`/`off`/`toggle`/`status`) | Turn Bluetooth/Wi-Fi on or off, toggle it, or check its status |
+| `translate` | `text`, optional `to` (language code or name) | Offline translation via local LibreTranslate, see [TRANSLATE.md](TRANSLATE.md) |
 | `web_search` | `query` | Web search via the local SearXNG (`settings.search`), result cards in the chat, excerpts for the AI, see [SEARCH.md](SEARCH.md) |
 
 Numeric parameters also understand `30%`, `30 %`, `30 Prozent` ("30 percent"), and `2,5` (comma as decimal separator).

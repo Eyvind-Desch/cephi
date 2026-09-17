@@ -20,6 +20,11 @@
     "maxResults": 6,
     "summarize": true
   },
+  "translate": {
+    "libretranslateUrl": "http://127.0.0.1:8890",
+    "nativeLanguage": "de",
+    "foreignLanguage": "en"
+  },
   "providers": [
     { "id": "anthropic", "type": "anthropic", "label": "Anthropic" },
     { "id": "gemini", "type": "openai", "label": "Google Gemini", "baseUrl": "https://generativelanguage.googleapis.com/v1beta/openai" },

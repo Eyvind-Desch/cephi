@@ -9,13 +9,13 @@ no tracking. A search takes about one second.
 Docker must be available in WSL (the default distro). Then:
 
 ```powershell
-.\infra\searxng\start.ps1           # copies the config to ~/.orbit/searxng in WSL and starts the container
-.\infra\searxng\start.ps1 -Update   # pull the newest SearXNG image first
+.\infra\start.ps1           # copies the config to ~/.orbit/infra in WSL and starts the containers
+.\infra\start.ps1 -Update   # pull the newest images first
 ```
 
 The container `orbit-searxng` listens on `http://127.0.0.1:8888` (only reachable from this PC) and
 restarts with Docker. Config: [`infra/searxng/settings.yml`](../infra/searxng/settings.yml); run
-`start.ps1` again after changing it.
+`infra/start.ps1` again after changing it. The same script also starts the [translator](TRANSLATE.md).
 
 ## Usage
 

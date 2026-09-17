@@ -112,6 +112,9 @@ request. Unambiguous commands ("open X") run through the quick action path witho
      `afterTrigger: "answer"`, source grid + citation badges → [docs/SEARCH.md](docs/SEARCH.md)
    - ✅ 3b: Web tab: native child webview in the panel (normal size, animated enlarge), icon tabs, address bar,
      `g query` and chat links open there, `open_url` `target: "orbit"`
+3c. ✅ **Translator** – offline via LibreTranslate (Docker, CPU): `tr …` fast path, translator tab, chat card
+   → [docs/TRANSLATE.md](docs/TRANSLATE.md). Local LLMs were tested first: ~2.5 s per request, 2–3 GB VRAM,
+   unreliable for single words.
 4. **MCP** – `mcp.json`, tools from MCP servers
 5. **Polish** – settings UI, save history, code highlighting, autostart, installer
 6. **Extras** – pick up selected text, ask about a screenshot (vision model), voice

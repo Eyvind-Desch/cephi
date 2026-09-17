@@ -2,12 +2,14 @@ import { create } from "zustand";
 import { setLanguage } from "../i18n";
 import { api, type ConfigSnapshot, type WindowMode } from "../lib/ipc";
 
-export type PanelView = "chat" | "keys" | "web";
+export type PanelView = "chat" | "keys" | "web" | "translate";
 
 /** Short confirmation shown in the compact bar after a successful fast-path action. */
 export interface Flash {
   ok: boolean;
   text: string;
+  /** Stays until the next interaction and can be copied (e.g. a translation). */
+  sticky?: boolean;
 }
 
 interface UiState {

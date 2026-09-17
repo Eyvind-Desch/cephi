@@ -97,11 +97,21 @@ export interface WebResult {
   engines: string[];
 }
 
+/** `src-tauri/src/translate/mod.rs` */
+export interface Translation {
+  text: string;
+  alternatives: string[];
+  /** Language codes, e.g. `en` → `de`. */
+  from: string;
+  to: string;
+}
+
 /** `src-tauri/src/tools/executor.rs`: structured tool output the UI renders richer than text. */
 export type ToolDisplay =
   | { kind: "webResults"; query: string; results: WebResult[] }
   /** A page opened in the web tab. */
-  | { kind: "webPage"; url: string };
+  | { kind: "webPage"; url: string }
+  | ({ kind: "translation" } & Translation);
 
 /** `src-tauri/src/agent/events.rs` */
 export type AgentEvent =
@@ -159,6 +169,9 @@ export const api = {
   webSetLayout: (bounds: WebBounds, visible: boolean, seq: number) =>
     invoke<void>("web_set_layout", { bounds, visible, seq }),
   webCommand: (command: WebCommand) => invoke<void>("web_command", { command }),
+
+  /** `to`: language code; `null` = automatic direction. */
+  translate: (text: string, to: string | null) => invoke<Translation>("translate", { text, to }),
 
   secretsList: () => invoke<SecretGroup[]>("secrets_list"),
   /** Resolves with a success message, rejects with the reason. */

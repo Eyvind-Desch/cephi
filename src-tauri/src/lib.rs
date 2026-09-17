@@ -15,6 +15,7 @@ mod search;
 mod secrets;
 mod state;
 mod tools;
+mod translate;
 
 use tauri::{Manager, WindowEvent};
 use tauri_plugin_log::{Target, TargetKind};
@@ -68,6 +69,7 @@ pub fn run() {
             commands::web_open,
             commands::web_set_layout,
             commands::web_command,
+            commands::translate,
             commands::secrets_list,
             commands::secrets_set,
             commands::secrets_delete,

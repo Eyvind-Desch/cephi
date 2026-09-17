@@ -64,7 +64,7 @@
       }
     },
     "search": {
-      "description": "Web search through a local SearXNG instance (start it with infra/searxng/start.ps1).",
+      "description": "Web search through a local SearXNG instance (start it with infra/start.ps1).",
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -72,6 +72,16 @@
         "language": { "type": "string", "default": "auto", "description": "Result language: \"auto\" (detected from the query), \"all\" or a code such as \"de\", \"en-US\"." },
         "maxResults": { "type": "integer", "minimum": 1, "maximum": 20, "default": 6, "description": "Results shown and passed to the model. Fewer = faster answers from small models." },
         "summarize": { "type": "boolean", "default": true, "description": "After \"? query\": let the AI answer from the results. false = only result cards; a button asks the AI on demand. Either way, if the AI is not available the cards stay without an error." }
+      }
+    },
+    "translate": {
+      "description": "Offline translation through a local LibreTranslate instance (start it with infra/start.ps1).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "libretranslateUrl": { "type": "string", "default": "http://127.0.0.1:8890" },
+        "nativeLanguage": { "type": "string", "default": "de", "description": "Your language: text in it is translated into foreignLanguage, everything else into it." },
+        "foreignLanguage": { "type": "string", "default": "en", "description": "The language to translate into from nativeLanguage. Must be loaded in LibreTranslate (LT_LOAD_ONLY)." }
       }
     },
     "providers": {

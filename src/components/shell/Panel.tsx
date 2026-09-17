@@ -2,11 +2,12 @@ import { useUi } from "../../store/ui";
 import { Composer } from "../chat/Composer";
 import { MessageList } from "../chat/MessageList";
 import { KeysView } from "../keys/KeysView";
+import { TranslateView } from "../translate/TranslateView";
 import { WebView } from "../web/WebView";
 import { DiagnosticsBanner } from "./DiagnosticsBanner";
 import { Header } from "./Header";
 
-/** Expanded mode: header plus the current view (chat, web tab or keys). */
+/** Expanded mode: header plus the current view (chat, web tab, translator or keys). */
 export function Panel() {
   const view = useUi((s) => s.view);
 
@@ -16,6 +17,7 @@ export function Panel() {
       <DiagnosticsBanner />
       {view === "keys" && <KeysView />}
       {view === "web" && <WebView />}
+      {view === "translate" && <TranslateView />}
       {view === "chat" && (
         <>
           <MessageList />

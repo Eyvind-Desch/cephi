@@ -59,6 +59,14 @@ export const en = {
   tabs: {
     chat: "Chat",
     web: "Web",
+    translate: "Translator",
+  },
+  translate: {
+    auto: "Automatic",
+    direction: "Translation direction",
+    placeholder: "Type or paste text…",
+    clear: "Clear",
+    alternatives: "Also:",
   },
   web: {
     back: "Back",

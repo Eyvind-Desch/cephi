@@ -57,6 +57,14 @@ export const de: Locale = {
   tabs: {
     chat: "Chat",
     web: "Web",
+    translate: "Übersetzer",
+  },
+  translate: {
+    auto: "Automatisch",
+    direction: "Übersetzungsrichtung",
+    placeholder: "Text eingeben oder einfügen…",
+    clear: "Leeren",
+    alternatives: "Auch:",
   },
   web: {
     back: "Zurück",

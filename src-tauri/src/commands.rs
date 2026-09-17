@@ -14,6 +14,7 @@ use crate::desktop::window::{self, WindowMode};
 use crate::error::{AppError, AppResult};
 use crate::secrets::SecretGroupInfo;
 use crate::state::AppState;
+use crate::translate::Translation;
 
 #[tauri::command]
 pub fn config_snapshot(app: AppHandle) -> ConfigSnapshot {
@@ -137,6 +138,15 @@ pub fn web_set_layout(app: AppHandle, bounds: web::Bounds, visible: bool, seq: u
 #[tauri::command]
 pub fn web_command(app: AppHandle, command: web::WebCommand) -> AppResult<()> {
     web::command(&app, command)
+}
+
+/// Translator tab. `to`: language code or name, `None` = automatic direction.
+#[tauri::command]
+pub async fn translate(state: State<'_, AppState>, text: String, to: Option<String>) -> AppResult<Translation> {
+    let config = state.config();
+    crate::translate::translate(&state.http, &config.settings.translate, &text, to.as_deref())
+        .await
+        .map_err(AppError::msg)
 }
 
 /// Opens a link from a chat message in the default browser. Web URLs only.

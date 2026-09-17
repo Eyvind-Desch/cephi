@@ -9,6 +9,7 @@ import { useUi, type Flash } from "../../store/ui";
 import { Composer } from "../chat/Composer";
 import { IconButton } from "../ui/IconButton";
 import { OrbitMark } from "../ui/OrbitMark";
+import { CopyButton } from "../translate/TranslateView";
 
 /** Compact mode: a single input line, Spotlight-style. */
 export function CompactBar() {
@@ -63,10 +64,11 @@ function FlashRow({ flash }: { flash: Flash }) {
       className="flex min-w-0 flex-1 items-center gap-2 text-[15px]"
       role="status"
     >
-      <Icon size={18} className={clsx("shrink-0", flash.ok ? "text-success" : "text-danger")} />
-      <span className={clsx("truncate", !flash.ok && "text-danger")} title={flash.text}>
+      {!flash.sticky && <Icon size={18} className={clsx("shrink-0", flash.ok ? "text-success" : "text-danger")} />}
+      <span className={clsx("truncate select-text", !flash.ok && "text-danger")} title={flash.text}>
         {flash.text}
       </span>
+      {flash.sticky && <CopyButton text={flash.text} />}
     </motion.div>
   );
 }

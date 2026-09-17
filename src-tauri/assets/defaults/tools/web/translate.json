@@ -1,0 +1,26 @@
+{
+  "$schema": "../../schemas/tool.schema.json",
+  "name": "translate",
+  "title": { "en": "Translate", "de": "Übersetzen" },
+  "description": "Translates text between German and English offline. German text is translated into English, other text into German, unless a target language is given. Use this when the user wants to translate something or asks what a word means in another language.",
+  "permission": "auto",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "text": { "type": "string", "description": "The exact text to translate" },
+      "to": { "type": "string", "description": "Target language code, e.g. 'en' or 'de'. Omit for automatic." }
+    },
+    "required": ["text"]
+  },
+  "triggers": [
+    "tr {text}",
+    "(übersetze|übersetz|translate) {text}",
+    "(übersetze|übersetz) {text} (auf|ins|in|nach) {to}",
+    "translate {text} (into|to) {to}",
+    "was (heißt|bedeutet) {text} (auf|in) {to}"
+  ],
+  "action": {
+    "type": "builtin",
+    "id": "translate"
+  }
+}

@@ -22,6 +22,7 @@ pub struct Settings {
     /// Cloud providers. API keys live in the vault as `<id>_api_key` (see `apiKeySecret`).
     pub providers: Vec<ProviderSettings>,
     pub search: SearchSettings,
+    pub translate: TranslateSettings,
     pub agent: AgentSettings,
     pub window: WindowSettings,
 }
@@ -134,6 +135,15 @@ pub struct SearchSettings {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(default, rename_all = "camelCase", deny_unknown_fields)]
+pub struct TranslateSettings {
+    pub libretranslate_url: String,
+    /// Text in this language is translated into `foreign_language`, everything else into this one.
+    pub native_language: String,
+    pub foreign_language: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(default, rename_all = "camelCase", deny_unknown_fields)]
 pub struct AgentSettings {
     pub system_prompt: String,
     pub max_tool_rounds: u32,
@@ -229,6 +239,9 @@ impl Settings {
         }
         if url::Url::parse(&self.search.searxng_url).is_err() {
             return Err(t!("settings.invalid_searxng_url", url = self.search.searxng_url).into());
+        }
+        if url::Url::parse(&self.translate.libretranslate_url).is_err() {
+            return Err(t!("settings.invalid_libretranslate_url", url = self.translate.libretranslate_url).into());
         }
         if !(1..=20).contains(&self.search.max_results) {
             return Err(t!("settings.max_results").into());
@@ -354,6 +367,7 @@ impl Default for Settings {
                 },
             ],
             search: SearchSettings::default(),
+            translate: TranslateSettings::default(),
             agent: AgentSettings::default(),
             window: WindowSettings::default(),
         }
@@ -377,6 +391,17 @@ impl Default for SearchSettings {
             language: "auto".into(),
             max_results: 6,
             summarize: true,
+        }
+    }
+}
+
+impl Default for TranslateSettings {
+    fn default() -> Self {
+        Self {
+            // Matches the port in infra/compose.yaml.
+            libretranslate_url: "http://127.0.0.1:8890".into(),
+            native_language: "de".into(),
+            foreign_language: "en".into(),
         }
     }
 }

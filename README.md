@@ -24,7 +24,7 @@ One hotkey, one input field: answer, search, or action ("öffne die Bluetooth-Ei
 
 Clicking outside hides Orbit, unless it's pinned (⋯ menu). Tray icon: open, configuration, quit.
 
-The panel has two tabs (icons top right): **Chat** and **Web**. The web tab shows Google and other pages inside
+The panel has three tabs (icons top right): **Chat**, **Web** and **Translator**. The web tab shows Google and other pages inside
 Orbit (address bar: search terms or an address) and can be enlarged; links from the chat and search results open there too.
 
 ### Quick actions (no AI, instant)
@@ -35,6 +35,7 @@ Orbit (address bar: search terms or an address) and can be enlarged; links from 
 | `spiele another love von tom odell auf spotify` / "play another love by tom odell on spotify" | Play song ([setup](docs/SPOTIFY.md)) |
 | `pause` / "pause", `nächster song` / "next song", `stumm` / "mute", `ton an` / "unmute" | Playback |
 | `lautstärke auf 30` / "volume to 30", `mach 24 lauter` / "turn it up by 24", `mach es leiser` / "turn it down" | Volume (exact) |
+| `tr word`, `übersetze …` / "translate …" | Offline translation German ↔ English ([setup](docs/TRANSLATE.md)) |
 | `? search term` | Web search in Orbit: result cards + short AI answer with sources ([setup](docs/SEARCH.md)) |
 | `g search term` | Google in Orbit's web tab |
 | `yt search term` | YouTube in the browser |
@@ -77,4 +78,5 @@ Logs: `%LOCALAPPDATA%\io.github.eyvind-desch.orbit\logs\`.
 - [docs/TOOLS.md](docs/TOOLS.md): custom tools, quick actions, API keys
 - [docs/SPOTIFY.md](docs/SPOTIFY.md): Spotify setup
 - [docs/SEARCH.md](docs/SEARCH.md): web search (local SearXNG)
+- [docs/TRANSLATE.md](docs/TRANSLATE.md): offline translator (local LibreTranslate)
 - [docs/PROVIDERS.md](docs/PROVIDERS.md): cloud AI providers (Claude, Gemini, OpenAI-compatible)

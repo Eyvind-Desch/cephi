@@ -20,10 +20,12 @@
 │ secrets/      Windows Credential Manager + key catalog for the keys view        │
 │ launcher/ integrations/  app index, Spotify, media/volume, radios                │
 │ search/       SearXNG client, excerpts for the model                            │
+│ translate/    LibreTranslate client, automatic direction                        │
 │ desktop/      window placement, web tab (child webview), tray, global hotkey     │
 └─────────────────────────────────────────────────────────────────────────────────┘
           │                       │                          │
-    Ollama :11434      SearXNG :8888 (Docker/WSL)   %APPDATA%\Orbit\ (settings.json, tools/)
+    Ollama :11434      SearXNG :8888, LibreTranslate :8890   %APPDATA%\Orbit\ (settings.json, tools/)
+                       (Docker in WSL, infra/compose.yaml)
 ```
 
 ## Principles

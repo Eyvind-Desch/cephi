@@ -24,6 +24,7 @@ pub enum Builtin {
     MediaControl,
     Radio,
     WebSearch,
+    Translate,
 }
 
 impl Builtin {
@@ -37,6 +38,7 @@ impl Builtin {
             Builtin::MediaControl => "media_control",
             Builtin::Radio => "radio",
             Builtin::WebSearch => "web_search",
+            Builtin::Translate => "translate",
         }
     }
 
@@ -48,6 +50,7 @@ impl Builtin {
             Builtin::SpotifyPlay | Builtin::WebSearch => &["query"],
             Builtin::MediaControl => &["action"],
             Builtin::Radio => &["device", "state"],
+            Builtin::Translate => &["text"],
             Builtin::Datetime | Builtin::ClipboardRead => &[],
         }
     }
@@ -75,6 +78,11 @@ impl Builtin {
                     .best_match(str_arg(args, "name"), FAST_PATH_MIN_SCORE)
                     .is_some()
             }
+            // "übersetze ich gehe in die Schule" also matches "… in {to}"; only real languages count.
+            Builtin::Translate => args
+                .get("to")
+                .and_then(|v| v.as_str())
+                .is_none_or(|to| crate::translate::language_code(to).is_some()),
             _ => true,
         }
     }
@@ -82,6 +90,10 @@ impl Builtin {
     pub async fn run(self, ctx: &ExecContext<'_>, args: &Args) -> Result<Success, String> {
         let text = match self {
             Builtin::WebSearch => return web_search(ctx, str_arg(args, "query")).await,
+            Builtin::Translate => {
+                let to = args.get("to").and_then(|v| v.as_str());
+                return translate(ctx, str_arg(args, "text"), to).await;
+            }
             Builtin::Datetime => Ok(chrono::Local::now().format("%A, %Y-%m-%d %H:%M:%S (%:z)").to_string()),
             Builtin::ClipboardRead => {
                 blocking(|| {
@@ -141,6 +153,19 @@ async fn web_search(ctx: &ExecContext<'_>, query: &str) -> Result<Success, Strin
             query: query.trim().to_string(),
             results: response.results,
         }),
+    })
+}
+
+async fn translate(ctx: &ExecContext<'_>, text: &str, to: Option<&str>) -> Result<Success, String> {
+    let config = ctx.app.state::<AppState>().config();
+    let translation = crate::translate::translate(ctx.http, &config.settings.translate, text, to).await?;
+    let mut content = translation.text.clone();
+    if !translation.alternatives.is_empty() {
+        content = format!("{content} ({})", translation.alternatives.join(", "));
+    }
+    Ok(Success {
+        content,
+        display: Some(ToolDisplay::Translation(translation)),
     })
 }
 
