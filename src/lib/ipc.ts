@@ -16,6 +16,8 @@ export interface ProfileInfo {
   /** Provider id; `ollama` for local models. */
   provider: string;
   providerLabel: string;
+  /** Logo name for `BrandIcon`. */
+  providerIcon: string;
   local: boolean;
   /** False when the provider's API key is missing. */
   available: boolean;
@@ -60,7 +62,9 @@ export interface SecretGroup {
   id: string;
   title: string;
   description: string;
+  /** Logo name: anthropic | gemini | openai | openrouter | ai | music | wrench */
   icon: string;
+  category: "ai" | "integration" | "custom";
   docsUrl: string | null;
   testable: boolean;
   secrets: SecretInfo[];

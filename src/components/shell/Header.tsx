@@ -49,7 +49,7 @@ export function Header() {
   return (
     <header className="flex items-center gap-1.5 border-b border-line py-2 pr-2 pl-3">
       <OrbitMark size={22} active={running} />
-      <span className="mr-1.5 text-[14px] font-semibold tracking-tight">Orbit</span>
+      <span className="mr-1.5 text-[13.5px] font-medium tracking-tight">Orbit</span>
       {pinned && (
         <span title={t("header.pinned")} className="text-accent">
           <Pin size={13} className="fill-current" />

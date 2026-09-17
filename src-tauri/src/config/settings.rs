@@ -85,6 +85,24 @@ impl ProviderSettings {
             .unwrap_or_else(|| format!("{}_api_key", self.id))
     }
 
+    /// Logo name for the UI and the page where keys are created, derived from type and base URL.
+    pub fn brand(&self) -> (&'static str, Option<&'static str>) {
+        let base_url = self.base_url.as_deref().unwrap_or_default();
+        if self.kind == ProviderKind::Anthropic {
+            ("anthropic", Some("https://console.anthropic.com/settings/keys"))
+        } else if base_url.contains("generativelanguage.googleapis.com") {
+            ("gemini", Some("https://aistudio.google.com/apikey"))
+        } else if base_url.contains("api.openai.com") {
+            ("openai", Some("https://platform.openai.com/api-keys"))
+        } else if base_url.contains("openrouter.ai") {
+            ("openrouter", Some("https://openrouter.ai/settings/keys"))
+        } else if base_url.contains("groq.com") {
+            ("ai", Some("https://console.groq.com/keys"))
+        } else {
+            ("ai", None)
+        }
+    }
+
     pub fn display_name(&self) -> String {
         match &self.label {
             Some(label) => label.resolve(&rust_i18n::locale()).to_string(),

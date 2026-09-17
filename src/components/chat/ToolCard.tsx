@@ -47,7 +47,7 @@ export function ToolCard({ part }: { part: ToolPart }) {
         ) : (
           <Wrench size={14} className="shrink-0 text-subtle" />
         )}
-        <span className="min-w-0 flex-1 truncate font-medium">{part.title}</span>
+        <span className="min-w-0 flex-1 truncate text-muted">{part.title}</span>
         {part.durationMs != null && (
           <span className="shrink-0 text-[11.5px] text-subtle">{formatDuration(part.durationMs)}</span>
         )}

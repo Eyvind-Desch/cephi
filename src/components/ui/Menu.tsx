@@ -1,7 +1,10 @@
 import clsx from "clsx";
-import { Check, type LucideIcon } from "lucide-react";
+import { Check } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ComponentType, type KeyboardEvent, type ReactNode } from "react";
+
+/** Lucide icons and `BrandIcon` wrappers both fit. */
+export type MenuIcon = ComponentType<{ size?: number; className?: string }>;
 
 export type MenuEntry =
   | {
@@ -11,7 +14,7 @@ export type MenuEntry =
       label: string;
       /** Second line under the label. */
       description?: string;
-      icon?: LucideIcon;
+      icon?: MenuIcon;
       onSelect: () => void;
       shortcut?: string;
       /** Small emphasised note on the right, e.g. "Key missing". */
@@ -124,7 +127,7 @@ export function Menu({ trigger, entries, width = "w-60" }: MenuProps) {
                 return (
                   <div
                     key={`label-${index}`}
-                    className="px-2.5 pt-2 pb-1 text-[10.5px] font-semibold tracking-wider text-subtle uppercase"
+                    className="px-2.5 pt-2 pb-1 text-[10.5px] font-medium tracking-wider text-subtle uppercase"
                   >
                     {entry.text}
                   </div>
@@ -153,11 +156,7 @@ export function Menu({ trigger, entries, width = "w-60" }: MenuProps) {
                       <span className="block truncate text-[11px] text-subtle">{entry.description}</span>
                     )}
                   </span>
-                  {entry.hint && (
-                    <span className="shrink-0 rounded-md bg-warning/15 px-1.5 py-0.5 text-[10.5px] font-medium text-warning">
-                      {entry.hint}
-                    </span>
-                  )}
+                  {entry.hint && <span className="shrink-0 text-[11px] text-subtle">{entry.hint}</span>}
                   {entry.checked && <Check size={14} className="shrink-0 text-accent" />}
                   {entry.shortcut && <span className="shrink-0 text-[11px] text-subtle">{entry.shortcut}</span>}
                 </button>

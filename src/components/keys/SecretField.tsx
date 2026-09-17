@@ -1,6 +1,5 @@
 import clsx from "clsx";
-import { Check, Pencil, Trash2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api, type SecretInfo } from "../../lib/ipc";
 
@@ -14,7 +13,6 @@ export function SecretField({ secret, onChange }: { secret: SecretInfo; onChange
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => setEditing(!secret.isSet), [secret.isSet]);
 
@@ -38,25 +36,23 @@ export function SecretField({ secret, onChange }: { secret: SecretInfo; onChange
     }
   };
 
+  const textButton = "text-[12px] text-subtle transition-colors hover:text-fg disabled:opacity-40";
+
   return (
-    <div className="space-y-1.5">
-      <div className="flex items-baseline gap-2">
-        <label htmlFor={secret.name} className="text-[12.5px] font-medium">
-          {secret.label}
-        </label>
-        <span className="truncate font-mono text-[11px] text-subtle">{secret.name}</span>
-      </div>
+    <div className="space-y-1">
+      <label htmlFor={secret.name} title={secret.name} className="block text-[12px] text-muted">
+        {secret.label}
+      </label>
 
       {editing ? (
         <form
-          className="flex gap-2"
+          className="relative"
           onSubmit={(e) => {
             e.preventDefault();
             if (value.trim()) void run(() => api.secretsSet(secret.name, value));
           }}
         >
           <input
-            ref={inputRef}
             id={secret.name}
             type={secret.sensitive ? "password" : "text"}
             value={value}
@@ -71,46 +67,38 @@ export function SecretField({ secret, onChange }: { secret: SecretInfo; onChange
                 setEditing(false);
               }
             }}
-            className="min-w-0 flex-1 rounded-lg border border-line bg-sunken px-2.5 py-1.5 font-mono text-[12.5px] outline-none placeholder:font-sans placeholder:text-subtle focus:border-accent/60"
+            className="h-8 w-full rounded-lg border border-line bg-sunken pr-24 pl-2.5 font-mono text-[12px] text-fg outline-none transition-colors placeholder:font-sans placeholder:text-subtle focus:border-accent/40"
           />
-          <button
-            type="submit"
-            disabled={busy || !value.trim()}
-            className="rounded-lg bg-accent px-3 text-[12.5px] font-medium text-accent-fg transition hover:brightness-110 disabled:opacity-40"
-          >
-            {t("common.save")}
-          </button>
-          {secret.isSet && (
-            <button
-              type="button"
-              onClick={() => setEditing(false)}
-              className="rounded-lg px-2 text-[12.5px] text-muted hover:bg-sunken hover:text-fg"
-            >
-              {t("common.cancel")}
-            </button>
-          )}
+          <div className="absolute inset-y-0 right-1.5 flex items-center gap-2">
+            {secret.isSet && !value && (
+              <button type="button" onClick={() => setEditing(false)} className={textButton}>
+                {t("common.cancel")}
+              </button>
+            )}
+            {value.trim() && (
+              <button
+                type="submit"
+                disabled={busy}
+                className="rounded-md px-2 py-0.5 text-[12px] font-medium text-accent transition-colors hover:bg-accent-soft disabled:opacity-40"
+              >
+                {t("common.save")}
+              </button>
+            )}
+          </div>
         </form>
       ) : (
-        <div className="flex items-center gap-2 rounded-lg border border-line bg-sunken py-1 pr-1 pl-2.5">
-          <Check size={14} className="shrink-0 text-success" />
-          <span className="flex-1 font-mono text-[12.5px] tracking-widest text-subtle select-none">••••••••••••</span>
-          <button
-            type="button"
-            onClick={() => setEditing(true)}
-            className="flex items-center gap-1 rounded-md px-2 py-1 text-[12px] text-muted hover:bg-raised hover:text-fg"
-          >
-            <Pencil size={12} /> {t("keys.field.change")}
+        <div className="flex h-8 items-center gap-3 rounded-lg bg-sunken pr-2.5 pl-2.5">
+          <span className="flex-1 font-mono text-[12px] tracking-[0.2em] text-subtle select-none">••••••••••</span>
+          <button type="button" onClick={() => setEditing(true)} className={textButton}>
+            {t("keys.field.change")}
           </button>
           <button
             type="button"
             disabled={busy}
             onClick={() => (confirmDelete ? void run(() => api.secretsDelete(secret.name)) : setConfirmDelete(true))}
-            className={clsx(
-              "flex items-center gap-1 rounded-md px-2 py-1 text-[12px] transition-colors",
-              confirmDelete ? "bg-danger/15 text-danger" : "text-muted hover:bg-raised hover:text-danger",
-            )}
+            className={clsx(textButton, confirmDelete && "text-danger hover:text-danger")}
           >
-            <Trash2 size={12} /> {confirmDelete ? t("keys.field.confirmRemove") : t("keys.field.remove")}
+            {confirmDelete ? t("keys.field.confirmRemove") : t("keys.field.remove")}
           </button>
         </div>
       )}

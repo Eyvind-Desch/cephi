@@ -29,6 +29,8 @@ pub struct ProfileInfo {
     pub provider: String,
     /// Display name of the provider.
     pub provider_label: String,
+    /// Logo name (`ollama`, `anthropic`, `gemini`, `openai`, `openrouter`, `ai`).
+    pub provider_icon: String,
     pub local: bool,
     /// False when the provider's API key is missing.
     pub available: bool,
@@ -66,6 +68,7 @@ impl ConfigSnapshot {
                         tools: p.tools,
                         provider: p.provider.clone(),
                         provider_label: provider.map_or_else(|| "Ollama".to_string(), |pr| pr.display_name()),
+                        provider_icon: provider.map_or("ollama", |pr| pr.brand().0).to_string(),
                         local: provider.is_none(),
                         available: provider.is_none_or(|pr| crate::secrets::is_set(&pr.api_key_secret())),
                     }

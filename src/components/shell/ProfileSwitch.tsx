@@ -1,12 +1,24 @@
 import clsx from "clsx";
-import { ChevronDown, Cloud, Cpu } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { ProfileInfo } from "../../lib/ipc";
 import { useChat } from "../../store/chat";
 import { useUi } from "../../store/ui";
-import { Menu, type MenuEntry } from "../ui/Menu";
+import { BrandIcon } from "../ui/BrandIcon";
+import { Menu, type MenuEntry, type MenuIcon } from "../ui/Menu";
 
 const NO_PROFILES: ProfileInfo[] = [];
+
+const brandIcons = new Map<string, MenuIcon>();
+/** Stable component per logo, so React doesn't remount icons on every render. */
+function brandIcon(name: string): MenuIcon {
+  let icon = brandIcons.get(name);
+  if (!icon) {
+    icon = (props) => <BrandIcon name={name} {...props} />;
+    brandIcons.set(name, icon);
+  }
+  return icon;
+}
 
 /** Model picker: local and cloud profiles; cloud profiles without a key link to the keys view. */
 export function ProfileSwitch() {
@@ -24,7 +36,7 @@ export function ProfileSwitch() {
     id: profile.id,
     label: profile.label,
     description: profile.local ? profile.model : `${profile.providerLabel} · ${profile.model}`,
-    icon: profile.local ? Cpu : Cloud,
+    icon: brandIcon(profile.providerIcon),
     checked: profile.id === profileId,
     hint: profile.available ? undefined : t("profile.keyMissing"),
     disabled: running,
@@ -37,8 +49,6 @@ export function ProfileSwitch() {
     ...(local.length > 0 ? [{ kind: "label", text: t("profile.local") } as const, ...local.map(toEntry)] : []),
     ...(cloud.length > 0 ? [{ kind: "label", text: t("profile.cloud") } as const, ...cloud.map(toEntry)] : []),
   ];
-
-  const CurrentIcon = current.local ? Cpu : Cloud;
 
   return (
     <Menu
@@ -53,13 +63,13 @@ export function ProfileSwitch() {
           aria-controls={id}
           title={`${t("profile.label")}: ${current.providerLabel} · ${current.model}`}
           className={clsx(
-            "flex h-8 items-center gap-1.5 rounded-lg bg-sunken pr-2 pl-2.5 text-[12.5px] font-medium transition-colors hover:text-fg",
-            open ? "text-fg" : "text-muted",
+            "flex h-7 items-center gap-1.5 rounded-lg pr-1.5 pl-2 text-[12.5px] transition-colors hover:bg-sunken hover:text-fg",
+            open ? "bg-sunken text-fg" : "text-muted",
           )}
         >
-          <CurrentIcon size={13} className="shrink-0 text-accent" />
+          <BrandIcon name={current.providerIcon} size={13} />
           <span className="max-w-32 truncate">{current.label}</span>
-          <ChevronDown size={13} className={clsx("shrink-0 transition-transform", open && "rotate-180")} />
+          <ChevronDown size={13} className={clsx("shrink-0 text-subtle transition-transform", open && "rotate-180")} />
         </button>
       )}
     />

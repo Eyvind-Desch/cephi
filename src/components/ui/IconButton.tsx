@@ -26,7 +26,7 @@ export function IconButton({ icon: Icon, label, active, variant = "ghost", class
       )}
       {...rest}
     >
-      <Icon size={16} strokeWidth={2} />
+      <Icon size={16} />
     </button>
   );
 }

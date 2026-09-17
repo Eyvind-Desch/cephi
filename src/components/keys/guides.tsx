@@ -29,11 +29,9 @@ function SpotifyGuide() {
 
 function Guide({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <details className="group rounded-xl bg-sunken px-3 py-2 text-[12.5px] leading-relaxed">
-      <summary className="cursor-pointer font-medium text-muted select-none marker:text-subtle hover:text-fg">
-        {title}
-      </summary>
-      <ol className="mt-1.5 mb-0.5 list-decimal space-y-1.5 pl-5 text-muted [&_b]:font-semibold [&_b]:text-fg">
+    <details className="group text-[12px] leading-relaxed">
+      <summary className="cursor-pointer text-muted select-none marker:text-subtle hover:text-fg">{title}</summary>
+      <ol className="mt-1.5 list-decimal space-y-1 pl-4 text-subtle [&_b]:font-medium [&_b]:text-muted">
         {children}
       </ol>
     </details>

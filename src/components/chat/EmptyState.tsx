@@ -19,7 +19,7 @@ export function EmptyState() {
         <OrbitMark size={56} />
       </motion.div>
       <div className="space-y-1.5">
-        <h1 className="text-[18px] font-semibold">{t("emptyState.title")}</h1>
+        <h1 className="text-[17px] font-medium">{t("emptyState.title")}</h1>
         <p className="text-[13px] text-muted">
           {t("emptyState.toolsReady", { count: toolCount })}
           {hotkey && (

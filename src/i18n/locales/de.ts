@@ -84,19 +84,23 @@ export const de: Locale = {
   keys: {
     back: "Chat",
     backTitle: "Zurück zum Chat (Esc)",
-    allSet: "Alles eingerichtet",
-    missing_one: "{{count}} Schlüssel fehlt",
-    missing_other: "{{count}} Schlüssel fehlen",
     title: "Schlüssel",
-    storageNote:
-      "Gespeichert in der Windows-Anmeldeinformationsverwaltung. Orbit zeigt gespeicherte Werte nie wieder an.",
-    empty: "Keins deiner Tools braucht gerade einen Schlüssel.",
+    storageNote: "Sicher in der Windows-Anmeldeinformationsverwaltung, wird nie wieder angezeigt.",
+    empty: "Gerade braucht nichts einen Schlüssel.",
+    sections: {
+      ai: "KI-Anbieter",
+      integration: "Integrationen",
+      custom: "Eigene Tools",
+    },
+    status: {
+      active: "Aktiv",
+      notSet: "Nicht eingerichtet",
+      partial_one: "{{count}} fehlt",
+      partial_other: "{{count}} fehlen",
+    },
     group: {
-      complete: "Eingerichtet",
-      missing_one: "{{count}} fehlt",
-      missing_other: "{{count}} fehlen",
       testConnection: "Verbindung testen",
-      dashboard: "Dashboard",
+      getKey: "Key erstellen",
     },
     field: {
       change: "Ändern",

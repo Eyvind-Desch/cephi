@@ -16,7 +16,7 @@ export const MessageView = memo(function MessageView({ message }: { message: Mes
   if (message.role === "user") {
     return (
       <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="flex justify-end">
-        <div className="max-w-[85%] rounded-2xl rounded-br-md bg-accent px-3.5 py-2 leading-relaxed whitespace-pre-wrap text-accent-fg">
+        <div className="max-w-[85%] rounded-2xl rounded-br-md border border-line bg-raised px-3.5 py-2 leading-relaxed whitespace-pre-wrap text-fg">
           {message.text}
         </div>
       </motion.div>

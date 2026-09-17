@@ -10,7 +10,7 @@ use rust_i18n::t;
 use serde::Serialize;
 
 use super::store;
-use crate::config::{ProviderKind, ProviderSettings, Settings};
+use crate::config::{ProviderSettings, Settings};
 
 struct SecretSpec {
     name: String,
@@ -24,8 +24,9 @@ struct GroupSpec {
     id: String,
     title: String,
     description: String,
-    /// Icon name understood by the frontend (also selects the brand colour).
+    /// Icon name understood by the frontend (selects the logo).
     icon: String,
+    category: &'static str,
     docs_url: Option<String>,
     /// Whether "test connection" is supported (see `app::test_secret_group`).
     testable: bool,
@@ -42,6 +43,7 @@ fn known_groups(settings: &Settings) -> Vec<GroupSpec> {
         title: "Spotify".into(),
         description: t!("secret_groups.spotify.description").into(),
         icon: "music".into(),
+        category: "integration",
         docs_url: Some("https://developer.spotify.com/dashboard".into()),
         testable: true,
         always_show: false,
@@ -64,26 +66,14 @@ fn known_groups(settings: &Settings) -> Vec<GroupSpec> {
 }
 
 fn provider_group(provider: &ProviderSettings) -> GroupSpec {
-    let base_url = provider.base_url.as_deref().unwrap_or_default();
-    let (icon, docs_url) = if provider.kind == ProviderKind::Anthropic {
-        ("anthropic", Some("https://console.anthropic.com/settings/keys"))
-    } else if base_url.contains("generativelanguage.googleapis.com") {
-        ("gemini", Some("https://aistudio.google.com/apikey"))
-    } else if base_url.contains("api.openai.com") {
-        ("openai", Some("https://platform.openai.com/api-keys"))
-    } else if base_url.contains("openrouter.ai") {
-        ("ai", Some("https://openrouter.ai/settings/keys"))
-    } else if base_url.contains("groq.com") {
-        ("ai", Some("https://console.groq.com/keys"))
-    } else {
-        ("ai", None)
-    };
+    let (icon, docs_url) = provider.brand();
 
     GroupSpec {
         id: provider.id.clone(),
         title: provider.display_name(),
         description: t!("secret_groups.ai.description").into(),
         icon: icon.into(),
+        category: "ai",
         docs_url: docs_url.map(Into::into),
         testable: true,
         always_show: true,
@@ -105,6 +95,8 @@ pub struct SecretGroupInfo {
     pub title: String,
     pub description: String,
     pub icon: String,
+    /// `ai` | `integration` | `custom`: sections in the keys view.
+    pub category: String,
     pub docs_url: Option<String>,
     pub testable: bool,
     pub secrets: Vec<SecretInfo>,
@@ -182,6 +174,7 @@ fn overview_with(
                 title: group.title,
                 description: group.description,
                 icon: group.icon,
+                category: group.category.into(),
                 docs_url: group.docs_url,
                 testable: group.testable,
                 secrets,
@@ -195,6 +188,7 @@ fn overview_with(
             title: t!("secret_groups.custom.title").into(),
             description: t!("secret_groups.custom.description").into(),
             icon: "wrench".into(),
+            category: "custom".into(),
             docs_url: None,
             testable: false,
             secrets: custom,

@@ -99,6 +99,21 @@
   }
 }
 
+/* Lighter line icons everywhere (CSS wins over Lucide's stroke-width attribute). */
+.lucide {
+  stroke-width: 1.75;
+}
+
+/* Design preview in a plain browser: stand-in for the Mica backdrop the desktop window gets. */
+html[data-preview] {
+  background: #e9e9ef;
+}
+@media (prefers-color-scheme: dark) {
+  html[data-preview] {
+    background: #1e1e24;
+  }
+}
+
 /* Chat content can be selected (also across messages) and copied with Ctrl+C; controls stay unselectable. */
 .selectable {
   user-select: text;

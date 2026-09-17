@@ -86,18 +86,23 @@ export const en = {
   keys: {
     back: "Chat",
     backTitle: "Back to chat (Esc)",
-    allSet: "All set",
-    missing_one: "{{count}} key missing",
-    missing_other: "{{count}} keys missing",
     title: "Keys",
-    storageNote: "Stored in the Windows Credential Manager. Orbit never shows saved values again.",
-    empty: "None of your tools needs a key right now.",
+    storageNote: "Stored securely in the Windows Credential Manager, never shown again.",
+    empty: "Nothing needs a key right now.",
+    sections: {
+      ai: "AI providers",
+      integration: "Integrations",
+      custom: "Custom tools",
+    },
+    status: {
+      active: "Active",
+      notSet: "Not set up",
+      partial_one: "{{count}} missing",
+      partial_other: "{{count}} missing",
+    },
     group: {
-      complete: "Set up",
-      missing_one: "{{count}} missing",
-      missing_other: "{{count}} missing",
       testConnection: "Test connection",
-      dashboard: "Dashboard",
+      getKey: "Get a key",
     },
     field: {
       change: "Change",
