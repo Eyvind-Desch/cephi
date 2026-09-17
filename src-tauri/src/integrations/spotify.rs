@@ -65,8 +65,14 @@ pub struct SpotifyClient {
 
 impl SpotifyClient {
     pub fn is_configured() -> bool {
-        matches!(secrets::get(CLIENT_ID_SECRET), Ok(Some(_)))
-            && matches!(secrets::get(CLIENT_SECRET_SECRET), Ok(Some(_)))
+        secrets::is_set(CLIENT_ID_SECRET) && secrets::is_set(CLIENT_SECRET_SECRET)
+    }
+
+    /// Requests a fresh token, which proves that the stored credentials are valid.
+    pub async fn test_connection(&self, http: &reqwest::Client) -> Result<String, String> {
+        self.invalidate().await;
+        self.access_token(http).await?;
+        Ok("Verbindung zu Spotify funktioniert.".into())
     }
 
     /// Forgets the cached token, e.g. after the credentials changed.

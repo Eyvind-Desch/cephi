@@ -18,16 +18,21 @@ export function useKeyboardShortcuts() {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const ctrl = e.ctrlKey && !e.altKey && !e.metaKey;
+      const key = e.key.toLowerCase();
 
       if (e.key === "Escape") {
         e.preventDefault();
-        void api.windowHide();
-      } else if (ctrl && e.key.toLowerCase() === "c" && copySelection()) {
+        // Sub-views go back first; only the chat hides the window.
+        const ui = useUi.getState();
+        if (ui.mode === "expanded" && ui.view !== "chat") ui.setView("chat");
+        else void api.windowHide();
+      } else if (ctrl && key === "c") {
+        copySelectionOutsideFocus();
+      } else if (ctrl && key === "n") {
         e.preventDefault();
-      } else if (ctrl && e.key.toLowerCase() === "n") {
-        e.preventDefault();
+        useUi.getState().setView("chat");
         void useChat.getState().reset();
-      } else if (ctrl && e.key.toLowerCase() === "e") {
+      } else if (ctrl && key === "e") {
         e.preventDefault();
         useUi.getState().toggleMode();
       }
@@ -38,28 +43,26 @@ export function useKeyboardShortcuts() {
 }
 
 /**
- * Copies selected chat text. Text fields keep their native behaviour; for everything else we
- * copy explicitly, because the focus often stays in the composer while text is selected elsewhere.
+ * The native copy handles the normal case. It fails when text is selected in the chat while
+ * the keyboard focus is still in an input (e.g. the composer): then Ctrl+C would copy the
+ * input's empty selection. In that case we copy the page selection ourselves.
  */
-function copySelection(): boolean {
+function copySelectionOutsideFocus() {
   const active = document.activeElement;
-  if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement) {
-    const hasFieldSelection = active.selectionStart !== active.selectionEnd;
-    if (hasFieldSelection) return false;
-  }
+  const inField = active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement;
+  if (!inField || active.selectionStart !== active.selectionEnd) return;
+
   const text = window.getSelection()?.toString() ?? "";
-  if (!text) return false;
-  void navigator.clipboard.writeText(text);
-  return true;
+  if (text) void navigator.clipboard.writeText(text);
 }
 
-/** Suppresses the browser context menu so the app feels native (keeps it on text fields). */
+/** Suppresses the browser context menu so the app feels native (keeps it on selectable content). */
 export function useNativeContextMenu() {
   useEffect(() => {
     const onContextMenu = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      const editable = target.closest("textarea, input, .prose-orbit, pre");
-      if (!editable && !import.meta.env.DEV) e.preventDefault();
+      const allowed = target.closest("textarea, input, .selectable, pre");
+      if (!allowed && !import.meta.env.DEV) e.preventDefault();
     };
     window.addEventListener("contextmenu", onContextMenu);
     return () => window.removeEventListener("contextmenu", onContextMenu);

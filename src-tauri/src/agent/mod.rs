@@ -271,7 +271,7 @@ impl Run<'_> {
                 .manifest
                 .secrets()
                 .into_iter()
-                .filter(|name| !matches!(crate::secrets::get(name), Ok(Some(_))))
+                .filter(|name| !crate::secrets::is_set(name))
                 .collect(),
             _ => Vec::new(),
         };

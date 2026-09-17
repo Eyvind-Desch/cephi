@@ -101,7 +101,13 @@ impl Builtin {
                     .play(ctx.app, ctx.http, str_arg(args, "query"), kind)
                     .await
             }
-            Builtin::MediaControl => Ok(MediaAction::parse(str_arg(args, "action"))?.run()),
+            Builtin::MediaControl => {
+                let action = MediaAction::parse(str_arg(args, "action"))?;
+                let level = args.get("level").and_then(|v| v.as_i64());
+                let amount = args.get("amount").and_then(|v| v.as_i64());
+                // Core Audio is COM: keep it off the async runtime threads.
+                blocking(move || action.run(level, amount)).await
+            }
         }
     }
 }

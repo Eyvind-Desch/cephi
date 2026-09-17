@@ -1,7 +1,4 @@
-//! API keys and other secrets, stored in the Windows Credential Manager.
-//!
-//! Secrets never live in JSON files (so they cannot end up in git or backups by accident) and
-//! are never sent to the frontend; the UI only learns whether a secret is set.
+//! Storage backend: Windows Credential Manager.
 //! Entries appear in *Anmeldeinformationsverwaltung → Windows-Anmeldeinformationen* as `Orbit/<name>`.
 
 use std::ptr;
@@ -22,13 +19,8 @@ pub fn is_valid_name(name: &str) -> bool {
         && chars.all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_')
 }
 
-/// Human-readable label for well-known secrets.
-pub fn label(name: &str) -> String {
-    match name {
-        "spotify_client_id" => "Spotify Client-ID".into(),
-        "spotify_client_secret" => "Spotify Client-Secret".into(),
-        other => other.to_string(),
-    }
+pub fn is_set(name: &str) -> bool {
+    matches!(get(name), Ok(Some(_)))
 }
 
 pub fn get(name: &str) -> Result<Option<String>, String> {

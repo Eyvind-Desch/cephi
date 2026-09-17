@@ -60,6 +60,7 @@ pub fn run() {
             commands::secrets_list,
             commands::secrets_set,
             commands::secrets_delete,
+            commands::secrets_test,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Orbit");

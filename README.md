@@ -30,11 +30,12 @@ Klick außerhalb blendet Orbit aus, außer es ist angepinnt (⋯-Menü). Tray-Ic
 |---|---|
 | `öffne discord`, `starte den rechner` | App starten |
 | `spiele another love von tom odell auf spotify` | Song abspielen ([Einrichtung](docs/SPOTIFY.md)) |
-| `pause`, `nächster song`, `lauter`, `stumm` | Medientasten |
+| `pause`, `nächster song`, `stumm`, `ton an` | Wiedergabe |
+| `lautstärke auf 30`, `mach 24 lauter`, `mach es leiser` | Lautstärke (exakt) |
 | `g suchbegriff`, `yt suchbegriff` | Google / YouTube |
 
 Alles andere geht an die KI, die dieselben Tools aufrufen kann. Eigene Schnellwege: `triggers` in den
-Tool-JSONs ([docs/TOOLS.md](docs/TOOLS.md)). API-Keys: ⋯ → *Schlüssel*.
+Tool-JSONs ([docs/TOOLS.md](docs/TOOLS.md)). API-Keys: ⋯ → *Schlüssel & API-Keys*.
 
 ## Konfiguration
 

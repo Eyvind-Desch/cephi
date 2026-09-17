@@ -10,7 +10,7 @@ use crate::desktop::{hotkey, tray, window};
 use crate::error::{AppError, AppResult};
 use crate::launcher::AppIndex;
 use crate::llm::OllamaClient;
-use crate::secrets;
+use crate::secrets::{self, SecretGroupInfo};
 use crate::state::AppState;
 
 pub const EVENT_CONFIG_CHANGED: &str = "orbit://config-changed";
@@ -105,30 +105,8 @@ pub fn snapshot(app: &AppHandle) -> ConfigSnapshot {
     ConfigSnapshot::build(&state.config(), state.paths.root.display().to_string(), hotkey_problem)
 }
 
-/// A secret required by at least one tool. The value itself is never exposed.
-#[derive(Clone, Debug, serde::Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct SecretInfo {
-    pub name: String,
-    pub label: String,
-    pub is_set: bool,
-    pub used_by: Vec<String>,
-}
-
-pub fn secret_overview(app: &AppHandle) -> Vec<SecretInfo> {
-    let state = app.state::<AppState>();
-    state
-        .config()
-        .tools
-        .secret_usage()
-        .into_iter()
-        .map(|(name, used_by)| SecretInfo {
-            label: secrets::label(&name),
-            is_set: matches!(secrets::get(&name), Ok(Some(_))),
-            name,
-            used_by,
-        })
-        .collect()
+pub fn secret_overview(state: &AppState) -> Vec<SecretGroupInfo> {
+    secrets::overview(&state.config().tools.secret_usage())
 }
 
 /// Stores (`Some`) or deletes (`None`) a secret and refreshes dependent integrations.
@@ -145,6 +123,16 @@ pub async fn update_secret(state: &AppState, name: &str, value: Option<&str>) ->
         state.spotify.warm_up(&state.http).await;
     }
     Ok(())
+}
+
+/// Verifies the stored keys of a service with a real request. Returns a success message.
+pub async fn test_secret_group(state: &AppState, group_id: &str) -> AppResult<String> {
+    match group_id {
+        "spotify" => state.spotify.test_connection(&state.http).await.map_err(AppError::msg),
+        other => Err(AppError::msg(format!(
+            "Für \"{other}\" gibt es keinen Verbindungstest."
+        ))),
+    }
 }
 
 pub fn open_config_folder(app: &AppHandle) -> AppResult<()> {

@@ -111,6 +111,19 @@ mitschicken. Eindeutige Befehle („öffne X“) laufen über den Schnellweg ohn
 5. **Feinschliff** – Einstellungs-UI, Verlauf speichern, Code-Highlighting, Autostart, Installer
 6. **Extras** – markierten Text übernehmen, Screenshot fragen (Bild-Modell), Sprache
 
+## Arbeitsweise
+
+Jede Funktion wird erst **alltagstauglich** gemacht (Nutzung findet die echten Probleme), bevor die
+nächste Etappe beginnt. Was nicht stört, landet im Backlog statt im nächsten Commit.
+
+### Backlog (Feinschliff)
+
+- [ ] Beim Start aus dem Terminal bleibt das Fenster verborgen (Windows-Vordergrundsperre) → Hotkey nötig
+- [ ] Code-Highlighting in Antworten
+- [ ] Chatverlauf speichern
+- [ ] Lautstärke-Anzeige (kurzes Overlay) nach „lauter/leiser“
+- [ ] Bei Alben/Playlists prüfen, ob Spotify automatisch abspielt
+
 ## Setup
 
 - [x] Git, Node LTS, Rustup, VS C++ Build Tools (winget)

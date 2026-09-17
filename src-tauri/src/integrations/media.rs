@@ -1,13 +1,13 @@
-//! System media keys: control whatever player is active (Spotify, browser, …) without any API.
+//! Media control: playback via system media keys (works with any player), volume via Core Audio.
 
 use serde::Deserialize;
 use windows_sys::Win32::UI::Input::KeyboardAndMouse::{
     keybd_event, KEYEVENTF_EXTENDEDKEY, KEYEVENTF_KEYUP, VK_MEDIA_NEXT_TRACK, VK_MEDIA_PLAY_PAUSE, VK_MEDIA_PREV_TRACK,
-    VK_VOLUME_DOWN, VK_VOLUME_MUTE, VK_VOLUME_UP,
 };
 
-/// One volume key press changes the volume by 2 %.
-const VOLUME_STEPS: usize = 5;
+use super::audio;
+
+const DEFAULT_VOLUME_STEP: i32 = 10;
 
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
@@ -15,9 +15,11 @@ pub enum MediaAction {
     PlayPause,
     Next,
     Previous,
+    SetVolume,
     VolumeUp,
     VolumeDown,
     Mute,
+    Unmute,
 }
 
 impl MediaAction {
@@ -26,26 +28,33 @@ impl MediaAction {
             .map_err(|_| format!("Unbekannte Medienaktion \"{value}\"."))
     }
 
-    pub fn run(self) -> String {
-        let (key, presses, message) = match self {
-            MediaAction::PlayPause => (VK_MEDIA_PLAY_PAUSE, 1, "Wiedergabe umgeschaltet."),
-            MediaAction::Next => (VK_MEDIA_NEXT_TRACK, 1, "Nächster Titel."),
-            MediaAction::Previous => (VK_MEDIA_PREV_TRACK, 1, "Vorheriger Titel."),
-            MediaAction::VolumeUp => (VK_VOLUME_UP, VOLUME_STEPS, "Lauter (+10 %)."),
-            MediaAction::VolumeDown => (VK_VOLUME_DOWN, VOLUME_STEPS, "Leiser (−10 %)."),
-            MediaAction::Mute => (VK_VOLUME_MUTE, 1, "Stummschaltung umgeschaltet."),
-        };
-        for _ in 0..presses {
-            press(key as u8);
+    /// `level`: target volume for `set_volume`; `amount`: step for `volume_up`/`volume_down`.
+    pub fn run(self, level: Option<i64>, amount: Option<i64>) -> Result<String, String> {
+        let step = amount.map_or(DEFAULT_VOLUME_STEP, |a| a.clamp(1, 100) as i32);
+        match self {
+            MediaAction::PlayPause => Ok(press(VK_MEDIA_PLAY_PAUSE, "Wiedergabe umgeschaltet.")),
+            MediaAction::Next => Ok(press(VK_MEDIA_NEXT_TRACK, "Nächster Titel.")),
+            MediaAction::Previous => Ok(press(VK_MEDIA_PREV_TRACK, "Vorheriger Titel.")),
+            MediaAction::SetVolume => {
+                let level = level.ok_or("Für set_volume fehlt \"level\" (0–100).")?;
+                if !(0..=100).contains(&level) {
+                    return Err(format!("Lautstärke muss zwischen 0 und 100 liegen, nicht {level}."));
+                }
+                audio::set(level as i32).map(audio::describe)
+            }
+            MediaAction::VolumeUp => audio::change(step).map(audio::describe),
+            MediaAction::VolumeDown => audio::change(-step).map(audio::describe),
+            MediaAction::Mute => audio::set_muted(None).map(audio::describe),
+            MediaAction::Unmute => audio::set_muted(Some(false)).map(audio::describe),
         }
-        message.to_string()
     }
 }
 
-fn press(vk: u8) {
+fn press(vk: u16, message: &str) -> String {
     // SAFETY: plain synthetic key events; no pointers involved.
     unsafe {
-        keybd_event(vk, 0, KEYEVENTF_EXTENDEDKEY, 0);
-        keybd_event(vk, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+        keybd_event(vk as u8, 0, KEYEVENTF_EXTENDEDKEY, 0);
+        keybd_event(vk as u8, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
     }
+    message.to_string()
 }

@@ -7,10 +7,10 @@ use tauri::{AppHandle, State};
 use tauri_plugin_opener::OpenerExt;
 
 use crate::agent::{self, AgentEvent};
-use crate::app::SecretInfo;
 use crate::config::ConfigSnapshot;
 use crate::desktop::window::{self, WindowMode};
 use crate::error::{AppError, AppResult};
+use crate::secrets::SecretGroupInfo;
 use crate::state::AppState;
 
 #[tauri::command]
@@ -47,8 +47,13 @@ pub async fn agent_preload(state: State<'_, AppState>, profile_id: Option<String
 }
 
 #[tauri::command]
-pub fn secrets_list(app: AppHandle) -> Vec<SecretInfo> {
-    crate::app::secret_overview(&app)
+pub fn secrets_list(state: State<'_, AppState>) -> Vec<SecretGroupInfo> {
+    crate::app::secret_overview(&state)
+}
+
+#[tauri::command]
+pub async fn secrets_test(state: State<'_, AppState>, group_id: String) -> AppResult<String> {
+    crate::app::test_secret_group(&state, &group_id).await
 }
 
 #[tauri::command]

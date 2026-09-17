@@ -1,17 +1,19 @@
 {
   "$schema": "../../schemas/tool.schema.json",
   "name": "media_control",
-  "title": "Mediensteuerung",
-  "description": "Steuert die laufende Musik- oder Videowiedergabe (Spotify, Browser …): Pause/Weiter, nächster oder vorheriger Titel, lauter, leiser, stumm.",
+  "title": "Medien & Lautstärke",
+  "description": "Steuert Wiedergabe und Lautstärke: Pause/Weiter, nächster oder vorheriger Titel, Lautstärke auf einen Wert setzen (set_volume mit level 0–100), lauter oder leiser (volume_up/volume_down mit amount in Prozentpunkten), stumm und Ton an.",
   "permission": "auto",
   "parameters": {
     "type": "object",
     "properties": {
       "action": {
         "type": "string",
-        "description": "play_pause = Pause/Weiter, next = nächster Titel, previous = vorheriger Titel, volume_up = lauter, volume_down = leiser, mute = stumm",
-        "enum": ["play_pause", "next", "previous", "volume_up", "volume_down", "mute"]
-      }
+        "description": "play_pause = Pause/Weiter, next = nächster Titel, previous = vorheriger Titel, set_volume = Lautstärke setzen, volume_up = lauter, volume_down = leiser, mute = stumm umschalten, unmute = Ton an",
+        "enum": ["play_pause", "next", "previous", "set_volume", "volume_up", "volume_down", "mute", "unmute"]
+      },
+      "level": { "type": "integer", "description": "Ziel-Lautstärke in Prozent (0–100), nur für set_volume" },
+      "amount": { "type": "integer", "description": "Um wie viele Prozentpunkte lauter/leiser (Standard 10)" }
     },
     "required": ["action"]
   },
@@ -19,9 +21,15 @@
     { "pattern": "(pause|pausieren|stopp|play|resume|weiterspielen) [die musik]", "args": { "action": "play_pause" } },
     { "pattern": "(nächster|nächstes|next) (song|lied|titel|track)", "args": { "action": "next" } },
     { "pattern": "(vorheriger|vorheriges|voriger|voriges|previous|letzter|letztes) (song|lied|titel|track)", "args": { "action": "previous" } },
-    { "pattern": "(lauter|volume up)", "args": { "action": "volume_up" } },
-    { "pattern": "(leiser|volume down)", "args": { "action": "volume_down" } },
-    { "pattern": "(stumm|ton aus|mute)", "args": { "action": "mute" } }
+
+    { "pattern": "[(mach|mache|stell|stelle|setz|setze)] [die] (lautstärke|volume) [(auf|to)] {level}", "args": { "action": "set_volume" } },
+    { "pattern": "[(mach|mache|stell|stelle)] [(es|den ton|die musik|den sound)] {amount} lauter", "args": { "action": "volume_up" } },
+    { "pattern": "[(mach|mache|stell|stelle)] [(es|den ton|die musik|den sound)] {amount} leiser", "args": { "action": "volume_down" } },
+    { "pattern": "[(mach|mache|stell|stelle)] [(es|den ton|die musik|den sound)] (lauter|volume up)", "args": { "action": "volume_up" } },
+    { "pattern": "[(mach|mache|stell|stelle)] [(es|den ton|die musik|den sound)] (leiser|volume down)", "args": { "action": "volume_down" } },
+
+    { "pattern": "(stumm|ton aus|mute)", "args": { "action": "mute" } },
+    { "pattern": "(ton an|unmute|stummschaltung aus)", "args": { "action": "unmute" } }
   ],
   "action": {
     "type": "builtin",

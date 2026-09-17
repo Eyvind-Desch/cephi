@@ -31,9 +31,10 @@ export function Header() {
     { label: "Anpinnen", icon: Pin, checked: pinned, onSelect: togglePinned },
     { kind: "separator" },
     {
-      label: view === "keys" ? "Zurück zum Chat" : "Schlüssel (API-Keys)",
+      label: "Schlüssel & API-Keys",
       icon: KeyRound,
-      onSelect: () => setView(view === "keys" ? "chat" : "keys"),
+      disabled: view === "keys",
+      onSelect: () => setView("keys"),
     },
     { label: "Konfigurationsordner", icon: FolderCog, onSelect: () => void api.configOpenFolder() },
     { label: "Konfiguration neu laden", icon: RefreshCw, onSelect: () => void api.configReload().then(applyConfig) },

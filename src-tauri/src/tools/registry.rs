@@ -191,6 +191,7 @@ mod tests {
             ("nächster Song", "media_control"),
             ("pause", "media_control"),
             ("lauter", "media_control"),
+            ("mach es leiser", "media_control"),
         ];
         for (input, expected) in cases {
             let (tool, _) = first_match(&registry, input).unwrap_or_else(|| panic!("no match for {input:?}"));
@@ -204,6 +205,35 @@ mod tests {
         let (tool, args) = first_match(&registry, "öffne another love in spotify").unwrap();
         assert_eq!(tool, "spotify_play");
         assert_eq!(args["query"], "another love");
+    }
+
+    /// First trigger whose arguments pass validation, like the agent's fast path.
+    fn first_valid(registry: &ToolRegistry, input: &str) -> Option<(String, Args)> {
+        registry
+            .trigger_matches(input)
+            .find_map(|(tool, raw)| Some((tool.manifest.name.clone(), tool.normalize_args(&raw).ok()?)))
+    }
+
+    #[test]
+    fn volume_phrases() {
+        let registry = default_registry();
+        let cases = [
+            ("mach die Lautstärke auf 30", "set_volume", Some(("level", 30))),
+            ("Lautstärke 30%", "set_volume", Some(("level", 30))),
+            ("stell die lautstärke auf 45 prozent", "set_volume", Some(("level", 45))),
+            ("mach 24 lauter", "volume_up", Some(("amount", 24))),
+            ("mach es 10 % leiser", "volume_down", Some(("amount", 10))),
+            ("mach es lauter", "volume_up", None),
+            ("ton an", "unmute", None),
+        ];
+        for (input, action, number) in cases {
+            let (tool, args) = first_valid(&registry, input).unwrap_or_else(|| panic!("no valid match for {input:?}"));
+            assert_eq!(tool, "media_control", "{input:?}");
+            assert_eq!(args["action"], action, "{input:?}");
+            if let Some((key, value)) = number {
+                assert_eq!(args[key], value, "{input:?}");
+            }
+        }
     }
 
     #[test]

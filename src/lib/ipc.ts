@@ -38,12 +38,24 @@ export interface ConfigSnapshot {
   diagnostics: Diagnostic[];
 }
 
-/** `src-tauri/src/app.rs` → `SecretInfo`. The value itself never leaves the backend. */
+/** `src-tauri/src/secrets/catalog.rs`. Secret values never leave the backend. */
 export interface SecretInfo {
   name: string;
   label: string;
+  sensitive: boolean;
+  placeholder: string;
   isSet: boolean;
   usedBy: string[];
+}
+
+export interface SecretGroup {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  docsUrl: string | null;
+  testable: boolean;
+  secrets: SecretInfo[];
 }
 
 /** `src-tauri/src/agent/events.rs` */
@@ -85,7 +97,9 @@ export const api = {
 
   openExternal: (url: string) => invoke<void>("open_external", { url }),
 
-  secretsList: () => invoke<SecretInfo[]>("secrets_list"),
+  secretsList: () => invoke<SecretGroup[]>("secrets_list"),
+  /** Resolves with a success message, rejects with the reason. */
+  secretsTest: (groupId: string) => invoke<string>("secrets_test", { groupId }),
   secretsSet: (name: string, value: string) => invoke<void>("secrets_set", { name, value }),
   secretsDelete: (name: string) => invoke<void>("secrets_delete", { name }),
 };

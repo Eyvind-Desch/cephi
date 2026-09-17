@@ -63,11 +63,15 @@ fn coerce(name: &str, kind: ParamType, value: &Value) -> Result<Value, String> {
         },
 
         (ParamType::Integer, Value::Number(n)) if n.is_i64() || n.is_u64() => Ok(value.clone()),
-        (ParamType::Integer, Value::String(s)) => s.trim().parse::<i64>().map(Value::from).map_err(|_| fail()),
+        (ParamType::Integer, Value::Number(n)) => n
+            .as_f64()
+            .filter(|f| f.fract() == 0.0)
+            .map(|f| Value::from(f as i64))
+            .ok_or_else(fail),
+        (ParamType::Integer, Value::String(s)) => numeric_text(s).parse::<i64>().map(Value::from).map_err(|_| fail()),
 
         (ParamType::Number, Value::Number(_)) => Ok(value.clone()),
-        (ParamType::Number, Value::String(s)) => s
-            .trim()
+        (ParamType::Number, Value::String(s)) => numeric_text(s)
             .parse::<f64>()
             .ok()
             .and_then(Number::from_f64)
@@ -76,6 +80,16 @@ fn coerce(name: &str, kind: ParamType, value: &Value) -> Result<Value, String> {
 
         _ => Err(fail()),
     }
+}
+
+/// Accepts how people write numbers: `30%`, `30 %`, `30 Prozent`, `2,5`.
+fn numeric_text(text: &str) -> String {
+    let lower = text.trim().to_lowercase();
+    let without_unit = ["prozent", "percent", "%"]
+        .iter()
+        .find_map(|unit| lower.strip_suffix(unit))
+        .unwrap_or(&lower);
+    without_unit.trim().replace(',', ".")
 }
 
 #[cfg(test)]
@@ -109,6 +123,28 @@ mod tests {
         let args = normalize(&params(), &json!(r#"{"query": 42, "count": "7"}"#)).unwrap();
         assert_eq!(args.get("query"), Some(&json!("42")));
         assert_eq!(args.get("count"), Some(&json!(7)));
+    }
+
+    #[test]
+    fn understands_percent_and_decimal_comma() {
+        let params: Parameters = serde_json::from_value(json!({
+            "type": "object",
+            "properties": { "level": { "type": "integer" }, "ratio": { "type": "number" } }
+        }))
+        .unwrap();
+        for input in ["30%", "30 %", "30 Prozent", " 30 ", "30.0"] {
+            let raw = if input == "30.0" {
+                json!({ "level": 30.0 })
+            } else {
+                json!({ "level": input })
+            };
+            assert_eq!(normalize(&params, &raw).unwrap()["level"], json!(30), "{input:?}");
+        }
+        assert_eq!(
+            normalize(&params, &json!({ "ratio": "2,5" })).unwrap()["ratio"],
+            json!(2.5)
+        );
+        assert!(normalize(&params, &json!({ "level": "es" })).is_err());
     }
 
     #[test]

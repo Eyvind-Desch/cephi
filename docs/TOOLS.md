@@ -203,7 +203,9 @@ erlaubt. Kommt die ganze URL vom Modell (`{{url|raw}}`), sind nur `http`/`https`
 | `clipboard_write` | `text` | Text in die Zwischenablage |
 | `open_app` | `name` | Installierte App starten (unscharfe Suche über Startmenü- und Store-Apps) |
 | `spotify_play` | `query`, optional `kind` (`track`/`album`/`artist`/`playlist`) | Musik in Spotify abspielen, siehe [SPOTIFY.md](SPOTIFY.md) |
-| `media_control` | `action` (`play_pause`/`next`/`previous`/`volume_up`/`volume_down`/`mute`) | Medientasten, funktioniert mit jedem Player |
+| `media_control` | `action` (`play_pause`/`next`/`previous`/`set_volume`/`volume_up`/`volume_down`/`mute`/`unmute`), optional `level` (0–100), `amount` | Wiedergabe über Medientasten (jeder Player), Lautstärke exakt über Windows Core Audio |
+
+Zahlen-Parameter verstehen auch `30%`, `30 %`, `30 Prozent` und `2,5`.
 
 `open_app` nimmt den Schnellweg nur, wenn eine App eindeutig passt. Sonst darf die KI übernehmen.
 
