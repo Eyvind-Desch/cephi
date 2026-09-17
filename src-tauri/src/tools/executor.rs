@@ -9,7 +9,7 @@ use tauri_plugin_opener::OpenerExt;
 use super::args::Args;
 use super::manifest::{Action, HttpMethod};
 use super::registry::Tool;
-use super::template::{self, Context};
+use super::template::{self, Context, Secrets};
 
 const DEFAULT_TIMEOUT_SECS: u64 = 30;
 /// Hides the console window of child processes.
@@ -60,7 +60,7 @@ pub async fn execute(ctx: &ExecContext<'_>, tool: &Tool, args: &Args) -> ToolOut
             body,
             timeout_secs,
         } => http(ctx, *method, url, headers, body.as_deref(), *timeout_secs, args).await,
-        Action::Builtin { id } => id.run(args).await,
+        Action::Builtin { id } => id.run(ctx, args).await,
     };
     if let Err(e) = &result {
         log::warn!("tool {} failed: {e}", tool.manifest.name);
@@ -68,9 +68,18 @@ pub async fn execute(ctx: &ExecContext<'_>, tool: &Tool, args: &Args) -> ToolOut
     ToolOutput::from_result(result)
 }
 
+/// Whether a trigger match may run the tool directly, without the model.
+pub fn accepts_fast_path(ctx: &ExecContext<'_>, tool: &Tool, args: &Args) -> bool {
+    match &tool.manifest.action {
+        Action::Builtin { id } => id.accepts_fast_path(ctx, args),
+        _ => true,
+    }
+}
+
 /// Human-readable description of what the tool is about to do, shown in the confirmation dialog.
+/// Secrets are masked.
 pub fn preview(tool: &Tool, args: &Args) -> String {
-    let render = |text: &str, context| template::render(text, context, args).unwrap_or_else(|e| e);
+    let render = |text: &str, context| template::render(text, context, args, Secrets::Mask).unwrap_or_else(|e| e);
     match &tool.manifest.action {
         Action::OpenUrl { url } => format!("Öffnen: {}", render(url, Context::Url)),
         Action::Launch {
@@ -100,8 +109,10 @@ pub fn preview(tool: &Tool, args: &Args) -> String {
 }
 
 fn open_url(ctx: &ExecContext<'_>, url_template: &str, args: &Args) -> Result<String, String> {
-    let rendered = template::render(url_template, Context::Url, args)?;
-    let parsed = url::Url::parse(&rendered).map_err(|e| format!("Ungültige URL \"{rendered}\": {e}"))?;
+    let rendered = template::render(url_template, Context::Url, args, Secrets::Resolve)?;
+    // Messages go to the model and the UI, so they use the masked URL.
+    let shown = template::render(url_template, Context::Url, args, Secrets::Mask)?;
+    let parsed = url::Url::parse(&rendered).map_err(|e| format!("Ungültige URL \"{shown}\": {e}"))?;
 
     // A fixed scheme in the template (e.g. "ms-settings:") is trusted. Otherwise the model
     // controls the scheme, so only web URLs are allowed (no file:, javascript:, …).
@@ -123,14 +134,14 @@ fn open_url(ctx: &ExecContext<'_>, url_template: &str, args: &Args) -> Result<St
         .opener()
         .open_url(parsed.as_str(), None::<&str>)
         .map_err(|e| format!("Konnte nicht geöffnet werden: {e}"))?;
-    Ok(format!("Geöffnet: {parsed}"))
+    Ok(format!("Geöffnet: {shown}"))
 }
 
 fn launch(program: &str, argv: &[String], cwd: Option<&str>, args: &Args) -> Result<String, String> {
-    let program = expand_env(&template::render(program, Context::Arg, args)?);
+    let program = expand_env(&template::render(program, Context::Arg, args, Secrets::Resolve)?);
     let rendered: Vec<String> = argv
         .iter()
-        .map(|a| template::render(a, Context::Arg, args).map(|a| expand_env(&a)))
+        .map(|a| template::render(a, Context::Arg, args, Secrets::Resolve).map(|a| expand_env(&a)))
         .collect::<Result<Vec<_>, _>>()?
         .into_iter()
         .filter(|a| !a.is_empty())
@@ -143,7 +154,12 @@ fn launch(program: &str, argv: &[String], cwd: Option<&str>, args: &Args) -> Res
         .stdout(Stdio::null())
         .stderr(Stdio::null());
     if let Some(cwd) = cwd {
-        command.current_dir(expand_env(&template::render(cwd, Context::Arg, args)?));
+        command.current_dir(expand_env(&template::render(
+            cwd,
+            Context::Arg,
+            args,
+            Secrets::Resolve,
+        )?));
     }
     command
         .spawn()
@@ -212,7 +228,7 @@ async fn http(
     timeout_secs: Option<u64>,
     args: &Args,
 ) -> Result<String, String> {
-    let url = template::render(url_template, Context::Url, args)?;
+    let url = template::render(url_template, Context::Url, args, Secrets::Resolve)?;
     let mut request = match method {
         HttpMethod::Get => ctx.http.get(&url),
         HttpMethod::Post => ctx.http.post(&url),
@@ -220,18 +236,19 @@ async fn http(
     .timeout(Duration::from_secs(timeout_secs.unwrap_or(DEFAULT_TIMEOUT_SECS)));
 
     for (name, value) in headers {
-        request = request.header(name, template::render(value, Context::Header, args)?);
+        request = request.header(name, template::render(value, Context::Header, args, Secrets::Resolve)?);
     }
     if let Some(body) = body {
         request = request
             .header(reqwest::header::CONTENT_TYPE, "application/json")
-            .body(template::render(body, Context::Body, args)?);
+            .body(template::render(body, Context::Body, args, Secrets::Resolve)?);
     }
 
+    // `without_url`: the URL may contain secrets and must not end up in messages.
     let response = request
         .send()
         .await
-        .map_err(|e| format!("Anfrage fehlgeschlagen: {e}"))?;
+        .map_err(|e| format!("Anfrage fehlgeschlagen: {}", e.without_url()))?;
     let status = response.status();
     let text = response
         .text()

@@ -8,6 +8,8 @@
 //! | `Body`   | `json`         | `http.body`               |
 //!
 //! Explicit filters: `{{name|raw}}`, `{{name|url}}`, `{{name|json}}`.
+//!
+//! `{{secret:name}}` inserts a secret from the Windows Credential Manager (see [`crate::secrets`]).
 
 use std::collections::BTreeMap;
 
@@ -15,6 +17,19 @@ use serde_json::Value;
 
 use super::args::Args;
 use super::manifest::ParamSpec;
+use crate::secrets;
+
+const SECRET_PREFIX: &str = "secret:";
+const MASK: &str = "••••••";
+
+/// How `{{secret:…}}` placeholders are rendered.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Secrets {
+    /// Real values, for execution.
+    Resolve,
+    /// Masked, for previews shown to the user.
+    Mask,
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Context {
@@ -80,11 +95,18 @@ fn parse_filter(filter: &str) -> Result<Filter, String> {
     }
 }
 
-/// Load-time check: syntax is valid and every placeholder refers to a declared parameter.
+/// Load-time check: syntax is valid and every placeholder refers to a declared parameter
+/// or a validly named secret.
 pub fn check(template: &str, context: Context, params: &BTreeMap<String, ParamSpec>) -> Result<(), String> {
     for segment in parse(template, context)? {
         if let Segment::Placeholder { name, .. } = segment {
-            if !params.contains_key(name) {
+            if let Some(secret) = name.strip_prefix(SECRET_PREFIX) {
+                if !secrets::is_valid_name(secret) {
+                    return Err(format!(
+                        "Schlüsselname \"{secret}\" ist ungültig: nur a-z, 0-9 und _, beginnend mit einem Buchstaben."
+                    ));
+                }
+            } else if !params.contains_key(name) {
                 return Err(format!(
                     "Platzhalter {{{{{name}}}}} verweist auf keinen definierten Parameter."
                 ));
@@ -94,14 +116,41 @@ pub fn check(template: &str, context: Context, params: &BTreeMap<String, ParamSp
     Ok(())
 }
 
+/// Names of all secrets referenced by a template.
+pub fn secret_names(template: &str) -> Vec<String> {
+    parse(template, Context::Arg)
+        .map(|segments| {
+            segments
+                .into_iter()
+                .filter_map(|segment| match segment {
+                    Segment::Placeholder { name, .. } => name.strip_prefix(SECRET_PREFIX).map(str::to_string),
+                    Segment::Literal(_) => None,
+                })
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
 /// Renders a template with validated arguments. Missing optional values render as empty.
-pub fn render(template: &str, context: Context, args: &Args) -> Result<String, String> {
+pub fn render(template: &str, context: Context, args: &Args, secrets_mode: Secrets) -> Result<String, String> {
     let mut out = String::with_capacity(template.len());
     for segment in parse(template, context)? {
         match segment {
             Segment::Literal(text) => out.push_str(text),
             Segment::Placeholder { name, filter } => {
-                let value = args.get(name);
+                let secret_value;
+                let value = match name.strip_prefix(SECRET_PREFIX) {
+                    Some(secret) => {
+                        secret_value = Value::String(match secrets_mode {
+                            Secrets::Mask => MASK.to_string(),
+                            Secrets::Resolve => secrets::get(secret)?.ok_or_else(|| {
+                                format!("Schlüssel \"{secret}\" fehlt. In Orbit unter „Schlüssel“ hinterlegen.")
+                            })?,
+                        });
+                        Some(&secret_value)
+                    }
+                    None => args.get(name),
+                };
                 let rendered = match filter {
                     Filter::Raw => plain(value),
                     Filter::Url => url::form_urlencoded::byte_serialize(plain(value).as_bytes()).collect(),
@@ -141,11 +190,15 @@ mod tests {
         serde_json::from_value(value).unwrap()
     }
 
+    fn render_resolved(template: &str, context: Context, args: &Args) -> Result<String, String> {
+        render(template, context, args, Secrets::Resolve)
+    }
+
     #[test]
     fn url_context_encodes_by_default() {
         let a = args(json!({ "q": "a&b c" }));
         assert_eq!(
-            render("https://x.de/?q={{q}}", Context::Url, &a).unwrap(),
+            render_resolved("https://x.de/?q={{q}}", Context::Url, &a).unwrap(),
             "https://x.de/?q=a%26b+c"
         );
     }
@@ -153,22 +206,50 @@ mod tests {
     #[test]
     fn explicit_filters() {
         let a = args(json!({ "u": "https://x.de/a?b=1", "n": 5 }));
-        assert_eq!(render("{{ u | raw }}", Context::Url, &a).unwrap(), "https://x.de/a?b=1");
         assert_eq!(
-            render(r#"{"n": {{n}}, "u": {{u}}}"#, Context::Body, &a).unwrap(),
+            render_resolved("{{ u | raw }}", Context::Url, &a).unwrap(),
+            "https://x.de/a?b=1"
+        );
+        assert_eq!(
+            render_resolved(r#"{"n": {{n}}, "u": {{u}}}"#, Context::Body, &a).unwrap(),
             r#"{"n": 5, "u": "https://x.de/a?b=1"}"#
         );
     }
 
     #[test]
     fn missing_optional_renders_empty() {
-        assert_eq!(render("a{{x}}b", Context::Arg, &Args::new()).unwrap(), "ab");
+        assert_eq!(render_resolved("a{{x}}b", Context::Arg, &Args::new()).unwrap(), "ab");
     }
 
     #[test]
     fn header_rejects_newlines() {
         let a = args(json!({ "h": "x\r\nEvil: 1" }));
-        assert!(render("{{h}}", Context::Header, &a).is_err());
+        assert!(render_resolved("{{h}}", Context::Header, &a).is_err());
+    }
+
+    #[test]
+    fn secrets_are_masked_resolved_and_listed() {
+        let template = "Bearer {{secret:orbit_template_test}}";
+        assert_eq!(secret_names(template), vec!["orbit_template_test"]);
+        assert_eq!(
+            render(template, Context::Header, &Args::new(), Secrets::Mask).unwrap(),
+            format!("Bearer {MASK}")
+        );
+        assert!(render_resolved(template, Context::Header, &Args::new())
+            .unwrap_err()
+            .contains("fehlt"));
+
+        secrets::set("orbit_template_test", "abc123").unwrap();
+        let resolved = render_resolved(template, Context::Header, &Args::new());
+        secrets::delete("orbit_template_test").unwrap();
+        assert_eq!(resolved.unwrap(), "Bearer abc123");
+    }
+
+    #[test]
+    fn secret_names_are_validated() {
+        let params = BTreeMap::new();
+        assert!(check("{{secret:api_key}}", Context::Header, &params).is_ok());
+        assert!(check("{{secret:Bad-Key}}", Context::Header, &params).is_err());
     }
 
     #[test]

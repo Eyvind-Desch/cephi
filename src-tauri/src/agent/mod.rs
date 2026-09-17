@@ -4,7 +4,7 @@ mod events;
 
 use std::collections::HashMap;
 use std::sync::Mutex;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use tauri::ipc::Channel;
 use tauri::AppHandle;
@@ -13,7 +13,7 @@ use tokio_util::sync::CancellationToken;
 
 use crate::config::Config;
 use crate::error::{AppError, AppResult};
-use crate::llm::{ChatMessage, ChatRequest, LlmError, ModelOptions, OllamaClient, ToolCall};
+use crate::llm::{ChatMessage, ChatRequest, FunctionCall, LlmError, ModelOptions, OllamaClient, ToolCall};
 use crate::state::AppState;
 use crate::tools::{self, ExecContext, Permission, ToolOutput};
 
@@ -143,6 +143,15 @@ impl Run<'_> {
             Vec::new()
         };
 
+        // Fast path: a trigger phrase runs its tool directly, without waiting for the model.
+        if let Some(call) = self.fast_path_call(&text) {
+            history.push(ChatMessage::user(text));
+            history.push(ChatMessage::assistant_tool_calls(vec![call.clone()]));
+            let output = self.run_tool_call(&call, true).await;
+            history.push(ChatMessage::tool(call.function.name, output.content));
+            return Ok(Outcome::Done);
+        }
+
         history.push(ChatMessage::user(text));
 
         for _ in 0..settings.agent.max_tool_rounds {
@@ -186,7 +195,7 @@ impl Run<'_> {
                 if self.cancel.is_cancelled() {
                     return Ok(Outcome::Cancelled);
                 }
-                let output = self.run_tool_call(&call).await;
+                let output = self.run_tool_call(&call, false).await;
                 history.push(ChatMessage::tool(call.function.name, output.content));
             }
         }
@@ -197,7 +206,35 @@ impl Run<'_> {
         ))
     }
 
-    async fn run_tool_call(&self, call: &ToolCall) -> ToolOutput {
+    /// The first trigger match whose arguments are valid and whose tool accepts the fast path.
+    fn fast_path_call(&self, text: &str) -> Option<ToolCall> {
+        let ctx = self.exec_context();
+        self.config
+            .tools
+            .trigger_matches(text)
+            .find(|(tool, raw_args)| {
+                tool.normalize_args(raw_args)
+                    .is_ok_and(|args| tools::accepts_fast_path(&ctx, tool, &args))
+            })
+            .map(|(tool, raw_args)| {
+                log::info!("fast path: {}", tool.manifest.name);
+                ToolCall {
+                    function: FunctionCall {
+                        name: tool.manifest.name.clone(),
+                        arguments: raw_args,
+                    },
+                }
+            })
+    }
+
+    fn exec_context(&self) -> ExecContext<'_> {
+        ExecContext {
+            app: self.app,
+            http: &self.state.http,
+        }
+    }
+
+    async fn run_tool_call(&self, call: &ToolCall, fast: bool) -> ToolOutput {
         let settings = &self.config.settings.agent;
         let call_id = uuid::Uuid::new_v4().to_string();
         let name = &call.function.name;
@@ -208,8 +245,10 @@ impl Run<'_> {
             name: name.clone(),
             title: tool.map_or(name.as_str(), |t| t.title()).to_string(),
             args: call.function.arguments.clone(),
+            fast,
         });
 
+        let started = Instant::now();
         let output = match tool {
             None => ToolOutput::error(format!("Unbekanntes Tool \"{name}\".")),
             Some(tool) => match tool.normalize_args(&call.function.arguments) {
@@ -218,11 +257,7 @@ impl Run<'_> {
                     let approved = tool.manifest.permission == Permission::Auto
                         || self.await_confirmation(&call_id, tools::preview(tool, &args)).await;
                     if approved {
-                        let ctx = ExecContext {
-                            app: self.app,
-                            http: &self.state.http,
-                        };
-                        tools::execute(&ctx, tool, &args).await
+                        tools::execute(&self.exec_context(), tool, &args).await
                     } else {
                         ToolOutput::error("Der Nutzer hat die Ausführung abgelehnt.")
                     }
@@ -231,10 +266,21 @@ impl Run<'_> {
         };
 
         let content = truncate(output.content, settings.max_tool_output_chars);
+        let missing_secrets = match tool {
+            Some(tool) if !output.ok => tool
+                .manifest
+                .secrets()
+                .into_iter()
+                .filter(|name| !matches!(crate::secrets::get(name), Ok(Some(_))))
+                .collect(),
+            _ => Vec::new(),
+        };
         self.emit(AgentEvent::ToolResult {
             call_id,
             ok: output.ok,
             output: content.clone(),
+            duration_ms: started.elapsed().as_millis() as u64,
+            missing_secrets,
         });
         ToolOutput { ok: output.ok, content }
     }

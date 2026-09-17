@@ -11,6 +11,11 @@
     },
     "required": ["query"]
   },
+  "triggers": [
+    "yt {query}",
+    "(suche|such) {query} (auf|bei|in) youtube",
+    "(suche|such) (auf|bei|in) youtube nach {query}"
+  ],
   "action": {
     "type": "open_url",
     "url": "https://www.youtube.com/results?search_query={{query}}"

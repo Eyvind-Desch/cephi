@@ -38,12 +38,27 @@ export interface ConfigSnapshot {
   diagnostics: Diagnostic[];
 }
 
+/** `src-tauri/src/app.rs` → `SecretInfo`. The value itself never leaves the backend. */
+export interface SecretInfo {
+  name: string;
+  label: string;
+  isSet: boolean;
+  usedBy: string[];
+}
+
 /** `src-tauri/src/agent/events.rs` */
 export type AgentEvent =
   | { type: "token"; text: string }
-  | { type: "toolCall"; callId: string; name: string; title: string; args: unknown }
+  | { type: "toolCall"; callId: string; name: string; title: string; args: unknown; fast: boolean }
   | { type: "toolAwaitingConfirmation"; callId: string; preview: string }
-  | { type: "toolResult"; callId: string; ok: boolean; output: string }
+  | {
+      type: "toolResult";
+      callId: string;
+      ok: boolean;
+      output: string;
+      durationMs: number;
+      missingSecrets: string[];
+    }
   | { type: "done" }
   | { type: "cancelled" }
   | { type: "error"; message: string };
@@ -59,6 +74,7 @@ export const api = {
     channel.onmessage = onEvent;
     return invoke<void>("agent_send", { text, profileId, onEvent: channel });
   },
+  agentPreload: (profileId: string) => invoke<void>("agent_preload", { profileId }),
   agentCancel: () => invoke<void>("agent_cancel"),
   agentConfirm: (callId: string, approved: boolean) => invoke<boolean>("agent_confirm", { callId, approved }),
   agentReset: () => invoke<void>("agent_reset"),
@@ -68,6 +84,10 @@ export const api = {
   windowSetPinned: (pinned: boolean) => invoke<void>("window_set_pinned", { pinned }),
 
   openExternal: (url: string) => invoke<void>("open_external", { url }),
+
+  secretsList: () => invoke<SecretInfo[]>("secrets_list"),
+  secretsSet: (name: string, value: string) => invoke<void>("secrets_set", { name, value }),
+  secretsDelete: (name: string) => invoke<void>("secrets_delete", { name }),
 };
 
 export const onWindowShown = (handler: () => void): Promise<UnlistenFn> => listen("orbit://shown", handler);

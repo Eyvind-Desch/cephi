@@ -3,6 +3,8 @@ use std::sync::{Arc, Mutex, RwLock};
 use crate::agent::AgentController;
 use crate::config::{Config, ConfigPaths};
 use crate::desktop::window::WindowController;
+use crate::integrations::spotify::SpotifyClient;
+use crate::launcher::AppIndex;
 
 /// Global application state, managed by Tauri.
 ///
@@ -13,17 +15,21 @@ pub struct AppState {
     pub http: reqwest::Client,
     pub agent: AgentController,
     pub window: WindowController,
+    pub launcher: AppIndex,
+    pub spotify: SpotifyClient,
     config: RwLock<Arc<Config>>,
     hotkey_error: Mutex<Option<String>>,
 }
 
 impl AppState {
-    pub fn new(paths: ConfigPaths, config: Config, http: reqwest::Client) -> Self {
+    pub fn new(paths: ConfigPaths, config: Config, http: reqwest::Client, launcher: AppIndex) -> Self {
         Self {
             paths,
             http,
             agent: AgentController::default(),
             window: WindowController::default(),
+            launcher,
+            spotify: SpotifyClient::default(),
             config: RwLock::new(Arc::new(config)),
             hotkey_error: Mutex::new(None),
         }

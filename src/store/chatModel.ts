@@ -14,8 +14,12 @@ export interface ToolPart {
   title: string;
   args: unknown;
   status: ToolStatus;
+  /** Run directly via a trigger phrase, without the model. */
+  fast: boolean;
   preview?: string;
   output?: string;
+  durationMs?: number;
+  missingSecrets?: string[];
 }
 
 export type Part = TextPart | ToolPart;
@@ -54,19 +58,49 @@ export function applyAgentEvent(message: AssistantMessage, event: AgentEvent): A
         ...message,
         parts: [
           ...message.parts,
-          { kind: "tool", callId: event.callId, name: event.name, title: event.title, args: event.args, status: "running" },
+          {
+            kind: "tool",
+            callId: event.callId,
+            name: event.name,
+            title: event.title,
+            args: event.args,
+            fast: event.fast,
+            status: "running",
+          },
         ],
       };
     case "toolAwaitingConfirmation":
       return updateTool(message, event.callId, { status: "awaiting", preview: event.preview });
     case "toolResult":
-      return updateTool(message, event.callId, { status: event.ok ? "ok" : "error", output: event.output });
+      return updateTool(message, event.callId, {
+        status: event.ok ? "ok" : "error",
+        output: event.output,
+        durationMs: event.durationMs,
+        missingSecrets: event.missingSecrets,
+      });
     case "done":
       return { ...message, status: "done" };
     case "cancelled":
       return { ...message, status: "cancelled", parts: settleTools(message.parts) };
     case "error":
       return { ...message, status: "error", error: event.message, parts: settleTools(message.parts) };
+  }
+}
+
+/**
+ * Whether an event needs the full panel. Fast-path tool runs stay in the compact bar;
+ * streamed answers, confirmations and errors need room.
+ */
+export function needsPanel(event: AgentEvent): boolean {
+  switch (event.type) {
+    case "token":
+    case "toolAwaitingConfirmation":
+    case "error":
+      return true;
+    case "toolCall":
+      return !event.fast;
+    default:
+      return false;
   }
 }
 

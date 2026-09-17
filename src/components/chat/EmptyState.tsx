@@ -5,10 +5,10 @@ import { useUi } from "../../store/ui";
 import { OrbitMark } from "../ui/OrbitMark";
 
 const SUGGESTIONS = [
+  "Spiele Another Love von Tom Odell auf Spotify",
+  "Öffne den Rechner",
   "Wie ist das Wetter in Berlin?",
   "Wie viel Arbeitsspeicher ist frei?",
-  "Such auf YouTube nach Lofi-Musik",
-  "Öffne die Bluetooth-Einstellungen",
 ];
 
 export function EmptyState() {

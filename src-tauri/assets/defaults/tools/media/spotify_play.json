@@ -1,0 +1,29 @@
+{
+  "$schema": "../../schemas/tool.schema.json",
+  "name": "spotify_play",
+  "title": "Spotify",
+  "description": "Spielt Musik in Spotify ab: einen Song, ein Album, einen Künstler oder eine Playlist. Nutze dies, wenn der Nutzer Musik hören oder etwas in Spotify abspielen möchte.",
+  "permission": "auto",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "query": { "type": "string", "description": "Titel und Künstler, z. B. 'Another Love Tom Odell'" },
+      "kind": {
+        "type": "string",
+        "description": "track = Song, album = Album, artist = Künstler, playlist = Playlist",
+        "enum": ["track", "album", "artist", "playlist"],
+        "default": "track"
+      }
+    },
+    "required": ["query"]
+  },
+  "triggers": [
+    "(spiele|spiel|play|hör|höre|öffne|open) {query} (auf|in|bei|mit|on|via) spotify",
+    { "pattern": "(spiele|spiel|play|hör|höre|öffne|open) [das] album {query} (auf|in|bei|mit|on|via) spotify", "args": { "kind": "album" } },
+    { "pattern": "(spiele|spiel|play|hör|höre|öffne|open) [die] playlist {query} (auf|in|bei|mit|on|via) spotify", "args": { "kind": "playlist" } }
+  ],
+  "action": {
+    "type": "builtin",
+    "id": "spotify_play"
+  }
+}

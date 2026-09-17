@@ -22,7 +22,19 @@ Ein Hotkey, ein Eingabefeld: Antwort, Suche oder Aktion („öffne die Bluetooth
 | `Strg+N` | Neuer Chat |
 | `Esc` | Ausblenden |
 
-Klick außerhalb blendet Orbit aus, außer es ist angepinnt. Tray-Icon: öffnen, Konfiguration, beenden.
+Klick außerhalb blendet Orbit aus, außer es ist angepinnt (⋯-Menü). Tray-Icon: öffnen, Konfiguration, beenden.
+
+### Schnellwege (ohne KI, sofort)
+
+| Eingabe | Aktion |
+|---|---|
+| `öffne discord`, `starte den rechner` | App starten |
+| `spiele another love von tom odell auf spotify` | Song abspielen ([Einrichtung](docs/SPOTIFY.md)) |
+| `pause`, `nächster song`, `lauter`, `stumm` | Medientasten |
+| `g suchbegriff`, `yt suchbegriff` | Google / YouTube |
+
+Alles andere geht an die KI, die dieselben Tools aufrufen kann. Eigene Schnellwege: `triggers` in den
+Tool-JSONs ([docs/TOOLS.md](docs/TOOLS.md)). API-Keys: ⋯ → *Schlüssel*.
 
 ## Konfiguration
 
@@ -53,4 +65,5 @@ Logs: `%LOCALAPPDATA%\io.github.eyvind-desch.orbit\logs\`.
 
 - [PLAN.md](PLAN.md): Ziele, Entscheidungen, Etappen
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): Aufbau und Datenfluss
-- [docs/TOOLS.md](docs/TOOLS.md): eigene Tools schreiben
+- [docs/TOOLS.md](docs/TOOLS.md): eigene Tools, Schnellwege, API-Keys
+- [docs/SPOTIFY.md](docs/SPOTIFY.md): Spotify einrichten

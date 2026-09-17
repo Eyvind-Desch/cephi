@@ -2,4 +2,4 @@
 
 mod ollama;
 
-pub use ollama::{ChatMessage, ChatRequest, LlmError, ModelOptions, OllamaClient, ToolCall};
+pub use ollama::{ChatMessage, ChatRequest, FunctionCall, LlmError, ModelOptions, OllamaClient, ToolCall};

@@ -22,6 +22,8 @@ export function useKeyboardShortcuts() {
       if (e.key === "Escape") {
         e.preventDefault();
         void api.windowHide();
+      } else if (ctrl && e.key.toLowerCase() === "c" && copySelection()) {
+        e.preventDefault();
       } else if (ctrl && e.key.toLowerCase() === "n") {
         e.preventDefault();
         void useChat.getState().reset();
@@ -33,6 +35,22 @@ export function useKeyboardShortcuts() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
+}
+
+/**
+ * Copies selected chat text. Text fields keep their native behaviour; for everything else we
+ * copy explicitly, because the focus often stays in the composer while text is selected elsewhere.
+ */
+function copySelection(): boolean {
+  const active = document.activeElement;
+  if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement) {
+    const hasFieldSelection = active.selectionStart !== active.selectionEnd;
+    if (hasFieldSelection) return false;
+  }
+  const text = window.getSelection()?.toString() ?? "";
+  if (!text) return false;
+  void navigator.clipboard.writeText(text);
+  return true;
 }
 
 /** Suppresses the browser context menu so the app feels native (keeps it on text fields). */

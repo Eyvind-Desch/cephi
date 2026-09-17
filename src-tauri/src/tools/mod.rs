@@ -11,7 +11,8 @@ mod executor;
 mod manifest;
 mod registry;
 mod template;
+mod trigger;
 
-pub use executor::{execute, preview, ExecContext, ToolOutput};
+pub use executor::{accepts_fast_path, execute, preview, ExecContext, ToolOutput};
 pub use manifest::Permission;
 pub use registry::ToolRegistry;

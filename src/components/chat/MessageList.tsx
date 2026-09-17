@@ -25,7 +25,7 @@ export function MessageList() {
         const el = e.currentTarget;
         stickToBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < STICK_THRESHOLD;
       }}
-      className="flex-1 overflow-y-auto px-4 py-4"
+      className="selectable flex-1 overflow-y-auto px-4 py-4"
     >
       <div className="space-y-5">
         {messages.map((message) => (

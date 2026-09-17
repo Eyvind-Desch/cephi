@@ -9,6 +9,8 @@ use crate::error::{AppError, AppResult};
 
 /// Environment variable to override the config folder (useful for development).
 const CONFIG_DIR_ENV: &str = "ORBIT_CONFIG_DIR";
+/// Remembers which default tools were already offered, so deleted ones are not re-created.
+const SEEDED_TOOLS_FILE: &str = ".seeded-tools.json";
 
 /// Locations of all user-editable configuration files.
 ///
@@ -49,12 +51,12 @@ impl ConfigPaths {
         }
     }
 
-    /// Creates the folder structure and seeds defaults on first run.
+    /// Creates the folder structure and seeds defaults.
     ///
     /// - Schemas are always rewritten so they match the running version.
     /// - `settings.json` is created only if missing.
-    /// - Default tools are seeded only if the `tools/` folder does not exist yet, so tools
-    ///   the user deleted stay deleted.
+    /// - Each default tool is seeded once: new defaults from app updates appear automatically,
+    ///   but tools the user deleted or edited are never touched again.
     pub fn ensure_initialized(&self) -> io::Result<()> {
         fs::create_dir_all(&self.schemas)?;
         for (name, content) in defaults::SCHEMAS {
@@ -66,14 +68,33 @@ impl ConfigPaths {
             log::info!("seeded {}", self.settings.display());
         }
 
-        if !self.tools.exists() {
-            for (relative, content) in defaults::TOOLS {
-                write_new(&self.tools.join(relative), content)?;
+        self.seed_default_tools()
+    }
+
+    fn seed_default_tools(&self) -> io::Result<()> {
+        let record = self.root.join(SEEDED_TOOLS_FILE);
+        let mut seeded: Vec<String> = fs::read(&record)
+            .ok()
+            .and_then(|bytes| serde_json::from_slice(&bytes).ok())
+            .unwrap_or_default();
+
+        let mut added = 0;
+        for (relative, content) in defaults::TOOLS {
+            if seeded.iter().any(|s| s == relative) {
+                continue;
             }
-            log::info!("seeded {} default tool(s)", defaults::TOOLS.len());
+            let path = self.tools.join(relative);
+            if !path.exists() {
+                write_new(&path, content)?;
+                added += 1;
+            }
+            seeded.push(relative.to_string());
         }
 
-        Ok(())
+        if added > 0 {
+            log::info!("seeded {added} default tool(s)");
+        }
+        fs::write(record, serde_json::to_vec_pretty(&seeded).unwrap_or_default())
     }
 }
 

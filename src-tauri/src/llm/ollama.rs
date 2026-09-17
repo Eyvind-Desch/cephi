@@ -57,6 +57,13 @@ impl ChatMessage {
         Self::new(Role::Assistant, content)
     }
 
+    pub fn assistant_tool_calls(tool_calls: Vec<ToolCall>) -> Self {
+        Self {
+            tool_calls,
+            ..Self::new(Role::Assistant, String::new())
+        }
+    }
+
     pub fn tool(name: impl Into<String>, content: impl Into<String>) -> Self {
         Self {
             tool_name: Some(name.into()),
@@ -187,6 +194,22 @@ impl OllamaClient {
         }
 
         Err(LlmError::Protocol("Stream endete unerwartet.".into()))
+    }
+
+    /// Loads a model into memory without generating anything.
+    pub async fn preload(&self, model: &str, keep_alive: &str) -> Result<(), LlmError> {
+        let response = self
+            .http
+            .post(format!("{}/api/generate", self.base_url))
+            .json(&serde_json::json!({ "model": model, "keep_alive": keep_alive }))
+            .send()
+            .await
+            .map_err(|e| self.map_transport_error(e))?;
+        if response.status().is_success() {
+            Ok(())
+        } else {
+            Err(LlmError::Api(format!("HTTP {}", response.status())))
+        }
     }
 
     fn map_transport_error(&self, error: reqwest::Error) -> LlmError {

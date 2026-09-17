@@ -13,20 +13,21 @@ im Panel, mit Dateiname und Grund. Ein kaputtes Tool legt die anderen nicht lahm
 ```json
 {
   "$schema": "../../schemas/tool.schema.json",
-  "name": "spotify_play",
-  "title": "Spotify",
-  "description": "Öffnet Spotify und sucht nach einem Song, Album oder Künstler.",
+  "name": "github_search",
+  "title": "GitHub-Suche",
+  "description": "Sucht Repositories auf GitHub. Nutze dies, wenn der Nutzer Code oder Projekte auf GitHub finden möchte.",
   "permission": "auto",
   "parameters": {
     "type": "object",
     "properties": {
-      "query": { "type": "string", "description": "Song, Album oder Künstler" }
+      "query": { "type": "string", "description": "Suchbegriff" }
     },
     "required": ["query"]
   },
+  "triggers": ["gh {query}", "(suche|such) {query} (auf|bei) github"],
   "action": {
     "type": "open_url",
-    "url": "spotify:search:{{query}}"
+    "url": "https://github.com/search?type=repositories&q={{query}}"
   }
 }
 ```
@@ -42,6 +43,7 @@ im Panel, mit Dateiname und Grund. Ein kaputtes Tool legt die anderen nicht lahm
 | `enabled` |  | `false` = Tool wird nicht geladen (Standard `true`) |
 | `permission` |  | `auto` = sofort, `confirm` = vorher nachfragen (**Standard**) |
 | `parameters` |  | Was das Modell ausfüllen soll (siehe unten) |
+| `triggers` |  | Sätze, die das Tool **sofort ohne KI** ausführen (siehe Schnellwege) |
 | `action` | ✔ | Was passiert (siehe Aktionstypen) |
 
 ## Parameter
@@ -65,6 +67,54 @@ im Panel, mit Dateiname und Grund. Ein kaputtes Tool legt die anderen nicht lahm
 
 Orbit prüft die Argumente, bevor etwas ausgeführt wird. Bei Fehlern bekommt das Modell eine Meldung und
 kann es erneut versuchen.
+
+## Schnellwege (Trigger)
+
+Trigger sind Sätze, bei denen Orbit **nicht** das Modell fragt, sondern das Tool direkt ausführt. Das
+dauert Millisekunden statt Sekunden und funktioniert unabhängig davon, wie schlau das Modell ist.
+
+```json
+"triggers": [
+  "(spiele|play) {query} (auf|in) spotify",
+  "(öffne|starte) [(den|die|das)] [app] {name}",
+  { "pattern": "spiele [das] album {query} auf spotify", "args": { "kind": "album" } }
+]
+```
+
+| Syntax | Bedeutung | Beispiel |
+|---|---|---|
+| `{name}` | fängt Text ein → Parameter `name` | `öffne {name}` |
+| `(a\|b)` | eine der Alternativen | `(spiele\|play)` |
+| `[x]` | optional | `[die] [app]` |
+| Leerzeichen | ein oder mehr Leerzeichen | |
+
+- Groß-/Kleinschreibung ist egal, `.`, `!`, `?` am Ende werden ignoriert, Anführungszeichen um
+  eingefangene Werte entfernt.
+- Der **ganze** Satz muss passen. „Spiele X auf Spotify“ passt, „Kannst du X auf Spotify spielen?“ nicht:
+  das geht dann ganz normal an die KI (die das Tool trotzdem aufrufen kann).
+- Mit `args` setzt ein Trigger feste Werte, z. B. `"kind": "album"`.
+- Passen mehrere Trigger, gewinnt der **spezifischere** (mehr feste Wörter).
+- Zu allgemeine Trigger wie `{query} spotify` besser vermeiden: sie fangen auch Sätze ab, die etwas
+  anderes meinen.
+- Im Chat erkennst du Schnellwege am ⚡ auf der Tool-Karte.
+
+## API-Keys ({{secret:…}})
+
+API-Keys gehören **nicht** in die JSON-Datei. Orbit speichert sie in der Windows-Anmeldeinformationsverwaltung
+und setzt sie über `{{secret:name}}` ein:
+
+```json
+"action": {
+  "type": "http",
+  "url": "https://api.example.com/v1/translate",
+  "headers": { "Authorization": "Bearer {{secret:example_api_key}}" },
+  "body": "{ \"text\": {{text}} }"
+}
+```
+
+Sobald ein Tool einen Schlüssel verwendet, erscheint er im Panel unter **🔑 Schlüssel**. Dort gibst du den
+Wert einmal ein. Orbit zeigt gespeicherte Werte nie wieder an und maskiert sie in Bestätigungsdialogen.
+Schlüsselnamen: `a-z`, `0-9`, `_`.
 
 ## Platzhalter
 
@@ -146,11 +196,16 @@ erlaubt. Kommt die ganze URL vom Modell (`{{url|raw}}`), sind nur `http`/`https`
 "action": { "type": "builtin", "id": "clipboard_read" }
 ```
 
-| id | Parameter |
-|---|---|
-| `datetime` | – |
-| `clipboard_read` | – |
-| `clipboard_write` | `text` (string, Pflicht) |
+| id | Parameter | Funktion |
+|---|---|---|
+| `datetime` | – | Datum, Wochentag, Uhrzeit |
+| `clipboard_read` | – | Text aus der Zwischenablage |
+| `clipboard_write` | `text` | Text in die Zwischenablage |
+| `open_app` | `name` | Installierte App starten (unscharfe Suche über Startmenü- und Store-Apps) |
+| `spotify_play` | `query`, optional `kind` (`track`/`album`/`artist`/`playlist`) | Musik in Spotify abspielen, siehe [SPOTIFY.md](SPOTIFY.md) |
+| `media_control` | `action` (`play_pause`/`next`/`previous`/`volume_up`/`volume_down`/`mute`) | Medientasten, funktioniert mit jedem Player |
+
+`open_app` nimmt den Schnellweg nur, wenn eine App eindeutig passt. Sonst darf die KI übernehmen.
 
 ## Tipps für gute Tools
 

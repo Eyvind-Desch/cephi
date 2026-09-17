@@ -1,28 +1,69 @@
-import { FolderCog, Minimize2, Pin, PinOff, SquarePen } from "lucide-react";
+import clsx from "clsx";
+import { FolderCog, KeyRound, Minimize2, MoreHorizontal, Pin, RefreshCw, SquarePen } from "lucide-react";
 import { api } from "../../lib/ipc";
 import { useChat } from "../../store/chat";
 import { useUi } from "../../store/ui";
 import { IconButton } from "../ui/IconButton";
+import { Menu, type MenuEntry } from "../ui/Menu";
 import { OrbitMark } from "../ui/OrbitMark";
 import { ProfileSwitch } from "./ProfileSwitch";
 
 export function Header() {
   const running = useChat((s) => s.running);
   const reset = useChat((s) => s.reset);
-  const hasMessages = useChat((s) => s.messages.length > 0);
   const pinned = useUi((s) => s.pinned);
+  const view = useUi((s) => s.view);
+  const setView = useUi((s) => s.setView);
   const togglePinned = useUi((s) => s.togglePinned);
   const setMode = useUi((s) => s.setMode);
+  const applyConfig = useUi((s) => s.applyConfig);
+
+  const entries: MenuEntry[] = [
+    {
+      label: "Neuer Chat",
+      icon: SquarePen,
+      shortcut: "Strg+N",
+      onSelect: () => {
+        setView("chat");
+        void reset();
+      },
+    },
+    { label: "Anpinnen", icon: Pin, checked: pinned, onSelect: togglePinned },
+    { kind: "separator" },
+    {
+      label: view === "keys" ? "Zurück zum Chat" : "Schlüssel (API-Keys)",
+      icon: KeyRound,
+      onSelect: () => setView(view === "keys" ? "chat" : "keys"),
+    },
+    { label: "Konfigurationsordner", icon: FolderCog, onSelect: () => void api.configOpenFolder() },
+    { label: "Konfiguration neu laden", icon: RefreshCw, onSelect: () => void api.configReload().then(applyConfig) },
+  ];
 
   return (
-    <header className="flex items-center gap-2 border-b border-line px-3 py-2.5">
+    <header className="flex items-center gap-1.5 border-b border-line py-2 pr-2 pl-3">
       <OrbitMark size={22} active={running} />
-      <span className="mr-1 text-[14px] font-semibold tracking-tight">Orbit</span>
-      <ProfileSwitch />
+      <span className="mr-1.5 text-[14px] font-semibold tracking-tight">Orbit</span>
+      {pinned && (
+        <span title="Angepinnt: bleibt offen" className="text-accent">
+          <Pin size={13} className="fill-current" />
+        </span>
+      )}
       <div className="flex-1" />
-      <IconButton icon={SquarePen} label="Neuer Chat (Strg+N)" onClick={() => void reset()} disabled={!hasMessages} />
-      <IconButton icon={pinned ? PinOff : Pin} label={pinned ? "Lösen" : "Anpinnen"} active={pinned} onClick={togglePinned} />
-      <IconButton icon={FolderCog} label="Konfiguration öffnen" onClick={() => void api.configOpenFolder()} />
+      <ProfileSwitch />
+      <Menu
+        entries={entries}
+        trigger={({ open, toggle, id }) => (
+          <IconButton
+            icon={MoreHorizontal}
+            label="Menü"
+            aria-haspopup="menu"
+            aria-expanded={open}
+            aria-controls={id}
+            onClick={toggle}
+            className={clsx(open && "bg-sunken text-fg")}
+          />
+        )}
+      />
       <IconButton icon={Minimize2} label="Verkleinern (Strg+E)" onClick={() => setMode("compact")} />
     </header>
   );

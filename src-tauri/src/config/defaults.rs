@@ -17,6 +17,15 @@ pub const SCHEMAS: &[(&str, &str)] = &[
 
 /// `(path relative to tools/, content)`
 pub const TOOLS: &[(&str, &str)] = &[
+    ("apps/open_app.json", asset!("defaults/tools/apps/open_app.json")),
+    (
+        "media/spotify_play.json",
+        asset!("defaults/tools/media/spotify_play.json"),
+    ),
+    (
+        "media/media_control.json",
+        asset!("defaults/tools/media/media_control.json"),
+    ),
     (
         "web/google_search.json",
         asset!("defaults/tools/web/google_search.json"),

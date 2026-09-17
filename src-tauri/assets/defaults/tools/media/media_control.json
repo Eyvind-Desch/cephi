@@ -1,0 +1,30 @@
+{
+  "$schema": "../../schemas/tool.schema.json",
+  "name": "media_control",
+  "title": "Mediensteuerung",
+  "description": "Steuert die laufende Musik- oder Videowiedergabe (Spotify, Browser …): Pause/Weiter, nächster oder vorheriger Titel, lauter, leiser, stumm.",
+  "permission": "auto",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "action": {
+        "type": "string",
+        "description": "play_pause = Pause/Weiter, next = nächster Titel, previous = vorheriger Titel, volume_up = lauter, volume_down = leiser, mute = stumm",
+        "enum": ["play_pause", "next", "previous", "volume_up", "volume_down", "mute"]
+      }
+    },
+    "required": ["action"]
+  },
+  "triggers": [
+    { "pattern": "(pause|pausieren|stopp|play|resume|weiterspielen) [die musik]", "args": { "action": "play_pause" } },
+    { "pattern": "(nächster|nächstes|next) (song|lied|titel|track)", "args": { "action": "next" } },
+    { "pattern": "(vorheriger|vorheriges|voriger|voriges|previous|letzter|letztes) (song|lied|titel|track)", "args": { "action": "previous" } },
+    { "pattern": "(lauter|volume up)", "args": { "action": "volume_up" } },
+    { "pattern": "(leiser|volume down)", "args": { "action": "volume_down" } },
+    { "pattern": "(stumm|ton aus|mute)", "args": { "action": "mute" } }
+  ],
+  "action": {
+    "type": "builtin",
+    "id": "media_control"
+  }
+}

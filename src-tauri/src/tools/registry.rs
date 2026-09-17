@@ -6,6 +6,7 @@ use serde_json::{json, Value};
 
 use super::args::{self, Args};
 use super::manifest::ToolManifest;
+use super::trigger::Trigger;
 use crate::config::Diagnostic;
 
 /// A loaded, validated and enabled tool.
@@ -37,10 +38,12 @@ impl Tool {
     }
 }
 
-/// All enabled tools, keyed by name.
+/// All enabled tools, keyed by name, plus their compiled fast-path triggers.
 #[derive(Default)]
 pub struct ToolRegistry {
     tools: BTreeMap<String, Tool>,
+    /// `(tool name, trigger)`, most specific first.
+    triggers: Vec<(String, Trigger)>,
 }
 
 impl ToolRegistry {
@@ -58,9 +61,13 @@ impl ToolRegistry {
         files.sort();
 
         for path in files {
-            match load_file(&path) {
-                Ok(manifest) if !manifest.enabled => {}
-                Ok(manifest) => {
+            let loaded = load_file(&path).and_then(|manifest| {
+                let triggers = manifest.compile_triggers()?;
+                Ok((manifest, triggers))
+            });
+            match loaded {
+                Ok((manifest, _)) if !manifest.enabled => {}
+                Ok((manifest, triggers)) => {
                     let source = Diagnostic::for_path(root, &path, "").source;
                     if let Some(existing) = registry.tools.get(&manifest.name) {
                         diagnostics.push(Diagnostic::for_path(
@@ -73,12 +80,20 @@ impl ToolRegistry {
                         ));
                         continue;
                     }
-                    registry.tools.insert(manifest.name.clone(), Tool { manifest, source });
+                    let name = manifest.name.clone();
+                    registry
+                        .triggers
+                        .extend(triggers.into_iter().map(|t| (name.clone(), t)));
+                    registry.tools.insert(name, Tool { manifest, source });
                 }
                 Err(message) => diagnostics.push(Diagnostic::for_path(root, &path, message)),
             }
         }
 
+        // Stable sort: equally specific triggers keep file order.
+        registry
+            .triggers
+            .sort_by_key(|(_, trigger)| std::cmp::Reverse(trigger.specificity));
         (registry, diagnostics)
     }
 
@@ -96,6 +111,24 @@ impl ToolRegistry {
 
     pub fn definitions(&self) -> Vec<Value> {
         self.tools.values().map(Tool::definition).collect()
+    }
+
+    /// All trigger matches for `input`, most specific first, with raw (unvalidated) arguments.
+    pub fn trigger_matches<'a>(&'a self, input: &'a str) -> impl Iterator<Item = (&'a Tool, Value)> + 'a {
+        self.triggers
+            .iter()
+            .filter_map(move |(name, trigger)| Some((self.tools.get(name)?, trigger.matches(input)?)))
+    }
+
+    /// Secret name → titles of the tools that use it.
+    pub fn secret_usage(&self) -> BTreeMap<String, Vec<String>> {
+        let mut usage: BTreeMap<String, Vec<String>> = BTreeMap::new();
+        for tool in self.tools.values() {
+            for secret in tool.manifest.secrets() {
+                usage.entry(secret).or_default().push(tool.title().to_string());
+            }
+        }
+        usage
     }
 }
 
@@ -116,4 +149,82 @@ fn collect_json_files(dir: &Path, out: &mut Vec<PathBuf>) -> std::io::Result<()>
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Loads the shipped default tools into a temporary folder.
+    fn default_registry() -> ToolRegistry {
+        let dir = std::env::temp_dir().join(format!("orbit-registry-test-{}", uuid::Uuid::new_v4()));
+        for (relative, content) in crate::config::defaults::TOOLS {
+            let path = dir.join(relative);
+            fs::create_dir_all(path.parent().unwrap()).unwrap();
+            fs::write(path, content).unwrap();
+        }
+        let (registry, diagnostics) = ToolRegistry::load_dir(&dir, &dir);
+        let _ = fs::remove_dir_all(&dir);
+        assert!(diagnostics.is_empty(), "{diagnostics:?}");
+        registry
+    }
+
+    fn first_match(registry: &ToolRegistry, input: &str) -> Option<(String, Value)> {
+        registry
+            .trigger_matches(input)
+            .next()
+            .map(|(tool, args)| (tool.manifest.name.clone(), args))
+    }
+
+    #[test]
+    fn default_triggers_route_common_phrases() {
+        let registry = default_registry();
+        let cases = [
+            ("Spiele Another Love von Tom Odell in Spotify", "spotify_play"),
+            ("öffne Another Love auf Spotify", "spotify_play"),
+            ("spiele das album Divide auf spotify", "spotify_play"),
+            ("öffne Discord", "open_app"),
+            ("starte die app Steam", "open_app"),
+            ("Öffne den Rechner", "open_app"),
+            ("g rust tauri tutorial", "google_search"),
+            ("yt lofi hip hop", "youtube_search"),
+            ("nächster Song", "media_control"),
+            ("pause", "media_control"),
+            ("lauter", "media_control"),
+        ];
+        for (input, expected) in cases {
+            let (tool, _) = first_match(&registry, input).unwrap_or_else(|| panic!("no match for {input:?}"));
+            assert_eq!(tool, expected, "{input:?}");
+        }
+    }
+
+    #[test]
+    fn spotify_trigger_beats_generic_open_app() {
+        let registry = default_registry();
+        let (tool, args) = first_match(&registry, "öffne another love in spotify").unwrap();
+        assert_eq!(tool, "spotify_play");
+        assert_eq!(args["query"], "another love");
+    }
+
+    #[test]
+    fn articles_are_not_part_of_the_app_name() {
+        let registry = default_registry();
+        let (_, args) = first_match(&registry, "Öffne den Rechner").unwrap();
+        assert_eq!(args["name"], "Rechner");
+    }
+
+    #[test]
+    fn questions_do_not_trigger() {
+        let registry = default_registry();
+        for input in [
+            "Was ist die Hauptstadt von Frankreich?",
+            "Wie ist das Wetter in Berlin?",
+            "pausen im job",
+        ] {
+            assert!(
+                first_match(&registry, input).is_none(),
+                "{input:?} should go to the model"
+            );
+        }
+    }
 }

@@ -5,6 +5,7 @@ use serde_json::Value;
 
 use super::builtin::Builtin;
 use super::template::{self, Context};
+use super::trigger::{Trigger, TriggerSpec};
 
 /// One tool, as written in `tools/**/*.json`. See `assets/schemas/tool.schema.json`.
 #[derive(Clone, Debug, Deserialize)]
@@ -24,6 +25,9 @@ pub struct ToolManifest {
     pub permission: Permission,
     #[serde(default)]
     pub parameters: Parameters,
+    /// Phrases that run the tool directly, without the model (see `trigger.rs`).
+    #[serde(default)]
+    pub triggers: Vec<TriggerSpec>,
     pub action: Action,
 }
 
@@ -155,7 +159,37 @@ impl ToolManifest {
             );
         }
         self.validate_parameters()?;
-        self.validate_action()
+        self.validate_action()?;
+        self.compile_triggers().map(|_| ())
+    }
+
+    pub fn compile_triggers(&self) -> Result<Vec<Trigger>, String> {
+        self.triggers
+            .iter()
+            .map(|spec| spec.compile(&self.parameters.properties))
+            .collect()
+    }
+
+    /// Names of all secrets this tool needs (template references and builtin requirements).
+    pub fn secrets(&self) -> Vec<String> {
+        let mut names: Vec<String> = match &self.action {
+            Action::OpenUrl { url } => template::secret_names(url),
+            Action::Launch { program, args, cwd } => std::iter::once(program)
+                .chain(args)
+                .chain(cwd)
+                .flat_map(|t| template::secret_names(t))
+                .collect(),
+            Action::Powershell { .. } => Vec::new(),
+            Action::Http { url, headers, body, .. } => std::iter::once(url)
+                .chain(headers.values())
+                .chain(body)
+                .flat_map(|t| template::secret_names(t))
+                .collect(),
+            Action::Builtin { id } => id.required_secrets().iter().map(|s| s.to_string()).collect(),
+        };
+        names.sort();
+        names.dedup();
+        names
     }
 
     fn validate_parameters(&self) -> Result<(), String> {
@@ -306,6 +340,34 @@ mod tests {
             r#"{ "name": "t1", "description": "x", "action": { "type": "open_url", "url": "https://x.de", "oops": 1 } }"#
         )
         .is_err());
+    }
+
+    #[test]
+    fn collects_secrets_from_templates_and_builtins() {
+        let http = parse(
+            r#"{ "name": "t1", "description": "x", "action": { "type": "http",
+                 "url": "https://x.de/?k={{secret:api_key}}", "headers": { "X-Other": "{{secret:other_key}}" } } }"#,
+        )
+        .unwrap();
+        assert_eq!(http.secrets(), vec!["api_key", "other_key"]);
+
+        let spotify = parse(
+            r#"{ "name": "t2", "description": "x",
+                 "parameters": { "type": "object", "properties": { "query": { "type": "string" } } },
+                 "action": { "type": "builtin", "id": "spotify_play" } }"#,
+        )
+        .unwrap();
+        assert_eq!(spotify.secrets(), vec!["spotify_client_id", "spotify_client_secret"]);
+    }
+
+    #[test]
+    fn invalid_trigger_is_reported() {
+        let err = parse(
+            r#"{ "name": "t1", "description": "x", "triggers": ["öffne {nope}"],
+                 "action": { "type": "builtin", "id": "datetime" } }"#,
+        )
+        .unwrap_err();
+        assert!(err.contains("nope"), "{err}");
     }
 
     #[test]

@@ -4,7 +4,10 @@ mod commands;
 mod config;
 mod desktop;
 mod error;
+mod integrations;
+mod launcher;
 mod llm;
+mod secrets;
 mod state;
 mod tools;
 
@@ -46,6 +49,7 @@ pub fn run() {
             commands::config_reload,
             commands::config_open_folder,
             commands::agent_send,
+            commands::agent_preload,
             commands::agent_cancel,
             commands::agent_confirm,
             commands::agent_reset,
@@ -53,6 +57,9 @@ pub fn run() {
             commands::window_hide,
             commands::window_set_pinned,
             commands::open_external,
+            commands::secrets_list,
+            commands::secrets_set,
+            commands::secrets_delete,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Orbit");

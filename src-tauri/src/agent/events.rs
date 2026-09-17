@@ -15,6 +15,8 @@ pub enum AgentEvent {
         name: String,
         title: String,
         args: Value,
+        /// Triggered directly by a phrase, without the model.
+        fast: bool,
     },
     ToolAwaitingConfirmation {
         call_id: String,
@@ -24,6 +26,9 @@ pub enum AgentEvent {
         call_id: String,
         ok: bool,
         output: String,
+        duration_ms: u64,
+        /// Secrets the tool needs but that are not stored yet (only reported on failure).
+        missing_secrets: Vec<String>,
     },
     Done,
     Cancelled,

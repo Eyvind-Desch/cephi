@@ -33,9 +33,32 @@
       "default": "confirm"
     },
     "parameters": { "$ref": "#/definitions/parameters" },
+    "triggers": {
+      "description": "Schnellweg: Sätze, die das Tool sofort ausführen, ohne die KI zu fragen. Syntax: {parameter} fängt Text ein, (a|b) Alternativen, [optional]. Groß-/Kleinschreibung egal.",
+      "type": "array",
+      "items": {
+        "anyOf": [
+          { "$ref": "#/definitions/triggerPattern" },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["pattern"],
+            "properties": {
+              "pattern": { "$ref": "#/definitions/triggerPattern" },
+              "args": { "type": "object", "description": "Feste Parameterwerte für diesen Trigger." }
+            }
+          }
+        ]
+      }
+    },
     "action": { "$ref": "#/definitions/action" }
   },
   "definitions": {
+    "triggerPattern": {
+      "type": "string",
+      "minLength": 1,
+      "examples": ["(spiele|play) {query} (auf|in) spotify", "(öffne|starte) [die] [app] {name}", "g {query}"]
+    },
     "parameters": {
       "description": "Parameter, die das Modell ausfüllt (JSON-Schema-Objekt mit einfachen Werten).",
       "type": "object",
@@ -67,7 +90,7 @@
     },
     "template": {
       "type": "string",
-      "description": "Text mit Platzhaltern {{parameter}}. Filter: {{name|raw}}, {{name|url}}, {{name|json}}."
+      "description": "Text mit Platzhaltern {{parameter}}. Filter: {{name|raw}}, {{name|url}}, {{name|json}}. API-Keys aus dem Tresor: {{secret:name}}."
     },
     "timeoutSecs": {
       "type": "integer",
@@ -148,8 +171,8 @@
             "properties": {
               "type": { "const": "builtin" },
               "id": {
-                "enum": ["datetime", "clipboard_read", "clipboard_write"],
-                "description": "clipboard_write braucht den Parameter \"text\"."
+                "enum": ["datetime", "clipboard_read", "clipboard_write", "open_app", "spotify_play", "media_control"],
+                "description": "Benötigte Parameter: clipboard_write → text · open_app → name · spotify_play → query (optional kind) · media_control → action."
               }
             }
           }

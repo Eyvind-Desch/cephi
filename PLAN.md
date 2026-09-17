@@ -100,9 +100,13 @@ mitschicken. Eindeutige Befehle („öffne X“) laufen über den Schnellweg ohn
 
 1. ✅ **MVP** – Tauri-Gerüst, Hotkey, Tray, kompakte Leiste ↔ großes Panel, Ollama-Chat mit Streaming,
    Modell-Profile, Mica, Hell/Dunkel
-2. 🟡 **Aktionen** – ✅ JSON-Tool-System mit Schema, Validierung, Hot-Reload, Tool-Calling-Schleife,
-   Bestätigungsdialoge · offen: App-Launcher mit Schnellweg, Präfix-Befehle
-3. **Web** – Google-Webview im Panel, SearXNG per Docker, `?`-Suche mit Quellen
+2. ✅ **Aktionen** – JSON-Tool-System mit Schema, Validierung, Hot-Reload, Tool-Calling-Schleife,
+   Bestätigungsdialoge · Schnellweg-Trigger ohne KI · App-Launcher · Spotify (Web-API-Suche + URI) ·
+   Medientasten · Schlüssel-Tresor (Windows Credential Manager) · Modell-Preload
+2b. **Modell-Anbieter** – `providers` in `settings.json`: Ollama, Anthropic, Gemini, OpenAI-kompatibel;
+   Profile verweisen auf einen Anbieter; API-Keys über den Schlüssel-Tresor
+3. **Web** – Entschieden: *beides*. Ergebnis-Karten sofort (SearXNG) + KI-Kurzfassung nur aus den
+   Auszügen (schnell), dazu ein Google-Tab im Panel
 4. **MCP** – `mcp.json`, Tools aus MCP-Servern
 5. **Feinschliff** – Einstellungs-UI, Verlauf speichern, Code-Highlighting, Autostart, Installer
 6. **Extras** – markierten Text übernehmen, Screenshot fragen (Bild-Modell), Sprache

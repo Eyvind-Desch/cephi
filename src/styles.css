@@ -9,6 +9,7 @@
   --surface: rgb(250 250 252 / 0.78);
   --surface-raised: rgb(255 255 255 / 0.72);
   --surface-sunken: rgb(0 0 0 / 0.04);
+  --popover: rgb(252 252 254 / 0.97);
   --line: rgb(0 0 0 / 0.08);
   --fg: #18181c;
   --fg-muted: #62626e;
@@ -28,6 +29,7 @@
     --surface: rgb(22 22 27 / 0.72);
     --surface-raised: rgb(255 255 255 / 0.06);
     --surface-sunken: rgb(0 0 0 / 0.22);
+    --popover: rgb(34 34 40 / 0.98);
     --line: rgb(255 255 255 / 0.09);
     --fg: #ececf1;
     --fg-muted: #a4a4b0;
@@ -48,6 +50,7 @@
   --color-surface: var(--surface);
   --color-raised: var(--surface-raised);
   --color-sunken: var(--surface-sunken);
+  --color-popover: var(--popover);
   --color-line: var(--line);
   --color-fg: var(--fg);
   --color-muted: var(--fg-muted);
@@ -94,6 +97,14 @@
     scrollbar-width: thin;
     scrollbar-color: var(--line) transparent;
   }
+}
+
+/* Chat content can be selected (also across messages) and copied with Ctrl+C; controls stay unselectable. */
+.selectable {
+  user-select: text;
+}
+.selectable :is(button, [role="button"], svg) {
+  user-select: none;
 }
 
 @keyframes orbit-spin {

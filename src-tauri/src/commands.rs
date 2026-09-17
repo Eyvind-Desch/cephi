@@ -7,6 +7,7 @@ use tauri::{AppHandle, State};
 use tauri_plugin_opener::OpenerExt;
 
 use crate::agent::{self, AgentEvent};
+use crate::app::SecretInfo;
 use crate::config::ConfigSnapshot;
 use crate::desktop::window::{self, WindowMode};
 use crate::error::{AppError, AppResult};
@@ -36,6 +37,28 @@ pub async fn agent_send(
     on_event: Channel<AgentEvent>,
 ) -> AppResult<()> {
     agent::run(&app, &state, text, profile_id, on_event).await
+}
+
+/// Loads the profile's model into memory in the background (e.g. after switching profiles).
+#[tauri::command]
+pub async fn agent_preload(state: State<'_, AppState>, profile_id: Option<String>) -> AppResult<()> {
+    crate::app::preload_profile(&state, profile_id.as_deref()).await;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn secrets_list(app: AppHandle) -> Vec<SecretInfo> {
+    crate::app::secret_overview(&app)
+}
+
+#[tauri::command]
+pub async fn secrets_set(state: State<'_, AppState>, name: String, value: String) -> AppResult<()> {
+    crate::app::update_secret(&state, &name, Some(&value)).await
+}
+
+#[tauri::command]
+pub async fn secrets_delete(state: State<'_, AppState>, name: String) -> AppResult<()> {
+    crate::app::update_secret(&state, &name, None).await
 }
 
 #[tauri::command]

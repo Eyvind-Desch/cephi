@@ -1,0 +1,22 @@
+{
+  "$schema": "../../schemas/tool.schema.json",
+  "name": "open_app",
+  "title": "App starten",
+  "description": "Startet ein installiertes Programm oder eine App, z. B. Discord, Steam, Excel oder Rechner. Der Name darf ungenau sein.",
+  "permission": "auto",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "name": { "type": "string", "description": "Name der App, z. B. 'Discord'" }
+    },
+    "required": ["name"]
+  },
+  "triggers": [
+    "(öffne|öffnen|starte|start|open|launch|run) [(den|die|das|the)] [(app|programm)] {name}",
+    "{name} (öffnen|starten)"
+  ],
+  "action": {
+    "type": "builtin",
+    "id": "open_app"
+  }
+}

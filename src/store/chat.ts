@@ -1,7 +1,10 @@
 import { create } from "zustand";
 import { api } from "../lib/ipc";
-import { applyAgentEvent, type AssistantMessage, type Message } from "./chatModel";
+import { applyAgentEvent, needsPanel, type AssistantMessage, type Message } from "./chatModel";
 import { useUi } from "./ui";
+
+/** How long a successful fast-path confirmation stays visible before Orbit hides itself. */
+const AUTO_HIDE_MS = 1400;
 
 interface ChatState {
   messages: Message[];
@@ -19,6 +22,9 @@ export const useChat = create<ChatState>()((set, get) => {
       messages: state.messages.map((m) => (m.id === id && m.role === "assistant" ? update(m) : m)),
     }));
 
+  const findAssistant = (id: string) =>
+    get().messages.find((m): m is AssistantMessage => m.id === id && m.role === "assistant");
+
   return {
     messages: [],
     running: false,
@@ -27,6 +33,8 @@ export const useChat = create<ChatState>()((set, get) => {
       const text = raw.trim();
       if (!text || get().running) return;
 
+      const ui = useUi.getState();
+      ui.showFlash(null);
       const assistantId = crypto.randomUUID();
       set((state) => ({
         running: true,
@@ -36,16 +44,35 @@ export const useChat = create<ChatState>()((set, get) => {
           { id: assistantId, role: "assistant", parts: [], status: "streaming" },
         ],
       }));
-      useUi.getState().setMode("expanded");
 
       try {
-        await api.agentSend(text, useUi.getState().profileId, (event) =>
-          updateAssistant(assistantId, (message) => applyAgentEvent(message, event)),
-        );
+        await api.agentSend(text, ui.profileId, (event) => {
+          updateAssistant(assistantId, (message) => applyAgentEvent(message, event));
+          if (needsPanel(event)) useUi.getState().setMode("expanded");
+        });
       } catch (error) {
         updateAssistant(assistantId, (message) => applyAgentEvent(message, { type: "error", message: String(error) }));
+        useUi.getState().setMode("expanded");
       } finally {
         set({ running: false });
+      }
+
+      // Still compact means everything ran via the fast path: confirm briefly, then get out of the way.
+      // Failures open the panel instead, where the full message (and e.g. the keys view) fits.
+      const { mode, pinned, showFlash, setMode } = useUi.getState();
+      const tool = findAssistant(assistantId)?.parts.find((p) => p.kind === "tool");
+      if (mode === "compact" && tool?.kind === "tool") {
+        if (tool.status !== "ok") {
+          setMode("expanded");
+          return;
+        }
+        const text = tool.output ?? tool.title;
+        showFlash({ ok: true, text });
+        if (!pinned) {
+          setTimeout(() => {
+            if (useUi.getState().flash?.text === text) void api.windowHide();
+          }, AUTO_HIDE_MS);
+        }
       }
     },
 
