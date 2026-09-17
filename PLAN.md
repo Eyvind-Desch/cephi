@@ -1,7 +1,7 @@
 # Orbit – Plan
 
 Always-available desktop assistant for Windows: ask AI, search the web, and get things done on your PC,
-without opening an extra window. Runs entirely locally with Ollama.
+without opening an extra window. Runs locally with Ollama; cloud models (Claude, Gemini, OpenAI-compatible) are optional.
 
 ## Decisions
 
@@ -103,8 +103,9 @@ request. Unambiguous commands ("open X") run through the quick action path witho
 2. ✅ **Actions** – JSON tool system with schema, validation, hot reload, tool-calling loop,
    confirmation dialogs · quick-action triggers without AI · app launcher · Spotify (Web API search + URI) ·
    media keys · key vault (Windows Credential Manager) · model preload · i18n: English source, German translation
-2b. **Model providers** – `providers` in `settings.json`: Ollama, Anthropic, Gemini, OpenAI-compatible;
-   profiles reference a provider; API keys via the key vault
+2b. ✅ **Model providers** – `providers` in `settings.json`: Ollama (local), Anthropic (native Messages API),
+   OpenAI-compatible (OpenAI, Gemini, OpenRouter, Groq, …); profiles reference a provider; API keys via
+   the key vault; model picker grouped Local/Cloud → [docs/PROVIDERS.md](docs/PROVIDERS.md)
 3. **Web** – Decided: *both*. Result cards immediately (SearXNG) + AI summary from the
    excerpts only (fast), plus a Google tab in the panel
 4. **MCP** – `mcp.json`, tools from MCP servers

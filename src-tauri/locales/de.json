@@ -74,9 +74,14 @@
   },
   "llm": {
     "unreachable": "Ollama ist nicht erreichbar unter %{url}. Läuft Ollama?",
-    "api_error": "Ollama: %{details}",
-    "invalid_response": "Ungültige Antwort von Ollama: %{details}",
-    "cancelled": "Abgebrochen"
+    "cloud_unreachable": "%{provider} ist nicht erreichbar: %{details}",
+    "auth": "%{provider}: API-Key fehlt oder ist ungültig. Unter „Schlüssel“ hinterlegen.",
+    "api_error": "%{provider}: %{details}",
+    "invalid_response": "Ungültige Antwort vom Modell: %{details}",
+    "truncated": "Die Antwort hat beim Tool-Aufruf das Ausgabelimit erreicht, das Tool wurde nicht ausgeführt.",
+    "refused": "Das Modell hat die Anfrage abgelehnt.",
+    "cancelled": "Abgebrochen",
+    "connection_ok": "Verbindung zu %{provider} funktioniert."
   },
   "media": {
     "unknown_action": "Unbekannte Medienaktion \"%{action}\".",
@@ -106,6 +111,10 @@
     "state_unknown": "in unbekanntem Zustand"
   },
   "secret_groups": {
+    "ai": {
+      "description": "KI-Modelle in der Cloud. Profile mit diesem Anbieter sind in der Modellauswahl nutzbar, sobald der Key gespeichert ist.",
+      "placeholder": "API-Key einfügen"
+    },
     "spotify": {
       "description": "Songs per Befehl abspielen. Die API wird nur zum Suchen genutzt, gespielt wird in der Spotify-App.",
       "client_id_placeholder": "32 Zeichen aus dem Spotify-Dashboard",
@@ -133,7 +142,12 @@
     "duplicate_profile": "profiles: doppelte id \"%{id}\".",
     "unknown_default_profile": "defaultProfile \"%{id}\" existiert nicht in \"profiles\".",
     "invalid_ollama_url": "ollama.baseUrl \"%{url}\" ist keine gültige URL.",
-    "max_tool_rounds": "agent.maxToolRounds muss mindestens 1 sein."
+    "max_tool_rounds": "agent.maxToolRounds muss mindestens 1 sein.",
+    "invalid_provider_id": "Anbieter-id \"%{id}\" ist ungültig: nur a-z, 0-9 und _, und nicht \"ollama\".",
+    "duplicate_provider": "providers: doppelte id \"%{id}\".",
+    "invalid_provider_url": "providers \"%{id}\": baseUrl \"%{url}\" ist keine gültige URL.",
+    "provider_needs_url": "providers \"%{id}\": Typ \"openai\" braucht eine baseUrl.",
+    "unknown_provider": "Profil \"%{profile}\" nutzt den unbekannten Anbieter \"%{provider}\"."
   },
   "spotify": {
     "unknown_kind": "Unbekannter Spotify-Typ \"%{kind}\".",

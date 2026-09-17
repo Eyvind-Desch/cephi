@@ -16,7 +16,9 @@
 │ config/       loads settings.json + tools, default files, schemas, watcher      │
 │ tools/        manifest format, validation, templates, execution                 │
 │ agent/        loop: model → tools → model, confirmations, cancellation          │
-│ llm/          Ollama client (NDJSON streaming, tool calls)                      │
+│ llm/          providers: Ollama, Anthropic, OpenAI-compatible (streaming, tools)│
+│ secrets/      Windows Credential Manager + key catalog for the keys view        │
+│ launcher/ integrations/  app index, Spotify, media/volume, radios                │
 │ desktop/      window placement, tray, global hotkey                             │
 └─────────────────────────────────────────────────────────────────────────────────┘
           │                                    │

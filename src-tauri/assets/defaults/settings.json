@@ -6,12 +6,19 @@
   "profiles": [
     { "id": "fast", "label": { "en": "Fast", "de": "Schnell" }, "model": "assistant-fast:latest" },
     { "id": "smart", "label": "Smart", "model": "assistant:latest", "think": false },
-    { "id": "deep", "label": { "en": "Thorough", "de": "Gründlich" }, "model": "assistant-big:latest" }
+    { "id": "deep", "label": { "en": "Thorough", "de": "Gründlich" }, "model": "assistant-big:latest" },
+    { "id": "claude", "label": "Claude", "provider": "anthropic", "model": "claude-opus-5", "effort": "low" },
+    { "id": "gemini", "label": "Gemini", "provider": "gemini", "model": "gemini-3.8-flash" }
   ],
   "ollama": {
     "baseUrl": "http://localhost:11434",
     "keepAlive": "10m"
   },
+  "providers": [
+    { "id": "anthropic", "type": "anthropic", "label": "Anthropic" },
+    { "id": "gemini", "type": "openai", "label": "Google Gemini", "baseUrl": "https://generativelanguage.googleapis.com/v1beta/openai" },
+    { "id": "openai", "type": "openai", "label": "OpenAI", "baseUrl": "https://api.openai.com/v1" }
+  ],
   "agent": {
     "systemPrompt": "You are Orbit, a desktop assistant on Windows. Answer briefly and in the user's language.\nRules:\n- You only know about the PC what tools report. Never claim to have checked, switched on or done something unless a tool result in this conversation proves it.\n- If no tool fits, say honestly that you cannot do it and suggest how the user can do it themselves.\n- If the user disagrees, check the state again with a tool instead of insisting on your statement.\n- Never invent tool results.",
     "maxToolRounds": 6,

@@ -11,11 +11,11 @@ use tauri::AppHandle;
 use tokio::sync::oneshot;
 use tokio_util::sync::CancellationToken;
 
-use crate::config::Config;
 use rust_i18n::t;
 
+use crate::config::Config;
 use crate::error::{AppError, AppResult};
-use crate::llm::{ChatMessage, ChatRequest, FunctionCall, LlmError, ModelOptions, OllamaClient, ToolCall};
+use crate::llm::{ChatMessage, LlmClient, LlmError, LlmRequest, ToolCall};
 use crate::state::AppState;
 use crate::tools::{self, ExecContext, Permission, ToolOutput};
 
@@ -138,37 +138,32 @@ impl Run<'_> {
     ) -> Result<Outcome, String> {
         let settings = &self.config.settings;
         let profile = settings.profile(profile_id);
-        let client = OllamaClient::new(self.state.http.clone(), &settings.ollama.base_url);
-        let tool_definitions = if profile.tools {
-            self.config.tools.definitions()
-        } else {
-            Vec::new()
-        };
 
         // Fast path: a trigger phrase runs its tool directly, without waiting for the model.
         if let Some(call) = self.fast_path_call(&text) {
             history.push(ChatMessage::user(text));
             history.push(ChatMessage::assistant_tool_calls(vec![call.clone()]));
             let output = self.run_tool_call(&call, true).await;
-            history.push(ChatMessage::tool(call.function.name, output.content));
+            history.push(ChatMessage::tool_result(&call, output.content, output.ok));
             return Ok(Outcome::Done);
         }
+
+        let client = LlmClient::for_profile(settings, profile, &self.state.http).map_err(|e| e.to_string())?;
+        let tool_definitions = if profile.tools {
+            self.config.tools.definitions()
+        } else {
+            Vec::new()
+        };
+        let system_prompt = self.system_prompt();
 
         history.push(ChatMessage::user(text));
 
         for _ in 0..settings.agent.max_tool_rounds {
-            let mut messages = Vec::with_capacity(history.len() + 1);
-            messages.push(ChatMessage::system(self.system_prompt()));
-            messages.extend(history.iter().cloned());
-
-            let request = ChatRequest {
-                model: &profile.model,
-                messages: &messages,
+            let request = LlmRequest {
+                system: &system_prompt,
+                messages: history,
                 tools: &tool_definitions,
-                stream: true,
-                think: profile.think,
-                keep_alive: &settings.ollama.keep_alive,
-                options: profile.temperature.map(|temperature| ModelOptions { temperature }),
+                profile,
             };
 
             let reply = match client
@@ -198,7 +193,7 @@ impl Run<'_> {
                     return Ok(Outcome::Cancelled);
                 }
                 let output = self.run_tool_call(&call, false).await;
-                history.push(ChatMessage::tool(call.function.name, output.content));
+                history.push(ChatMessage::tool_result(&call, output.content, output.ok));
             }
         }
 
@@ -219,10 +214,9 @@ impl Run<'_> {
             .map(|(tool, raw_args)| {
                 log::info!("fast path: {}", tool.manifest.name);
                 ToolCall {
-                    function: FunctionCall {
-                        name: tool.manifest.name.clone(),
-                        arguments: raw_args,
-                    },
+                    id: format!("fast_{}", uuid::Uuid::new_v4().simple()),
+                    name: tool.manifest.name.clone(),
+                    arguments: raw_args,
                 }
             })
     }
@@ -237,21 +231,21 @@ impl Run<'_> {
     async fn run_tool_call(&self, call: &ToolCall, fast: bool) -> ToolOutput {
         let settings = &self.config.settings.agent;
         let call_id = uuid::Uuid::new_v4().to_string();
-        let name = &call.function.name;
+        let name = &call.name;
         let tool = self.config.tools.get(name);
 
         self.emit(AgentEvent::ToolCall {
             call_id: call_id.clone(),
             name: name.clone(),
             title: tool.map_or_else(|| name.clone(), |t| t.title()),
-            args: call.function.arguments.clone(),
+            args: call.arguments.clone(),
             fast,
         });
 
         let started = Instant::now();
         let output = match tool {
             None => ToolOutput::error(t!("agent.unknown_tool", name = name)),
-            Some(tool) => match tool.normalize_args(&call.function.arguments) {
+            Some(tool) => match tool.normalize_args(&call.arguments) {
                 Err(message) => ToolOutput::error(message),
                 Ok(args) => {
                     let approved = tool.manifest.permission == Permission::Auto

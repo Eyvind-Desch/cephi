@@ -1,5 +1,17 @@
 import clsx from "clsx";
-import { Check, ChevronDown, ExternalLink, KeyRound, Loader2, Music, PlugZap, Wrench, X, type LucideIcon } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  ExternalLink,
+  KeyRound,
+  Loader2,
+  Music,
+  PlugZap,
+  Sparkles,
+  Wrench,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -7,10 +19,23 @@ import { api, type SecretGroup } from "../../lib/ipc";
 import { SecretField } from "./SecretField";
 import { guides } from "./guides";
 
-const icons: Record<string, LucideIcon> = { music: Music, wrench: Wrench };
+/** Keyed by the `icon` name sent by the backend (`secrets/catalog.rs`). */
+const icons: Record<string, LucideIcon> = {
+  music: Music,
+  wrench: Wrench,
+  anthropic: Sparkles,
+  gemini: Sparkles,
+  openai: Sparkles,
+  ai: Sparkles,
+};
 
 /** Brand colours for well-known services; others use the accent colour. */
-const brand: Record<string, string> = { spotify: "#1DB954" };
+const brand: Record<string, string> = {
+  music: "#1DB954",
+  anthropic: "#D97757",
+  gemini: "#4285F4",
+  openai: "#10A37F",
+};
 
 type TestState = { status: "idle" } | { status: "testing" } | { status: "ok" | "error"; message: string };
 
@@ -22,7 +47,7 @@ export function SecretGroupCard({ group, onChange }: { group: SecretGroup; onCha
   const [test, setTest] = useState<TestState>({ status: "idle" });
 
   const Icon = icons[group.icon] ?? KeyRound;
-  const color = brand[group.id];
+  const color = brand[group.icon];
   const Guide = guides[group.id];
 
   const runTest = async () => {

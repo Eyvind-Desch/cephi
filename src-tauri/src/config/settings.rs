@@ -17,7 +17,10 @@ pub struct Settings {
     pub hotkey: String,
     pub default_profile: String,
     pub profiles: Vec<Profile>,
+    /// The local provider (id `ollama`), always available.
     pub ollama: OllamaSettings,
+    /// Cloud providers. API keys live in the vault as `<id>_api_key` (see `apiKeySecret`).
+    pub providers: Vec<ProviderSettings>,
     pub agent: AgentSettings,
     pub window: WindowSettings,
 }
@@ -27,15 +30,67 @@ pub struct Settings {
 pub struct Profile {
     pub id: String,
     pub label: LocalizedText,
+    /// Provider id: `ollama` (default) or an id from `providers`.
+    #[serde(default = "default_provider")]
+    pub provider: String,
     pub model: String,
     /// Whether the model may call tools.
     #[serde(default = "default_true")]
     pub tools: bool,
-    /// Enable/disable the model's reasoning mode. `None` = model default.
+    /// Ollama: enable/disable the model's reasoning mode. `None` = model default.
     #[serde(default)]
     pub think: Option<bool>,
+    /// Ollama and OpenAI-compatible providers. Not sent to Anthropic (current Claude models reject it).
     #[serde(default)]
     pub temperature: Option<f32>,
+    /// Anthropic: `low` | `medium` | `high` | `xhigh` | `max`. Lower is faster.
+    #[serde(default)]
+    pub effort: Option<String>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum ProviderKind {
+    /// Anthropic Messages API (Claude).
+    Anthropic,
+    /// OpenAI Chat Completions or a compatible API (Gemini, OpenRouter, Groq, LM Studio, …).
+    Openai,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ProviderSettings {
+    pub id: String,
+    #[serde(rename = "type")]
+    pub kind: ProviderKind,
+    #[serde(default)]
+    pub label: Option<LocalizedText>,
+    /// Required for `openai`; optional for `anthropic`.
+    #[serde(default)]
+    pub base_url: Option<String>,
+    /// Vault key name; default `<id>_api_key`.
+    #[serde(default)]
+    pub api_key_secret: Option<String>,
+    #[serde(default)]
+    pub max_tokens: Option<u32>,
+    /// Anthropic: re-run declined requests on the recommended fallback model (server-side).
+    #[serde(default = "default_true")]
+    pub fallbacks: bool,
+}
+
+impl ProviderSettings {
+    pub fn api_key_secret(&self) -> String {
+        self.api_key_secret
+            .clone()
+            .unwrap_or_else(|| format!("{}_api_key", self.id))
+    }
+
+    pub fn display_name(&self) -> String {
+        match &self.label {
+            Some(label) => label.resolve(&rust_i18n::locale()).to_string(),
+            None => self.id.clone(),
+        }
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -92,7 +147,32 @@ impl Settings {
             .unwrap_or(&self.profiles[0])
     }
 
+    pub fn provider(&self, id: &str) -> Option<&ProviderSettings> {
+        self.providers.iter().find(|p| p.id == id)
+    }
+
     fn validate(&self) -> Result<(), String> {
+        for (index, provider) in self.providers.iter().enumerate() {
+            if provider.id == crate::llm::LOCAL_PROVIDER_ID || !crate::secrets::is_valid_name(&provider.id) {
+                return Err(t!("settings.invalid_provider_id", id = provider.id).into());
+            }
+            if self.providers[..index].iter().any(|p| p.id == provider.id) {
+                return Err(t!("settings.duplicate_provider", id = provider.id).into());
+            }
+            match (&provider.base_url, provider.kind) {
+                (Some(url), _) if url::Url::parse(url).is_err() => {
+                    return Err(t!("settings.invalid_provider_url", id = provider.id, url = url).into());
+                }
+                (None, ProviderKind::Openai) => {
+                    return Err(t!("settings.provider_needs_url", id = provider.id).into());
+                }
+                _ => {}
+            }
+            if !crate::secrets::is_valid_name(&provider.api_key_secret()) {
+                return Err(t!("secrets.invalid_name", name = provider.api_key_secret()).into());
+            }
+        }
+
         if self.profiles.is_empty() {
             return Err(t!("settings.no_profiles").into());
         }
@@ -102,6 +182,10 @@ impl Settings {
             }
             if self.profiles[..index].iter().any(|p| p.id == profile.id) {
                 return Err(t!("settings.duplicate_profile", id = profile.id).into());
+            }
+            if profile.provider != crate::llm::LOCAL_PROVIDER_ID && self.provider(&profile.provider).is_none() {
+                let (id, provider) = (&profile.id, &profile.provider);
+                return Err(t!("settings.unknown_provider", profile = id, provider = provider).into());
             }
         }
         if !self.profiles.iter().any(|p| p.id == self.default_profile) {
@@ -147,6 +231,23 @@ fn default_true() -> bool {
     true
 }
 
+fn default_provider() -> String {
+    crate::llm::LOCAL_PROVIDER_ID.into()
+}
+
+fn local_profile(id: &str, label: LocalizedText, model: &str) -> Profile {
+    Profile {
+        id: id.into(),
+        label,
+        provider: default_provider(),
+        model: model.into(),
+        tools: true,
+        think: None,
+        temperature: None,
+        effort: None,
+    }
+}
+
 impl Default for Settings {
     fn default() -> Self {
         Self {
@@ -157,31 +258,62 @@ impl Default for Settings {
             default_profile: "fast".into(),
             profiles: vec![
                 Profile {
-                    id: "fast".into(),
-                    label: LocalizedText::translated(&[("en", "Fast"), ("de", "Schnell")]),
-                    model: "assistant-fast:latest".into(),
-                    tools: true,
                     think: None,
-                    temperature: None,
+                    ..local_profile(
+                        "fast",
+                        LocalizedText::translated(&[("en", "Fast"), ("de", "Schnell")]),
+                        "assistant-fast:latest",
+                    )
                 },
                 Profile {
-                    id: "smart".into(),
-                    label: LocalizedText::plain("Smart"),
-                    model: "assistant:latest".into(),
-                    tools: true,
                     think: Some(false),
-                    temperature: None,
+                    ..local_profile("smart", LocalizedText::plain("Smart"), "assistant:latest")
+                },
+                local_profile(
+                    "deep",
+                    LocalizedText::translated(&[("en", "Thorough"), ("de", "Gründlich")]),
+                    "assistant-big:latest",
+                ),
+                Profile {
+                    provider: "anthropic".into(),
+                    effort: Some("low".into()),
+                    ..local_profile("claude", LocalizedText::plain("Claude"), "claude-opus-5")
                 },
                 Profile {
-                    id: "deep".into(),
-                    label: LocalizedText::translated(&[("en", "Thorough"), ("de", "Gründlich")]),
-                    model: "assistant-big:latest".into(),
-                    tools: true,
-                    think: None,
-                    temperature: None,
+                    provider: "gemini".into(),
+                    ..local_profile("gemini", LocalizedText::plain("Gemini"), "gemini-3.8-flash")
                 },
             ],
             ollama: OllamaSettings::default(),
+            providers: vec![
+                ProviderSettings {
+                    id: "anthropic".into(),
+                    kind: ProviderKind::Anthropic,
+                    label: Some(LocalizedText::plain("Anthropic")),
+                    base_url: None,
+                    api_key_secret: None,
+                    max_tokens: None,
+                    fallbacks: true,
+                },
+                ProviderSettings {
+                    id: "gemini".into(),
+                    kind: ProviderKind::Openai,
+                    label: Some(LocalizedText::plain("Google Gemini")),
+                    base_url: Some("https://generativelanguage.googleapis.com/v1beta/openai".into()),
+                    api_key_secret: None,
+                    max_tokens: None,
+                    fallbacks: true,
+                },
+                ProviderSettings {
+                    id: "openai".into(),
+                    kind: ProviderKind::Openai,
+                    label: Some(LocalizedText::plain("OpenAI")),
+                    base_url: Some("https://api.openai.com/v1".into()),
+                    api_key_secret: None,
+                    max_tokens: None,
+                    fallbacks: true,
+                },
+            ],
             agent: AgentSettings::default(),
             window: WindowSettings::default(),
         }
@@ -236,6 +368,40 @@ mod tests {
             settings.agent.system_prompt, DEFAULT_SYSTEM_PROMPT,
             "defaults/settings.json is out of sync"
         );
+
+        // The Rust defaults (used when settings.json is missing) must describe the same setup.
+        let fallback = Settings::default();
+        fallback.validate().unwrap();
+        let profiles = |s: &Settings| {
+            s.profiles
+                .iter()
+                .map(|p| (p.id.clone(), p.provider.clone(), p.model.clone()))
+                .collect::<Vec<_>>()
+        };
+        let providers = |s: &Settings| {
+            s.providers
+                .iter()
+                .map(|p| (p.id.clone(), p.kind, p.base_url.clone()))
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(profiles(&settings), profiles(&fallback));
+        assert_eq!(providers(&settings), providers(&fallback));
+    }
+
+    #[test]
+    fn rejects_profiles_with_unknown_providers() {
+        let settings: Settings = serde_json::from_str(
+            r#"{ "defaultProfile": "x", "profiles": [{ "id": "x", "label": "X", "provider": "nope", "model": "m" }] }"#,
+        )
+        .unwrap();
+        assert!(settings.validate().unwrap_err().contains("nope"));
+    }
+
+    #[test]
+    fn openai_providers_need_a_base_url() {
+        let settings: Settings =
+            serde_json::from_str(r#"{ "providers": [{ "id": "groq", "type": "openai" }] }"#).unwrap();
+        assert!(settings.validate().is_err());
     }
 
     #[test]

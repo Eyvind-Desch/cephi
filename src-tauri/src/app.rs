@@ -10,7 +10,7 @@ use crate::config::{self, ConfigPaths, ConfigSnapshot, Diagnostic};
 use crate::desktop::{hotkey, tray, window};
 use crate::error::{AppError, AppResult};
 use crate::launcher::AppIndex;
-use crate::llm::OllamaClient;
+use crate::llm::{LlmClient, OllamaClient, LOCAL_PROVIDER_ID};
 use crate::secrets::{self, SecretGroupInfo};
 use crate::state::AppState;
 
@@ -67,13 +67,17 @@ fn warm_up(app: &AppHandle) {
     });
 }
 
-/// Loads a profile's model into memory so the first answer starts without delay.
+/// Loads a local profile's model into memory so the first answer starts without delay.
+/// Cloud profiles need no warm-up.
 pub async fn preload_profile(state: &AppState, profile_id: Option<&str>) {
     let config = state.config();
     let settings = &config.settings;
     let profile = settings.profile(profile_id);
-    let client = OllamaClient::new(state.http.clone(), &settings.ollama.base_url);
-    match client.preload(&profile.model, &settings.ollama.keep_alive).await {
+    if profile.provider != LOCAL_PROVIDER_ID {
+        return;
+    }
+    let client = OllamaClient::new(state.http.clone(), &settings.ollama);
+    match client.preload(&profile.model).await {
         Ok(()) => log::info!("model preloaded: {}", profile.model),
         Err(e) => log::warn!("model preload {}: {e}", profile.model),
     }
@@ -114,17 +118,24 @@ pub fn snapshot(app: &AppHandle) -> ConfigSnapshot {
 }
 
 pub fn secret_overview(state: &AppState) -> Vec<SecretGroupInfo> {
-    secrets::overview(&state.config().tools.secret_usage())
+    let config = state.config();
+    secrets::overview(&config.tools.secret_usage(), &config.settings)
 }
 
 /// Stores (`Some`) or deletes (`None`) a secret and refreshes dependent integrations.
-pub async fn update_secret(state: &AppState, name: &str, value: Option<&str>) -> AppResult<()> {
+pub async fn update_secret(app: &AppHandle, name: &str, value: Option<&str>) -> AppResult<()> {
+    let state = app.state::<AppState>();
     match value {
         Some(value) => secrets::set(name, value),
         None => secrets::delete(name),
     }
     .map_err(AppError::msg)?;
     log::info!("secret {} {}", name, if value.is_some() { "saved" } else { "deleted" });
+
+    // Cloud profiles become (un)available when their key changes.
+    if let Err(e) = app.emit(EVENT_CONFIG_CHANGED, &snapshot(app)) {
+        log::error!("emit config change: {e}");
+    }
 
     if name.starts_with("spotify_") {
         state.spotify.invalidate().await;
@@ -135,10 +146,18 @@ pub async fn update_secret(state: &AppState, name: &str, value: Option<&str>) ->
 
 /// Verifies the stored keys of a service with a real request. Returns a success message.
 pub async fn test_secret_group(state: &AppState, group_id: &str) -> AppResult<String> {
-    match group_id {
-        "spotify" => state.spotify.test_connection(&state.http).await.map_err(AppError::msg),
-        other => Err(AppError::msg(format!("no connection test for \"{other}\""))),
+    let config = state.config();
+    if group_id == "spotify" {
+        return state.spotify.test_connection(&state.http).await.map_err(AppError::msg);
     }
+    let provider = config
+        .settings
+        .provider(group_id)
+        .ok_or_else(|| AppError::msg(format!("no connection test for \"{group_id}\"")))?;
+    let client = LlmClient::for_provider(&config.settings, &provider.id, &state.http)
+        .map_err(|e| AppError::msg(e.to_string()))?;
+    client.check().await.map_err(|e| AppError::msg(e.to_string()))?;
+    Ok(t!("llm.connection_ok", provider = provider.display_name()).into())
 }
 
 pub fn open_config_folder(app: &AppHandle) -> AppResult<()> {

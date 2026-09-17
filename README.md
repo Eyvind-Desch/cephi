@@ -43,7 +43,7 @@ Everything lives in **`%APPDATA%\Orbit\`** and is reloaded immediately on change
 
 ```
 Orbit/
-├── settings.json   hotkey, model profiles, window, agent
+├── settings.json   language, hotkey, model profiles, AI providers, window, agent
 ├── tools/          custom tools as JSON → docs/TOOLS.md
 └── schemas/        for editor autocompletion (generated automatically)
 ```
@@ -71,3 +71,4 @@ Logs: `%LOCALAPPDATA%\io.github.eyvind-desch.orbit\logs\`.
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): structure and data flow
 - [docs/TOOLS.md](docs/TOOLS.md): custom tools, quick actions, API keys
 - [docs/SPOTIFY.md](docs/SPOTIFY.md): Spotify setup
+- [docs/PROVIDERS.md](docs/PROVIDERS.md): cloud AI providers (Claude, Gemini, OpenAI-compatible)

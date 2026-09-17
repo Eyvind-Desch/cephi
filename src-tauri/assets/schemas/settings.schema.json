@@ -32,6 +32,15 @@
         "required": ["id", "label", "model"],
         "properties": {
           "id": { "type": "string", "description": "Unique identifier." },
+          "provider": {
+            "type": "string",
+            "default": "ollama",
+            "description": "\"ollama\" (local) or the id of an entry in \"providers\"."
+          },
+          "effort": {
+            "enum": ["low", "medium", "high", "xhigh", "max"],
+            "description": "Anthropic only: how much the model thinks. Lower is faster and cheaper."
+          },
           "label": {
             "description": "Display name: a plain string or per language, e.g. { \"en\": \"Fast\", \"de\": \"Schnell\" }.",
             "anyOf": [
@@ -41,8 +50,8 @@
           },
           "model": { "type": "string", "description": "Ollama model name, e.g. \"assistant-fast:latest\" (see `ollama list`)." },
           "tools": { "type": "boolean", "default": true, "description": "May the model call tools?" },
-          "think": { "type": "boolean", "description": "Reasoning mode on/off (only for models with 'thinking'). Omit = model default." },
-          "temperature": { "type": "number", "minimum": 0, "maximum": 2, "description": "Creativity. Omit = model default." }
+          "think": { "type": "boolean", "description": "Ollama only: reasoning mode on/off (models with 'thinking'). Omit = model default." },
+          "temperature": { "type": "number", "minimum": 0, "maximum": 2, "description": "Ollama and OpenAI-compatible only: creativity. Omit = model default." }
         }
       }
     },
@@ -52,6 +61,36 @@
       "properties": {
         "baseUrl": { "type": "string", "default": "http://localhost:11434" },
         "keepAlive": { "type": "string", "default": "10m", "description": "How long the model stays loaded after a request, e.g. \"10m\", \"1h\", \"-1\" (forever)." }
+      }
+    },
+    "providers": {
+      "description": "Cloud AI providers. The API key is entered in Orbit under Keys (stored as <id>_api_key in the Windows Credential Manager).",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "type"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]{1,63}$", "description": "Referenced by profiles. Not \"ollama\"." },
+          "type": {
+            "enum": ["anthropic", "openai"],
+            "description": "anthropic = Claude (Messages API). openai = OpenAI Chat Completions or a compatible API (Gemini, OpenRouter, Groq, LM Studio, …)."
+          },
+          "label": {
+            "description": "Display name: a plain string or per language.",
+            "anyOf": [
+              { "type": "string", "minLength": 1 },
+              { "type": "object", "minProperties": 1, "additionalProperties": { "type": "string", "minLength": 1 } }
+            ]
+          },
+          "baseUrl": {
+            "type": "string",
+            "description": "Required for openai, e.g. https://api.openai.com/v1, https://generativelanguage.googleapis.com/v1beta/openai, https://openrouter.ai/api/v1."
+          },
+          "apiKeySecret": { "type": "string", "pattern": "^[a-z][a-z0-9_]{1,63}$", "description": "Vault key name. Default: <id>_api_key." },
+          "maxTokens": { "type": "integer", "minimum": 1, "description": "Output limit per answer (Anthropic default 64000)." },
+          "fallbacks": { "type": "boolean", "default": true, "description": "Anthropic: re-run declined requests on the recommended fallback model (Claude Opus 5 / Fable 5)." }
+        }
       }
     },
     "agent": {

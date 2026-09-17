@@ -58,13 +58,13 @@ pub async fn secrets_test(state: State<'_, AppState>, group_id: String) -> AppRe
 }
 
 #[tauri::command]
-pub async fn secrets_set(state: State<'_, AppState>, name: String, value: String) -> AppResult<()> {
-    crate::app::update_secret(&state, &name, Some(&value)).await
+pub async fn secrets_set(app: AppHandle, name: String, value: String) -> AppResult<()> {
+    crate::app::update_secret(&app, &name, Some(&value)).await
 }
 
 #[tauri::command]
-pub async fn secrets_delete(state: State<'_, AppState>, name: String) -> AppResult<()> {
-    crate::app::update_secret(&state, &name, None).await
+pub async fn secrets_delete(app: AppHandle, name: String) -> AppResult<()> {
+    crate::app::update_secret(&app, &name, None).await
 }
 
 #[tauri::command]

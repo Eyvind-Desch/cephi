@@ -11,3 +11,6 @@ mod store;
 
 pub use catalog::{overview, SecretGroupInfo};
 pub use store::{delete, get, is_set, is_valid_name, set};
+
+#[cfg(test)]
+pub(crate) use store::tests as test_support;

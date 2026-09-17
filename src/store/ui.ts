@@ -63,8 +63,9 @@ export const useUi = create<UiState>()((set, get) => ({
   applyConfig: (config) => {
     setLanguage(config.language);
     const current = get().profileId;
-    const stillExists = config.profiles.some((p) => p.id === current);
-    set({ config, profileId: stillExists ? current : config.defaultProfile });
+    // Fall back to the default if the profile was removed or its API key was deleted.
+    const stillUsable = config.profiles.some((p) => p.id === current && p.available);
+    set({ config, profileId: stillUsable ? current : config.defaultProfile });
   },
 
   showFlash: (flash) => set({ flash }),

@@ -13,6 +13,12 @@ export interface ProfileInfo {
   label: string;
   model: string;
   tools: boolean;
+  /** Provider id; `ollama` for local models. */
+  provider: string;
+  providerLabel: string;
+  local: boolean;
+  /** False when the provider's API key is missing. */
+  available: boolean;
 }
 
 export interface ToolInfo {

@@ -224,6 +224,9 @@ mod tests {
 
     #[test]
     fn secrets_are_masked_resolved_and_listed() {
+        let _serial = crate::secrets::test_support::CREDENTIAL_MANAGER
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
         // Unique name: the test touches the real Credential Manager, runs must not interfere.
         let name = format!("orbit_test_{}", uuid::Uuid::new_v4().simple());
         let template = format!("Bearer {{{{secret:{name}}}}}");

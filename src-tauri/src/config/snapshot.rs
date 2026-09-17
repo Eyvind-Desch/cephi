@@ -25,6 +25,13 @@ pub struct ProfileInfo {
     pub label: String,
     pub model: String,
     pub tools: bool,
+    /// Provider id (`ollama` for local models).
+    pub provider: String,
+    /// Display name of the provider.
+    pub provider_label: String,
+    pub local: bool,
+    /// False when the provider's API key is missing.
+    pub available: bool,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -50,11 +57,18 @@ impl ConfigSnapshot {
             profiles: settings
                 .profiles
                 .iter()
-                .map(|p| ProfileInfo {
-                    id: p.id.clone(),
-                    label: p.label.resolve(&locale).to_string(),
-                    model: p.model.clone(),
-                    tools: p.tools,
+                .map(|p| {
+                    let provider = settings.provider(&p.provider);
+                    ProfileInfo {
+                        id: p.id.clone(),
+                        label: p.label.resolve(&locale).to_string(),
+                        model: p.model.clone(),
+                        tools: p.tools,
+                        provider: p.provider.clone(),
+                        provider_label: provider.map_or_else(|| "Ollama".to_string(), |pr| pr.display_name()),
+                        local: provider.is_none(),
+                        available: provider.is_none_or(|pr| crate::secrets::is_set(&pr.api_key_secret())),
+                    }
                 })
                 .collect(),
             tools: config

@@ -74,9 +74,14 @@
   },
   "llm": {
     "unreachable": "Ollama is not reachable at %{url}. Is Ollama running?",
-    "api_error": "Ollama: %{details}",
-    "invalid_response": "Invalid response from Ollama: %{details}",
-    "cancelled": "Cancelled"
+    "cloud_unreachable": "%{provider} is not reachable: %{details}",
+    "auth": "%{provider}: API key missing or invalid. Add it under \"Keys\".",
+    "api_error": "%{provider}: %{details}",
+    "invalid_response": "Invalid response from the model: %{details}",
+    "truncated": "The answer hit the output limit while calling a tool, so the tool was not run.",
+    "refused": "The model declined this request.",
+    "cancelled": "Cancelled",
+    "connection_ok": "Connection to %{provider} works."
   },
   "media": {
     "unknown_action": "Unknown media action \"%{action}\".",
@@ -106,6 +111,10 @@
     "state_unknown": "in an unknown state"
   },
   "secret_groups": {
+    "ai": {
+      "description": "AI models in the cloud. Profiles using this provider appear in the model picker once the key is saved.",
+      "placeholder": "Paste API key"
+    },
     "spotify": {
       "description": "Play songs by command. The API is only used for search, playback happens in the Spotify app.",
       "client_id_placeholder": "32 characters from the Spotify dashboard",
@@ -133,7 +142,12 @@
     "duplicate_profile": "profiles: duplicate id \"%{id}\".",
     "unknown_default_profile": "defaultProfile \"%{id}\" does not exist in \"profiles\".",
     "invalid_ollama_url": "ollama.baseUrl \"%{url}\" is not a valid URL.",
-    "max_tool_rounds": "agent.maxToolRounds must be at least 1."
+    "max_tool_rounds": "agent.maxToolRounds must be at least 1.",
+    "invalid_provider_id": "Provider id \"%{id}\" is invalid: only a-z, 0-9 and _, and not \"ollama\".",
+    "duplicate_provider": "providers: duplicate id \"%{id}\".",
+    "invalid_provider_url": "providers \"%{id}\": baseUrl \"%{url}\" is not a valid URL.",
+    "provider_needs_url": "providers \"%{id}\": type \"openai\" needs a baseUrl.",
+    "unknown_provider": "Profile \"%{profile}\" uses the unknown provider \"%{provider}\"."
   },
   "spotify": {
     "unknown_kind": "Unknown Spotify type \"%{kind}\".",

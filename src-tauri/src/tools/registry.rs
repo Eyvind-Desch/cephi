@@ -3,12 +3,13 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use rust_i18n::t;
-use serde_json::{json, Value};
+use serde_json::Value;
 
 use super::args::{self, Args};
 use super::manifest::ToolManifest;
 use super::trigger::Trigger;
 use crate::config::Diagnostic;
+use crate::llm::ToolDef;
 
 /// A loaded, validated and enabled tool.
 pub struct Tool {
@@ -30,16 +31,13 @@ impl Tool {
         args::normalize(&self.manifest.parameters, raw)
     }
 
-    /// Tool definition in the format expected by Ollama's `/api/chat`.
-    fn definition(&self) -> Value {
-        json!({
-            "type": "function",
-            "function": {
-                "name": self.manifest.name,
-                "description": self.manifest.description,
-                "parameters": self.manifest.parameters,
-            }
-        })
+    /// Provider-neutral definition offered to the model.
+    fn definition(&self) -> ToolDef {
+        ToolDef {
+            name: self.manifest.name.clone(),
+            description: self.manifest.description.clone(),
+            parameters: serde_json::to_value(&self.manifest.parameters).unwrap_or_default(),
+        }
     }
 }
 
@@ -115,7 +113,7 @@ impl ToolRegistry {
         self.tools.len()
     }
 
-    pub fn definitions(&self) -> Vec<Value> {
+    pub fn definitions(&self) -> Vec<ToolDef> {
         self.tools.values().map(Tool::definition).collect()
     }
 

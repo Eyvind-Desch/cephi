@@ -1,127 +1,26 @@
+//! Local models via Ollama's `/api/chat` (NDJSON streaming).
+
 use futures_util::StreamExt;
-use rust_i18n::t;
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
+use serde::Deserialize;
+use serde_json::{json, Value};
 use tokio_util::sync::CancellationToken;
 
-#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "lowercase")]
-pub enum Role {
-    System,
-    User,
-    Assistant,
-    Tool,
+use super::{
+    new_call_id, status_error, transport_error, ChatMessage, LlmError, LlmRequest, Role, ToolCall, ToolDef,
+    LOCAL_PROVIDER_ID,
+};
+use crate::config::OllamaSettings;
+
+pub struct OllamaClient {
+    http: reqwest::Client,
+    base_url: String,
+    keep_alive: String,
 }
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct ChatMessage {
-    pub role: Role,
-    #[serde(default)]
-    pub content: String,
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub tool_calls: Vec<ToolCall>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub tool_name: Option<String>,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct ToolCall {
-    pub function: FunctionCall,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct FunctionCall {
-    pub name: String,
-    #[serde(default)]
-    pub arguments: Value,
-}
-
-impl ChatMessage {
-    fn new(role: Role, content: impl Into<String>) -> Self {
-        Self {
-            role,
-            content: content.into(),
-            tool_calls: Vec::new(),
-            tool_name: None,
-        }
-    }
-
-    pub fn system(content: impl Into<String>) -> Self {
-        Self::new(Role::System, content)
-    }
-
-    pub fn user(content: impl Into<String>) -> Self {
-        Self::new(Role::User, content)
-    }
-
-    pub fn assistant(content: impl Into<String>) -> Self {
-        Self::new(Role::Assistant, content)
-    }
-
-    pub fn assistant_tool_calls(tool_calls: Vec<ToolCall>) -> Self {
-        Self {
-            tool_calls,
-            ..Self::new(Role::Assistant, String::new())
-        }
-    }
-
-    pub fn tool(name: impl Into<String>, content: impl Into<String>) -> Self {
-        Self {
-            tool_name: Some(name.into()),
-            ..Self::new(Role::Tool, content)
-        }
-    }
-}
-
-#[derive(Debug, Serialize)]
-pub struct ChatRequest<'a> {
-    pub model: &'a str,
-    pub messages: &'a [ChatMessage],
-    #[serde(skip_serializing_if = "<[Value]>::is_empty")]
-    pub tools: &'a [Value],
-    pub stream: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub think: Option<bool>,
-    pub keep_alive: &'a str,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub options: Option<ModelOptions>,
-}
-
-#[derive(Debug, Serialize)]
-pub struct ModelOptions {
-    pub temperature: f32,
-}
-
-#[derive(Debug)]
-pub enum LlmError {
-    Unreachable(String),
-    Api(String),
-    Protocol(String),
-    /// Cancelled by the user; carries the text generated so far.
-    Cancelled {
-        partial: String,
-    },
-}
-
-/// User-facing, localized.
-impl std::fmt::Display for LlmError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let message = match self {
-            LlmError::Unreachable(url) => t!("llm.unreachable", url = url),
-            LlmError::Api(details) => t!("llm.api_error", details = details),
-            LlmError::Protocol(details) => t!("llm.invalid_response", details = details),
-            LlmError::Cancelled { .. } => t!("llm.cancelled"),
-        };
-        f.write_str(&message)
-    }
-}
-
-impl std::error::Error for LlmError {}
 
 #[derive(Deserialize)]
 struct StreamChunk {
     #[serde(default)]
-    message: Option<ChatMessage>,
+    message: Option<WireMessage>,
     #[serde(default)]
     done: bool,
     #[serde(default)]
@@ -129,45 +28,68 @@ struct StreamChunk {
 }
 
 #[derive(Deserialize)]
-struct ErrorBody {
-    error: String,
+struct WireMessage {
+    #[serde(default)]
+    content: String,
+    #[serde(default)]
+    tool_calls: Vec<WireToolCall>,
 }
 
-pub struct OllamaClient {
-    http: reqwest::Client,
-    base_url: String,
+#[derive(Deserialize)]
+struct WireToolCall {
+    #[serde(default)]
+    id: Option<String>,
+    function: WireFunction,
+}
+
+#[derive(Deserialize)]
+struct WireFunction {
+    name: String,
+    #[serde(default)]
+    arguments: Value,
 }
 
 impl OllamaClient {
-    pub fn new(http: reqwest::Client, base_url: &str) -> Self {
+    pub fn new(http: reqwest::Client, settings: &OllamaSettings) -> Self {
         Self {
             http,
-            base_url: base_url.trim_end_matches('/').to_string(),
+            base_url: settings.base_url.trim_end_matches('/').to_string(),
+            keep_alive: settings.keep_alive.clone(),
         }
     }
 
-    /// Streams a chat completion. `on_token` receives content deltas as they arrive;
-    /// the fully assembled assistant message (including tool calls) is returned.
     pub async fn chat(
         &self,
-        request: &ChatRequest<'_>,
+        request: &LlmRequest<'_>,
         cancel: &CancellationToken,
         mut on_token: impl FnMut(&str),
     ) -> Result<ChatMessage, LlmError> {
-        let url = format!("{}/api/chat", self.base_url);
-        let send = self.http.post(&url).json(request).send();
+        let profile = request.profile;
+        let mut body = json!({
+            "model": profile.model,
+            "messages": wire_messages(request),
+            "stream": true,
+            "keep_alive": self.keep_alive,
+        });
+        if !request.tools.is_empty() {
+            body["tools"] = wire_tools(request.tools);
+        }
+        if let Some(think) = profile.think {
+            body["think"] = json!(think);
+        }
+        if let Some(temperature) = profile.temperature {
+            body["options"] = json!({ "temperature": temperature });
+        }
+
+        let send = self.http.post(format!("{}/api/chat", self.base_url)).json(&body).send();
         let response = tokio::select! {
             _ = cancel.cancelled() => return Err(LlmError::Cancelled { partial: String::new() }),
-            response = send => response.map_err(|e| self.map_transport_error(e))?,
+            response = send => response.map_err(|e| self.transport(e))?,
         };
-
-        let status = response.status();
-        if !status.is_success() {
+        if !response.status().is_success() {
+            let status = response.status();
             let body = response.text().await.unwrap_or_default();
-            let message = serde_json::from_str::<ErrorBody>(&body)
-                .map(|b| b.error)
-                .unwrap_or(body);
-            return Err(LlmError::Api(format!("HTTP {status}: {message}")));
+            return Err(status_error(LOCAL_PROVIDER_ID, status, &body));
         }
 
         let mut reply = ChatMessage::assistant(String::new());
@@ -181,9 +103,9 @@ impl OllamaClient {
                 next = stream.next() => next,
             };
             let Some(bytes) = next else { break };
-            buffer.extend_from_slice(&bytes.map_err(|e| self.map_transport_error(e))?);
+            buffer.extend_from_slice(&bytes.map_err(|e| self.transport(e))?);
 
-            // The response is NDJSON: one JSON object per line.
+            // One JSON object per line.
             while let Some(newline) = buffer.iter().position(|b| *b == b'\n') {
                 let line: Vec<u8> = buffer.drain(..=newline).collect();
                 if line.iter().all(u8::is_ascii_whitespace) {
@@ -192,14 +114,23 @@ impl OllamaClient {
                 let chunk: StreamChunk =
                     serde_json::from_slice(&line).map_err(|e| LlmError::Protocol(e.to_string()))?;
                 if let Some(error) = chunk.error {
-                    return Err(LlmError::Api(error));
+                    return Err(LlmError::Api {
+                        provider: LOCAL_PROVIDER_ID.into(),
+                        details: error,
+                    });
                 }
                 if let Some(message) = chunk.message {
                     if !message.content.is_empty() {
                         on_token(&message.content);
                         reply.content.push_str(&message.content);
                     }
-                    reply.tool_calls.extend(message.tool_calls);
+                    reply
+                        .tool_calls
+                        .extend(message.tool_calls.into_iter().map(|call| ToolCall {
+                            id: call.id.unwrap_or_else(new_call_id),
+                            name: call.function.name,
+                            arguments: call.function.arguments,
+                        }));
                 }
                 if chunk.done {
                     return Ok(reply);
@@ -210,67 +141,141 @@ impl OllamaClient {
         Err(LlmError::Protocol("stream ended unexpectedly".into()))
     }
 
-    /// Loads a model into memory without generating anything.
-    pub async fn preload(&self, model: &str, keep_alive: &str) -> Result<(), LlmError> {
+    pub async fn check(&self) -> Result<(), LlmError> {
         let response = self
             .http
-            .post(format!("{}/api/generate", self.base_url))
-            .json(&serde_json::json!({ "model": model, "keep_alive": keep_alive }))
+            .get(format!("{}/api/tags", self.base_url))
             .send()
             .await
-            .map_err(|e| self.map_transport_error(e))?;
+            .map_err(|e| self.transport(e))?;
         if response.status().is_success() {
             Ok(())
         } else {
-            Err(LlmError::Api(format!("HTTP {}", response.status())))
+            let status = response.status();
+            Err(status_error(
+                LOCAL_PROVIDER_ID,
+                status,
+                &response.text().await.unwrap_or_default(),
+            ))
         }
     }
 
-    fn map_transport_error(&self, error: reqwest::Error) -> LlmError {
-        if error.is_connect() {
-            LlmError::Unreachable(self.base_url.clone())
+    /// Loads a model into memory without generating anything.
+    pub async fn preload(&self, model: &str) -> Result<(), LlmError> {
+        let response = self
+            .http
+            .post(format!("{}/api/generate", self.base_url))
+            .json(&json!({ "model": model, "keep_alive": self.keep_alive }))
+            .send()
+            .await
+            .map_err(|e| self.transport(e))?;
+        if response.status().is_success() {
+            Ok(())
         } else {
-            LlmError::Api(error.to_string())
+            let status = response.status();
+            Err(status_error(
+                LOCAL_PROVIDER_ID,
+                status,
+                &response.text().await.unwrap_or_default(),
+            ))
         }
     }
+
+    fn transport(&self, error: reqwest::Error) -> LlmError {
+        match transport_error(LOCAL_PROVIDER_ID, error) {
+            // The local message names the URL, which helps more than the raw error.
+            LlmError::Unreachable { provider, .. } => LlmError::Unreachable {
+                provider,
+                details: self.base_url.clone(),
+            },
+            other => other,
+        }
+    }
+}
+
+fn wire_messages(request: &LlmRequest<'_>) -> Vec<Value> {
+    let mut messages = vec![json!({ "role": "system", "content": request.system })];
+    for message in request.messages {
+        messages.push(match message.role {
+            Role::User => json!({ "role": "user", "content": message.content }),
+            Role::Assistant => {
+                let mut wire = json!({ "role": "assistant", "content": message.content });
+                if !message.tool_calls.is_empty() {
+                    wire["tool_calls"] = message
+                        .tool_calls
+                        .iter()
+                        .map(|call| json!({ "function": { "name": call.name, "arguments": call.arguments } }))
+                        .collect();
+                }
+                wire
+            }
+            Role::Tool => json!({
+                "role": "tool",
+                "tool_name": message.tool_name,
+                "content": message.content,
+            }),
+        });
+    }
+    messages
+}
+
+fn wire_tools(tools: &[ToolDef]) -> Value {
+    tools
+        .iter()
+        .map(|tool| {
+            json!({
+                "type": "function",
+                "function": { "name": tool.name, "description": tool.description, "parameters": tool.parameters },
+            })
+        })
+        .collect()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    /// End-to-end against the local Ollama with a real tool call. Run manually:
+    /// `cargo test -- --ignored live_chat_calls_a_tool`
     #[test]
-    fn serializes_request_without_empty_fields() {
-        let messages = [ChatMessage::user("hi")];
-        let request = ChatRequest {
-            model: "m",
+    #[ignore = "needs a running Ollama with assistant-fast:latest"]
+    fn live_chat_calls_a_tool() {
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap();
+        let settings = crate::config::Settings::default();
+        let profile = settings.profile(Some("fast")).clone();
+        let client = OllamaClient::new(reqwest::Client::new(), &settings.ollama);
+        let tools = [ToolDef {
+            name: "weather".into(),
+            description: "Returns the current weather for a location.".into(),
+            parameters: json!({ "type": "object", "properties": { "location": { "type": "string" } }, "required": ["location"] }),
+        }];
+        let messages = [ChatMessage::user("What's the weather in Hamburg?")];
+        let request = LlmRequest {
+            system: "You are a helpful assistant. Use tools when they help.",
             messages: &messages,
-            tools: &[],
-            stream: true,
-            think: None,
-            keep_alive: "5m",
-            options: None,
+            tools: &tools,
+            profile: &profile,
         };
-        let json = serde_json::to_value(&request).unwrap();
-        assert_eq!(
-            json,
-            serde_json::json!({
-                "model": "m",
-                "messages": [{ "role": "user", "content": "hi" }],
-                "stream": true,
-                "keep_alive": "5m"
-            })
-        );
+        let reply = runtime
+            .block_on(client.chat(&request, &CancellationToken::new(), |_| {}))
+            .unwrap();
+        assert_eq!(reply.tool_calls.len(), 1, "{reply:?}");
+        assert_eq!(reply.tool_calls[0].name, "weather");
+        assert!(!reply.tool_calls[0].id.is_empty());
     }
 
     #[test]
-    fn parses_tool_call_chunk() {
+    fn parses_tool_call_chunk_and_assigns_ids() {
         let chunk: StreamChunk = serde_json::from_str(
             r#"{"model":"m","message":{"role":"assistant","content":"","tool_calls":[{"function":{"name":"weather","arguments":{"location":"Berlin"}}}]},"done":false}"#,
         )
         .unwrap();
-        let message = chunk.message.unwrap();
-        assert_eq!(message.tool_calls[0].function.name, "weather");
-        assert_eq!(message.tool_calls[0].function.arguments["location"], "Berlin");
+        let call = &chunk.message.unwrap().tool_calls[0];
+        assert_eq!(call.function.name, "weather");
+        assert_eq!(call.function.arguments["location"], "Berlin");
+        assert!(call.id.is_none());
     }
 }

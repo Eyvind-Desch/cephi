@@ -67,6 +67,9 @@ export const de: Locale = {
   },
   profile: {
     label: "Modell",
+    local: "Lokal",
+    cloud: "Cloud",
+    keyMissing: "Schlüssel fehlt",
   },
   compact: {
     expand: "Erweitern (Strg+E)",

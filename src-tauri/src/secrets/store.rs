@@ -110,11 +110,18 @@ fn wide(text: &str) -> Vec<u16> {
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
+    use std::sync::Mutex;
+
     use super::*;
+
+    /// Tests that write to the real Credential Manager run one at a time: concurrent writes from
+    /// parallel test threads fail intermittently.
+    pub(crate) static CREDENTIAL_MANAGER: Mutex<()> = Mutex::new(());
 
     #[test]
     fn roundtrip_in_credential_manager() {
+        let _serial = CREDENTIAL_MANAGER.lock().unwrap_or_else(|e| e.into_inner());
         // Unique name: the test touches the real Credential Manager, runs must not interfere.
         let name = &format!("orbit_test_{}", uuid::Uuid::new_v4().simple());
         // Non-ASCII on purpose: the blob must round-trip as UTF-8.

@@ -69,6 +69,9 @@ export const en = {
   },
   profile: {
     label: "Model",
+    local: "Local",
+    cloud: "Cloud",
+    keyMissing: "Key missing",
   },
   compact: {
     expand: "Expand (Ctrl+E)",
