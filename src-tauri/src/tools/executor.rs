@@ -38,6 +38,8 @@ pub struct ToolOutput {
 #[serde(tag = "kind", rename_all = "camelCase", rename_all_fields = "camelCase")]
 pub enum ToolDisplay {
     WebResults { query: String, results: Vec<WebResult> },
+    /// A page opened in the web tab; the UI links back to it.
+    WebPage { url: String },
 }
 
 /// A successful tool run: text for the model plus optional display data.
@@ -76,7 +78,7 @@ impl ToolOutput {
 pub async fn execute(ctx: &ExecContext<'_>, tool: &Tool, args: &Args) -> ToolOutput {
     log::info!("tool {} ({})", tool.manifest.name, tool.manifest.action.kind());
     let result = match &tool.manifest.action {
-        Action::OpenUrl { url, target } => open_url(ctx, url, *target, args).await.map(Success::from),
+        Action::OpenUrl { url, target } => open_url(ctx, url, *target, args).await,
         Action::Launch {
             program,
             args: argv,
@@ -149,7 +151,7 @@ async fn open_url(
     url_template: &str,
     target: OpenTarget,
     args: &Args,
-) -> Result<String, String> {
+) -> Result<Success, String> {
     let rendered = template::render(url_template, Context::Url, args, Secrets::Resolve)?;
     // Messages go to the model and the UI, so they use the masked URL.
     let shown = template::render(url_template, Context::Url, args, Secrets::Mask)?;
@@ -173,17 +175,24 @@ async fn open_url(
         if !matches!(parsed.scheme(), "http" | "https") {
             return Err(t!("executor.scheme_not_allowed", scheme = parsed.scheme()).into());
         }
+        let url = parsed.to_string();
         web::open(ctx.app, parsed)
             .await
             .map_err(|e| t!("executor.open_failed", error = e).to_string())?;
-        return Ok(t!("executor.opened_in_orbit", url = shown).into());
+        return Ok(Success {
+            content: t!("executor.opened_in_orbit", url = shown).into(),
+            // A URL with secrets must not reach the UI.
+            display: template::secret_names(url_template)
+                .is_empty()
+                .then_some(ToolDisplay::WebPage { url }),
+        });
     }
 
     ctx.app
         .opener()
         .open_url(parsed.as_str(), None::<&str>)
         .map_err(|e| t!("executor.open_failed", error = e).to_string())?;
-    Ok(t!("executor.opened", url = shown).into())
+    Ok(Success::from(t!("executor.opened", url = shown).to_string()))
 }
 
 fn launch(program: &str, argv: &[String], cwd: Option<&str>, args: &Args) -> Result<String, String> {

@@ -56,6 +56,7 @@ pub struct WebController {
 struct Layout {
     bounds: Bounds,
     visible: bool,
+    seq: u64,
 }
 
 impl WebController {
@@ -167,35 +168,42 @@ async fn create(app: &AppHandle, url: Url) -> AppResult<()> {
     let webview = tauri::async_runtime::spawn_blocking(move || window.add_child(builder, position, size))
         .await
         .map_err(|e| AppError::msg(format!("internal error: {e}")))??;
-    if !layout.visible {
-        webview.hide()?;
-    }
+    // The layout may have changed while the webview was being created.
+    let layout = state.web.layout();
+    apply(&webview, layout.bounds, layout.visible)?;
     log::info!("web tab created");
     Ok(())
 }
 
-pub fn set_bounds(app: &AppHandle, bounds: Bounds) -> AppResult<()> {
+/// Where the page is and whether it is shown, as reported by the frontend.
+///
+/// `seq` increases with every report. IPC calls may arrive out of order; a stale report
+/// (e.g. "hidden" from a view that was just replaced) must not win over a newer one.
+pub fn set_layout(app: &AppHandle, bounds: Bounds, visible: bool, seq: u64) -> AppResult<()> {
     let state = app.state::<AppState>();
-    state.web.layout.lock().expect("web layout lock poisoned").bounds = bounds;
+    {
+        let mut layout = state.web.layout.lock().expect("web layout lock poisoned");
+        if seq < layout.seq {
+            return Ok(());
+        }
+        *layout = Layout { bounds, visible, seq };
+    }
     if let Some(webview) = app.get_webview(WEB_LABEL) {
-        let (position, size) = logical(bounds);
-        webview.set_bounds(Rect {
-            position: position.into(),
-            size: size.into(),
-        })?;
+        apply(&webview, bounds, visible)?;
     }
     Ok(())
 }
 
-pub fn set_visible(app: &AppHandle, visible: bool) -> AppResult<()> {
-    let state = app.state::<AppState>();
-    state.web.layout.lock().expect("web layout lock poisoned").visible = visible;
-    if let Some(webview) = app.get_webview(WEB_LABEL) {
-        if visible {
-            webview.show()?;
-        } else {
-            webview.hide()?;
-        }
+fn apply(webview: &Webview, bounds: Bounds, visible: bool) -> AppResult<()> {
+    let (position, size) = logical(bounds);
+    webview.set_bounds(Rect {
+        position: position.into(),
+        size: size.into(),
+    })?;
+    if visible {
+        webview.show()?;
+    } else {
+        webview.hide()?;
     }
     Ok(())
 }

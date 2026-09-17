@@ -364,8 +364,14 @@ impl Run<'_> {
     fn system_prompt(&self) -> String {
         // Model-facing, so English like the default prompt.
         let now = chrono::Local::now().format("%A, %Y-%m-%d %H:%M");
+        // Short inputs like "? serendipity" don't reveal the user's language; the app language does.
+        let language = match rust_i18n::locale().as_ref() {
+            "de" => "German",
+            _ => "English",
+        };
         format!(
-            "{}\n\nCurrent date and time: {now}.",
+            "{}\n\nCurrent date and time: {now}.\nThe user's language is {language}: answer in {language} \
+             unless the user writes full sentences in another language.",
             self.config.settings.agent.system_prompt
         )
     }

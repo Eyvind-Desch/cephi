@@ -22,6 +22,8 @@ interface UiState {
    * so it hides while something would overlap it.
    */
   overlays: number;
+  /** The web tab is enlarged (window mode `large`). */
+  webLarge: boolean;
 
   /** Shows the panel for the current view (no-op if a panel is already shown). */
   expand: () => void;
@@ -33,10 +35,12 @@ interface UiState {
   applyConfig: (config: ConfigSnapshot) => void;
   showFlash: (flash: Flash | null) => void;
   setOverlay: (open: boolean) => void;
+  toggleWebLarge: () => void;
 }
 
-/** The web tab gets a wider window. */
-const panelMode = (view: PanelView): WindowMode => (view === "web" ? "web" : "expanded");
+/** Panels share the normal size; only the web tab can be enlarged. */
+const panelMode = (view: PanelView, webLarge: boolean): WindowMode =>
+  view === "web" && webLarge ? "large" : "expanded";
 
 export const useUi = create<UiState>()((set, get) => {
   const setMode = (mode: WindowMode) => {
@@ -53,9 +57,10 @@ export const useUi = create<UiState>()((set, get) => {
     profileId: null,
     flash: null,
     overlays: 0,
+    webLarge: false,
 
     expand: () => {
-      if (get().mode === "compact") setMode(panelMode(get().view));
+      if (get().mode === "compact") setMode(panelMode(get().view, get().webLarge));
     },
 
     collapse: () => setMode("compact"),
@@ -64,7 +69,7 @@ export const useUi = create<UiState>()((set, get) => {
 
     setView: (view) => {
       set({ view });
-      setMode(panelMode(view));
+      setMode(panelMode(view, get().webLarge));
     },
 
     togglePinned: () => {
@@ -90,5 +95,11 @@ export const useUi = create<UiState>()((set, get) => {
     showFlash: (flash) => set({ flash }),
 
     setOverlay: (open) => set((s) => ({ overlays: Math.max(0, s.overlays + (open ? 1 : -1)) })),
+
+    toggleWebLarge: () => {
+      const webLarge = !get().webLarge;
+      set({ webLarge });
+      if (get().mode !== "compact") setMode(panelMode(get().view, webLarge));
+    },
   };
 });

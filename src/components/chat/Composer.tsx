@@ -21,9 +21,10 @@ export function Composer({ compact = false }: ComposerProps) {
   const cancel = useChat((s) => s.cancel);
 
   // Focus when the window is summoned via hotkey/tray, and on mount (mode switch).
+  // One frame later: the webview only accepts keyboard focus once the window is active.
   useEffect(() => {
     inputRef.current?.focus();
-    const unlisten = onWindowShown(() => inputRef.current?.focus());
+    const unlisten = onWindowShown(() => requestAnimationFrame(() => inputRef.current?.focus()));
     return () => void unlisten.then((fn) => fn());
   }, []);
 

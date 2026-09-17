@@ -128,7 +128,7 @@
         "showOnStartup": { "type": "boolean", "default": true },
         "compact": { "$ref": "#/definitions/size", "description": "Size of the compact bar." },
         "expanded": { "$ref": "#/definitions/size", "description": "Size of the large panel." },
-        "web": { "$ref": "#/definitions/size", "description": "Size of the panel while the web tab is open. Limited to the screen." }
+        "large": { "$ref": "#/definitions/size", "description": "Size of the enlarged panel (expand button, e.g. in the web tab). Limited to the screen." }
       }
     }
   },

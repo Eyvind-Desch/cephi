@@ -38,6 +38,6 @@
     "showOnStartup": true,
     "compact": { "width": 640, "height": 68 },
     "expanded": { "width": 480, "height": 720 },
-    "web": { "width": 1040, "height": 820 }
+    "large": { "width": 1040, "height": 820 }
   }
 }

@@ -8,14 +8,14 @@ const TABS: { view: PanelView; icon: LucideIcon; label: "tabs.chat" | "tabs.web"
   { view: "web", icon: Globe, label: "tabs.web" },
 ];
 
-/** Segmented switch between chat and web tab. Sub-views like the keys page select neither. */
+/** Icon switch between the main views. Sub-views like the keys page select none. */
 export function ViewTabs() {
   const { t } = useTranslation();
   const view = useUi((s) => s.view);
   const setView = useUi((s) => s.setView);
 
   return (
-    <div role="tablist" className="flex items-center gap-0.5 rounded-lg bg-sunken p-0.5">
+    <div role="tablist" className="flex items-center rounded-lg bg-sunken p-0.5">
       {TABS.map((tab) => {
         const selected = view === tab.view;
         const Icon = tab.icon;
@@ -25,14 +25,15 @@ export function ViewTabs() {
             type="button"
             role="tab"
             aria-selected={selected}
+            aria-label={t(tab.label)}
+            title={t(tab.label)}
             onClick={() => setView(tab.view)}
             className={clsx(
-              "flex h-7 items-center gap-1.5 rounded-md px-2.5 text-[12.5px] transition-colors",
-              selected ? "bg-raised text-fg shadow-sm shadow-black/10" : "text-muted hover:text-fg",
+              "grid size-7 place-items-center rounded-md transition-colors",
+              selected ? "bg-raised text-fg shadow-sm shadow-black/10" : "text-subtle hover:text-fg",
             )}
           >
-            <Icon size={14} />
-            {t(tab.label)}
+            <Icon size={15} />
           </button>
         );
       })}

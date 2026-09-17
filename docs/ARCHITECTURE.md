@@ -75,9 +75,12 @@ It travels only in the `ToolResult` event, so the UI can render cards without pa
 The web tab is a second, native webview (`web`) inside the Orbit window (`tauri` feature `unstable`,
 `Window::add_child`). The window is therefore handled as `Window`, not `WebviewWindow`.
 
-- **Layout:** the React `WebView` reserves the page area and reports its position (`web_set_bounds`)
-  on every resize; the backend moves the native view there. Native views are drawn above the HTML, so
-  the page hides while a menu is open (`ui.overlays`).
+- **Layout:** the React `WebView` reserves the page area and reports position and visibility together
+  (`web_set_layout`) on every resize. Each report carries an increasing `seq`: IPC calls can arrive out of
+  order, and a stale "hidden" must not win. Native views are drawn above the HTML, so the page hides while a
+  menu is open (`ui.overlays`).
+- **Window size:** the web tab uses the normal panel size; *enlarge* switches the window to mode `large`.
+  Mode changes are animated in the backend (`SetWindowPos` per frame, position and size in one call).
 - **State:** URL, title and loading state come from page load and title events (`orbit://web-state`).
   Tools with `"target": "orbit"` navigate and emit `orbit://web-open`, which switches to the tab.
 - **Isolation:** the capability lists webviews (`"webviews": ["main"]`), not windows, so the web tab gets

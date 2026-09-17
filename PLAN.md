@@ -110,7 +110,7 @@ request. Unambiguous commands ("open X") run through the quick action path witho
    excerpts only (fast), plus a Google tab in the panel
    - ✅ 3a: SearXNG in Docker/WSL (`infra/searxng`), `web_search` builtin, `? query` fast path with
      `afterTrigger: "answer"`, source grid + citation badges → [docs/SEARCH.md](docs/SEARCH.md)
-   - ✅ 3b: Web tab: native child webview in the panel (wider window), Chat | Web tabs, address bar,
+   - ✅ 3b: Web tab: native child webview in the panel (normal size, animated enlarge), icon tabs, address bar,
      `g query` and chat links open there, `open_url` `target: "orbit"`
 4. **MCP** – `mcp.json`, tools from MCP servers
 5. **Polish** – settings UI, save history, code highlighting, autostart, installer

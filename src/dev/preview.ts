@@ -2,7 +2,7 @@
  * Design preview: runs the UI in a normal browser with sample data (dev server only).
  *
  * Open http://localhost:1420/?mode=expanded&view=keys&lang=de
- *   mode: compact | expanded   view: chat | keys | web   chat: demo | results   lang: en | de   keys: some
+ *   mode: compact | expanded | large   view: chat | keys | web   chat: demo | results   lang: en | de   keys: some
  *   web: page (web tab with a loaded page)
  *
  * Used to review UI changes (and take headless screenshots) without touching the running app.
@@ -160,7 +160,8 @@ export function installPreview() {
 
   document.documentElement.dataset.preview = "true";
   useUi.setState({
-    mode: params.get("mode") === "compact" ? "compact" : params.get("view") === "web" ? "web" : "expanded",
+    mode: params.get("mode") === "compact" ? "compact" : params.get("mode") === "large" ? "large" : "expanded",
+    webLarge: params.get("mode") === "large",
     view: (params.get("view") as PanelView | null) ?? "chat",
   });
   if (params.get("chat") === "demo") useChat.setState({ messages: demoChat });

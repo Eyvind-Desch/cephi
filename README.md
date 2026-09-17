@@ -24,8 +24,8 @@ One hotkey, one input field: answer, search, or action ("öffne die Bluetooth-Ei
 
 Clicking outside hides Orbit, unless it's pinned (⋯ menu). Tray icon: open, configuration, quit.
 
-The panel has two tabs: **Chat** and **Web**. The web tab shows Google and other pages inside Orbit
-(address bar: search terms or an address); links from the chat and search results open there too.
+The panel has two tabs (icons top right): **Chat** and **Web**. The web tab shows Google and other pages inside
+Orbit (address bar: search terms or an address) and can be enlarged; links from the chat and search results open there too.
 
 ### Quick actions (no AI, instant)
 

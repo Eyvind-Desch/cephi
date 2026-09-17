@@ -33,9 +33,13 @@ pub struct SearchResponse {
 impl SearchResponse {
     /// Numbered excerpts for the model. Model-facing, so English.
     pub fn for_model(&self, query: &str) -> String {
+        // Small models tend to describe the request ("The user asked about …") instead of answering.
         let mut text = format!(
-            "Web results for \"{query}\". Answer the user's question from these results only and cite \
-             sources as [1], [2], …. If they do not contain the answer, say so.\n"
+            "Web results for \"{query}\".\n\
+             Answer directly in the user's language, in 1-4 sentences, using only these results. \
+             If the query is just a word or name, explain what it is or means. \
+             Cite sources as [1], [2]. Never talk about \"the user\", the query or the results themselves. \
+             If the results do not contain the answer, say so briefly.\n"
         );
         for answer in &self.answers {
             let _ = write!(text, "\nDirect answer: {}\n", excerpt(answer, MODEL_SNIPPET_CHARS));

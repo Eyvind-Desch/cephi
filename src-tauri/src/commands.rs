@@ -128,14 +128,10 @@ pub async fn web_open(app: AppHandle, url: String) -> AppResult<()> {
     web::open(&app, parsed).await
 }
 
+/// Position and visibility of the page; `seq` orders reports that arrive out of order.
 #[tauri::command]
-pub fn web_set_bounds(app: AppHandle, bounds: web::Bounds) -> AppResult<()> {
-    web::set_bounds(&app, bounds)
-}
-
-#[tauri::command]
-pub fn web_set_visible(app: AppHandle, visible: bool) -> AppResult<()> {
-    web::set_visible(&app, visible)
+pub fn web_set_layout(app: AppHandle, bounds: web::Bounds, visible: bool, seq: u64) -> AppResult<()> {
+    web::set_layout(&app, bounds, visible, seq)
 }
 
 #[tauri::command]

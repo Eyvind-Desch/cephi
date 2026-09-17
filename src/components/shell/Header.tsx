@@ -50,15 +50,16 @@ export function Header() {
   return (
     <header className="flex items-center gap-1.5 border-b border-line py-2 pr-2 pl-3">
       <OrbitMark size={22} active={running} />
-      <span className="mr-2 text-[13.5px] font-medium tracking-tight">Orbit</span>
-      <ViewTabs />
+      <span className="mr-1.5 text-[13.5px] font-medium tracking-tight">Orbit</span>
       {pinned && (
-        <span title={t("header.pinned")} className="ml-1 text-accent">
+        <span title={t("header.pinned")} className="text-accent">
           <Pin size={13} className="fill-current" />
         </span>
       )}
       <div className="flex-1" />
-      <ProfileSwitch />
+      {/* The model only matters in the chat. */}
+      {view === "chat" && <ProfileSwitch />}
+      <ViewTabs />
       <Menu
         entries={entries}
         trigger={({ open, toggle, id }) => (

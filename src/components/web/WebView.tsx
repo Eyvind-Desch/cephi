@@ -1,8 +1,8 @@
 import clsx from "clsx";
-import { ArrowLeft, ArrowRight, ExternalLink, Globe, Lock, RotateCw, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Expand, ExternalLink, Globe, Lock, RotateCw, Shrink, X } from "lucide-react";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { useTranslation } from "react-i18next";
-import { api } from "../../lib/ipc";
+import { api, onWindowShown } from "../../lib/ipc";
 import { useUi } from "../../store/ui";
 import { useWeb } from "../../store/web";
 import { IconButton } from "../ui/IconButton";
@@ -31,10 +31,12 @@ export function WebView() {
 function Toolbar() {
   const { t } = useTranslation();
   const { url, loading } = useWeb();
+  const large = useUi((s) => s.webLarge);
+  const toggleLarge = useUi((s) => s.toggleWebLarge);
   const hasPage = url != null;
 
   return (
-    <div className="flex items-center gap-1 border-b border-line px-2 py-1.5">
+    <div className="flex items-center gap-0.5 border-b border-line px-2 py-1.5">
       <IconButton icon={ArrowLeft} label={t("web.back")} disabled={!hasPage} onClick={() => void api.webCommand("back")} />
       <IconButton
         icon={ArrowRight}
@@ -55,6 +57,11 @@ function Toolbar() {
         disabled={!hasPage}
         onClick={() => void api.webCommand("openExternal")}
       />
+      <IconButton
+        icon={large ? Shrink : Expand}
+        label={large ? t("web.shrink") : t("web.enlarge")}
+        onClick={toggleLarge}
+      />
     </div>
   );
 }
@@ -66,9 +73,11 @@ function AddressBar() {
   const inputRef = useRef<HTMLInputElement>(null);
   const editing = draft != null;
 
-  // Opening the tab without a page: ready for input.
+  // Ready for input when the tab opens without a page and whenever Orbit is summoned.
   useEffect(() => {
     if (!useWeb.getState().url) inputRef.current?.focus();
+    const unlisten = onWindowShown(() => requestAnimationFrame(() => inputRef.current?.focus()));
+    return () => void unlisten.then((fn) => fn());
   }, []);
 
   // A page loaded (from the address bar, a tool or a link): show its address.
@@ -85,8 +94,7 @@ function AddressBar() {
     if (input) void api.webNavigate(input);
   };
 
-  const secure = url?.startsWith("https://");
-  const Icon = secure ? Lock : Globe;
+  const Icon = url?.startsWith("https://") ? Lock : Globe;
 
   return (
     <label
@@ -112,8 +120,8 @@ function AddressBar() {
         onChange={(e) => setDraft(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === "Enter") submit();
-          if (e.key === "Escape" && editing) {
-            // Leave editing first; a second Escape goes back to the chat.
+          if (e.key === "Escape" && editing && url) {
+            // With a page: leave editing first; a second Escape goes back to the chat.
             e.stopPropagation();
             e.preventDefault();
             setDraft(null);
@@ -144,27 +152,29 @@ function EmptyPage() {
   );
 }
 
+/** Increases across remounts and page reloads, so the backend can drop stale layout reports. */
+let layoutSeq = Date.now() * 1000;
+
 /**
  * Keeps the native page on top of `ref`'s area while mounted and `visible`, hides it otherwise.
- * Measured again shortly after mounting because the panel animates in with a slight scale.
+ * Every report carries position and visibility together, so reports cannot contradict each other.
  */
 function usePagePlacement(ref: RefObject<HTMLDivElement | null>, visible: boolean) {
-  const hasPage = useWeb((s) => s.url != null);
+  const visibleRef = useRef(visible);
+  const reportRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    let last = "";
     const report = () => {
       const r = el.getBoundingClientRect();
       const bounds = { x: r.left, y: r.top, width: r.width, height: r.height };
-      const key = JSON.stringify(bounds);
-      if (key === last) return;
-      last = key;
-      void api.webSetBounds(bounds);
+      void api.webSetLayout(bounds, visibleRef.current, ++layoutSeq);
     };
+    reportRef.current = report;
 
     report();
+    // The panel animates in with a slight scale; measure again once it settled.
     const settle = window.setTimeout(report, 220);
     const observer = new ResizeObserver(report);
     observer.observe(el);
@@ -173,12 +183,12 @@ function usePagePlacement(ref: RefObject<HTMLDivElement | null>, visible: boolea
       window.clearTimeout(settle);
       observer.disconnect();
       window.removeEventListener("resize", report);
+      void api.webSetLayout({ x: 0, y: 0, width: 0, height: 0 }, false, ++layoutSeq);
     };
-  }, [ref, hasPage]);
+  }, [ref]);
 
   useEffect(() => {
-    void api.webSetVisible(visible);
+    visibleRef.current = visible;
+    reportRef.current();
   }, [visible]);
-
-  useEffect(() => () => void api.webSetVisible(false), []);
 }

@@ -150,8 +150,8 @@ pub struct WindowSettings {
     pub show_on_startup: bool,
     pub compact: Size,
     pub expanded: Size,
-    /// Panel size while the web tab is open (limited to the screen).
-    pub web: Size,
+    /// Enlarged panel, e.g. for the web tab (limited to the screen).
+    pub large: Size,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -404,7 +404,7 @@ impl Default for WindowSettings {
                 width: 480,
                 height: 720,
             },
-            web: Size {
+            large: Size {
                 width: 1040,
                 height: 820,
             },

@@ -1,9 +1,10 @@
 import clsx from "clsx";
-import { Check, ChevronRight, KeyRound, Loader2, ShieldQuestion, Wrench, X, Zap } from "lucide-react";
+import { Check, ChevronRight, Globe, KeyRound, Loader2, ShieldQuestion, Wrench, X, Zap } from "lucide-react";
 import { motion } from "motion/react";
 import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { formatDuration } from "../../i18n";
+import { openLink } from "../../lib/links";
 import { useChat } from "../../store/chat";
 import type { ToolPart } from "../../store/chatModel";
 import { useUi } from "../../store/ui";
@@ -25,6 +26,7 @@ export function ToolCard({ part }: { part: ToolPart }) {
   const awaiting = part.status === "awaiting";
   const failed = part.status === "error";
   const hasArgs = part.args != null && Object.keys(part.args as object).length > 0;
+  const pageUrl = part.display?.kind === "webPage" ? part.display.url : null;
 
   return (
     <motion.div
@@ -35,27 +37,40 @@ export function ToolCard({ part }: { part: ToolPart }) {
         awaiting ? "border-warning/50" : "border-line",
       )}
     >
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center gap-2.5 px-3 py-2 text-left hover:bg-sunken"
-      >
-        {part.fast ? (
-          <span title={t("toolCard.fastPath")}>
-            <Zap size={14} className="shrink-0 text-accent" />
+      <div className="flex items-center hover:bg-sunken">
+        <button
+          type="button"
+          // Opened a page: the card leads back to it. Otherwise it toggles the details.
+          onClick={() => (pageUrl ? void openLink(pageUrl) : setOpen((v) => !v))}
+          title={pageUrl ? t("toolCard.showPage") : undefined}
+          className="flex min-w-0 flex-1 items-center gap-2.5 py-2 pl-3 text-left"
+        >
+          {part.fast ? (
+            <span title={t("toolCard.fastPath")}>
+              <Zap size={14} className="shrink-0 text-accent" />
+            </span>
+          ) : (
+            <Wrench size={14} className="shrink-0 text-subtle" />
+          )}
+          <span className="min-w-0 flex-1 truncate text-muted">{part.title}</span>
+          {pageUrl && <Globe size={13} className="shrink-0 text-subtle" />}
+          {part.durationMs != null && (
+            <span className="shrink-0 text-[11.5px] text-subtle">{formatDuration(part.durationMs)}</span>
+          )}
+          <span title={t(`toolCard.status.${part.status}`)} className={clsx("shrink-0", status.className)}>
+            <StatusIcon size={15} className={clsx(status.spin && "animate-spin")} />
           </span>
-        ) : (
-          <Wrench size={14} className="shrink-0 text-subtle" />
-        )}
-        <span className="min-w-0 flex-1 truncate text-muted">{part.title}</span>
-        {part.durationMs != null && (
-          <span className="shrink-0 text-[11.5px] text-subtle">{formatDuration(part.durationMs)}</span>
-        )}
-        <span title={t(`toolCard.status.${part.status}`)} className={clsx("shrink-0", status.className)}>
-          <StatusIcon size={15} className={clsx(status.spin && "animate-spin")} />
-        </span>
-        <ChevronRight size={14} className={clsx("shrink-0 text-subtle transition-transform", open && "rotate-90")} />
-      </button>
+        </button>
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          title={t("toolCard.details.toggle")}
+          className="grid h-9 w-8 shrink-0 place-items-center pr-1 text-subtle hover:text-fg"
+        >
+          <ChevronRight size={14} className={clsx("transition-transform", open && "rotate-90")} />
+        </button>
+      </div>
 
       {awaiting && (
         <div className="space-y-2.5 border-t border-line px-3 py-2.5">

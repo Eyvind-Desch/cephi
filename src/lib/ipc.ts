@@ -5,8 +5,8 @@
 import { Channel, invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 
-/** `web` is the wider panel for the web tab. */
-export type WindowMode = "compact" | "expanded" | "web";
+/** `large` is the enlarged panel (e.g. the web tab after "enlarge"). */
+export type WindowMode = "compact" | "expanded" | "large";
 
 /** `src-tauri/src/desktop/web.rs` */
 export interface WebState {
@@ -24,6 +24,7 @@ export interface WebBounds {
 }
 
 export type WebCommand = "back" | "forward" | "reload" | "stop" | "openExternal";
+
 export type Permission = "auto" | "confirm";
 
 export interface ProfileInfo {
@@ -97,7 +98,10 @@ export interface WebResult {
 }
 
 /** `src-tauri/src/tools/executor.rs`: structured tool output the UI renders richer than text. */
-export type ToolDisplay = { kind: "webResults"; query: string; results: WebResult[] };
+export type ToolDisplay =
+  | { kind: "webResults"; query: string; results: WebResult[] }
+  /** A page opened in the web tab. */
+  | { kind: "webPage"; url: string };
 
 /** `src-tauri/src/agent/events.rs` */
 export type AgentEvent =
@@ -135,7 +139,7 @@ export const api = {
     channel.onmessage = onEvent;
     return invoke<void>("agent_continue", { profileId, onEvent: channel });
   },
-  agentPreload:(profileId: string) => invoke<void>("agent_preload", { profileId }),
+  agentPreload: (profileId: string) => invoke<void>("agent_preload", { profileId }),
   agentCancel: () => invoke<void>("agent_cancel"),
   agentConfirm: (callId: string, approved: boolean) => invoke<boolean>("agent_confirm", { callId, approved }),
   agentReset: () => invoke<void>("agent_reset"),
@@ -151,8 +155,9 @@ export const api = {
   webNavigate: (input: string) => invoke<void>("web_navigate", { input }),
   /** Opens a link in the web tab; the backend then emits `orbit://web-open`. */
   webOpen: (url: string) => invoke<void>("web_open", { url }),
-  webSetBounds: (bounds: WebBounds) => invoke<void>("web_set_bounds", { bounds }),
-  webSetVisible: (visible: boolean) => invoke<void>("web_set_visible", { visible }),
+  /** `seq` must increase with every call: IPC calls can arrive out of order. */
+  webSetLayout: (bounds: WebBounds, visible: boolean, seq: number) =>
+    invoke<void>("web_set_layout", { bounds, visible, seq }),
   webCommand: (command: WebCommand) => invoke<void>("web_command", { command }),
 
   secretsList: () => invoke<SecretGroup[]>("secrets_list"),
@@ -170,5 +175,5 @@ export const onWebState = (handler: (state: WebState) => void): Promise<Unlisten
 /** A tool opened a page in the web tab. */
 export const onWebOpen = (handler: () => void): Promise<UnlistenFn> => listen("orbit://web-open", handler);
 
-export const onConfigChanged =(handler: (snapshot: ConfigSnapshot) => void): Promise<UnlistenFn> =>
+export const onConfigChanged = (handler: (snapshot: ConfigSnapshot) => void): Promise<UnlistenFn> =>
   listen<ConfigSnapshot>("orbit://config-changed", (event) => handler(event.payload));
