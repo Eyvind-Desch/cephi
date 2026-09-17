@@ -1,11 +1,13 @@
 import clsx from "clsx";
-import { Bot, Sparkles, Wrench } from "lucide-react";
-import { siClaude, siGooglegemini, siOllama, siOpenrouter, siSpotify, type SimpleIcon } from "simple-icons";
+import { Sparkles, Wrench } from "lucide-react";
+import { siClaude, siGooglegemini, siOllama, siOpenrouter, siSpotify } from "simple-icons";
+import { openAi, type Logo } from "./logos";
 
-/** Monochrome brand logos (Simple Icons, CC0) with neutral fallbacks. */
-const logos: Record<string, SimpleIcon> = {
+/** Monochrome brand logos (Simple Icons, CC0, plus `logos.ts`) with neutral fallbacks. */
+const logos: Record<string, Logo> = {
   anthropic: siClaude,
   gemini: siGooglegemini,
+  openai: openAi,
   openrouter: siOpenrouter,
   ollama: siOllama,
   music: siSpotify,
@@ -26,7 +28,7 @@ export function BrandIcon({ name, size = 16, className }: BrandIconProps) {
       <svg
         role="img"
         aria-label={logo.title}
-        viewBox="0 0 24 24"
+        viewBox={logo.viewBox ?? "0 0 24 24"}
         width={size}
         height={size}
         fill="currentColor"
@@ -36,6 +38,6 @@ export function BrandIcon({ name, size = 16, className }: BrandIconProps) {
       </svg>
     );
   }
-  const Fallback = name === "wrench" ? Wrench : name === "openai" ? Bot : Sparkles;
-  return <Fallback size={size} strokeWidth={1.6} className={clsx("shrink-0", className)} />;
+  const Fallback = name === "wrench" ? Wrench : Sparkles;
+  return <Fallback size={size} className={clsx("shrink-0", className)} />;
 }
