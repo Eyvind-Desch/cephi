@@ -4,7 +4,9 @@ use std::time::{Duration, Instant};
 
 use serde::Deserialize;
 use tauri::{AppHandle, Emitter, Manager, Monitor, Window};
-use windows_sys::Win32::UI::WindowsAndMessaging::{SetWindowPos, SWP_NOACTIVATE, SWP_NOOWNERZORDER, SWP_NOZORDER};
+use windows_sys::Win32::UI::WindowsAndMessaging::{
+    GetForegroundWindow, SetWindowPos, SWP_NOACTIVATE, SWP_NOOWNERZORDER, SWP_NOZORDER,
+};
 
 use crate::config::{Anchor, WindowSettings};
 use crate::error::{AppError, AppResult};
@@ -96,7 +98,7 @@ pub fn hide(app: &AppHandle) -> AppResult<()> {
 /// Hotkey behaviour: hide when in front, otherwise bring to front.
 pub fn toggle(app: &AppHandle) -> AppResult<()> {
     let window = main_window(app)?;
-    if window.is_visible()? && window.is_focused()? {
+    if window.is_visible()? && is_foreground(&window) {
         hide(app)
     } else {
         show(app)
@@ -149,7 +151,8 @@ pub fn on_focus_lost(app: &AppHandle) {
             return;
         }
         if let Ok(window) = main_window(&app) {
-            if window.is_visible().unwrap_or(false) && !window.is_focused().unwrap_or(true) {
+            if window.is_visible().unwrap_or(false) && !is_foreground(&window) {
+                log::info!("hidden: another window became active");
                 let _ = window.hide();
             }
         }
@@ -197,12 +200,30 @@ fn current_rect(window: &Window) -> AppResult<Rect> {
     })
 }
 
+/// Whether Orbit is the active app. Unlike `is_focused`, this stays true while the keyboard focus is in a
+/// child webview (the web tab): focus moving *inside* the window must not count as clicking elsewhere.
+fn is_foreground(window: &Window) -> bool {
+    // SAFETY: plain query without arguments.
+    let foreground = unsafe { GetForegroundWindow() };
+    window.hwnd().is_ok_and(|hwnd| std::ptr::eq(foreground, hwnd.0))
+}
+
 /// Moves and resizes in one step, so the anchored edge does not jitter during animations.
 fn place(window: &Window, rect: Rect) -> AppResult<()> {
     let hwnd = window.hwnd()?.0 as windows_sys::Win32::Foundation::HWND;
     let flags = SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOACTIVATE;
     // SAFETY: `hwnd` belongs to a live window owned by this process.
-    let ok = unsafe { SetWindowPos(hwnd, std::ptr::null_mut(), rect.x, rect.y, rect.width, rect.height, flags) };
+    let ok = unsafe {
+        SetWindowPos(
+            hwnd,
+            std::ptr::null_mut(),
+            rect.x,
+            rect.y,
+            rect.width,
+            rect.height,
+            flags,
+        )
+    };
     if ok == 0 {
         return Err(AppError::msg(format!(
             "SetWindowPos failed: {}",
@@ -238,8 +259,18 @@ mod tests {
 
     #[test]
     fn interpolation_hits_both_ends() {
-        let from = Rect { x: 100, y: 800, width: 640, height: 68 };
-        let to = Rect { x: -60, y: 100, width: 800, height: 768 };
+        let from = Rect {
+            x: 100,
+            y: 800,
+            width: 640,
+            height: 68,
+        };
+        let to = Rect {
+            x: -60,
+            y: 100,
+            width: 800,
+            height: 768,
+        };
         assert_eq!(interpolate(from, to, ease_out_cubic(0.0)), from);
         assert_eq!(interpolate(from, to, ease_out_cubic(1.0)), to);
         // Anchored bottom-right: the right edge stays put along the way.

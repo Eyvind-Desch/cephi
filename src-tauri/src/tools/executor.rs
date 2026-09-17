@@ -37,9 +37,14 @@ pub struct ToolOutput {
 #[derive(Clone, Debug, Serialize)]
 #[serde(tag = "kind", rename_all = "camelCase", rename_all_fields = "camelCase")]
 pub enum ToolDisplay {
-    WebResults { query: String, results: Vec<WebResult> },
+    WebResults {
+        query: String,
+        results: Vec<WebResult>,
+    },
     /// A page opened in the web tab; the UI links back to it.
-    WebPage { url: String },
+    WebPage {
+        url: String,
+    },
 }
 
 /// A successful tool run: text for the model plus optional display data.
