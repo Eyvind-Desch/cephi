@@ -48,7 +48,11 @@ pub async fn search(http: &reqwest::Client, settings: &SearchSettings, query: &s
     let base = settings.searxng_url.trim_end_matches('/');
     let response = http
         .get(format!("{base}/search"))
-        .query(&[("q", query), ("format", "json"), ("language", settings.language.as_str())])
+        .query(&[
+            ("q", query),
+            ("format", "json"),
+            ("language", settings.language.as_str()),
+        ])
         .timeout(REQUEST_TIMEOUT)
         .send()
         .await
@@ -85,7 +89,9 @@ fn parse(raw: RawResponse, max_results: usize) -> SearchResponse {
         .results
         .into_iter()
         .filter_map(|r| {
-            let url = r.url.filter(|u| u.starts_with("http://") || u.starts_with("https://"))?;
+            let url = r
+                .url
+                .filter(|u| u.starts_with("http://") || u.starts_with("https://"))?;
             Some(WebResult {
                 title: super::excerpt(if r.title.trim().is_empty() { &url } else { &r.title }, 160),
                 snippet: super::excerpt(&r.content, 600),

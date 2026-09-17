@@ -54,6 +54,7 @@ pub fn run() {
             commands::config_reload,
             commands::config_open_folder,
             commands::agent_send,
+            commands::agent_continue,
             commands::agent_preload,
             commands::agent_cancel,
             commands::agent_confirm,

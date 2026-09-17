@@ -16,5 +16,5 @@ mod trigger;
 
 pub use executor::{accepts_fast_path, execute, preview, ExecContext, ToolDisplay, ToolOutput};
 pub use localized::LocalizedText;
-pub use manifest::{AfterTrigger, Permission};
+pub use manifest::Permission;
 pub use registry::ToolRegistry;

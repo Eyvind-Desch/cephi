@@ -26,8 +26,12 @@ restarts with Docker. Config: [`infra/searxng/settings.yml`](../infra/searxng/se
 | Any question that needs current information | The AI can call `web_search` by itself |
 | `g …` | Opens Google in the browser (`google_search` tool) |
 
-The answer only uses the excerpts of the results (fast, also with small local models). Click a card or a
-citation badge to open the page in the browser.
+The answer only uses the excerpts of the results (fast, also with small local models) and comes from the
+model selected in the header, local or cloud. Click a card or a citation badge to open the page in the browser.
+
+**Without AI:** the search itself never needs a model. If the model is not available (Ollama not running,
+API key missing), the cards stay and a quiet note explains why. **Summarize with AI** below the cards
+asks the model later, e.g. after switching to another model.
 
 ## Settings (`settings.json`)
 
@@ -35,9 +39,13 @@ citation badge to open the page in the browser.
 "search": {
   "searxngUrl": "http://127.0.0.1:8888",
   "language": "auto",
-  "maxResults": 6
+  "maxResults": 6,
+  "summarize": true
 }
 ```
+
+- `summarize`: `false` = only result cards after `? query` (fastest, no model involved); the button
+  asks the AI on demand.
 
 - `language`: `auto` detects it from the query; `all`, `de`, `en-US`, … force one.
 - `maxResults`: fewer results = shorter prompt = faster answers from local models.

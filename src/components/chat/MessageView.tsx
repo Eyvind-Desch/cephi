@@ -1,8 +1,9 @@
-import { AlertCircle, Check, CircleSlash, Copy } from "lucide-react";
+import { AlertCircle, Check, CircleSlash, Copy, Info, Sparkles } from "lucide-react";
 import { motion } from "motion/react";
 import { Fragment, memo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { citationSources, type AssistantMessage, type Message } from "../../store/chatModel";
+import { useChat } from "../../store/chat";
+import { citationSources, hasUnansweredResults, type AssistantMessage, type Message } from "../../store/chatModel";
 import { Markdown } from "./Markdown";
 import { ToolCard } from "./ToolCard";
 import { WebResults } from "./WebResults";
@@ -11,8 +12,10 @@ import { WebResults } from "./WebResults";
  * Memoized: while a reply streams only the message being updated gets a new object,
  * so all other messages skip re-rendering.
  */
-export const MessageView = memo(function MessageView({ message }: { message: Message }) {
+export const MessageView = memo(function MessageView({ message, isLast }: { message: Message; isLast: boolean }) {
   const { t } = useTranslation();
+  const running = useChat((s) => s.running);
+  const summarize = useChat((s) => s.summarize);
 
   if (message.role === "user") {
     return (
@@ -24,7 +27,10 @@ export const MessageView = memo(function MessageView({ message }: { message: Mes
     );
   }
 
-  const isEmpty = message.parts.length === 0;
+  const lastPart = message.parts.at(-1);
+  // Nothing yet, or a tool finished and the model is about to answer.
+  const waitingForModel =
+    message.status === "streaming" && (!lastPart || (lastPart.kind === "tool" && lastPart.status === "ok"));
   const text = plainText(message);
   const sources = citationSources(message.parts);
 
@@ -41,7 +47,23 @@ export const MessageView = memo(function MessageView({ message }: { message: Mes
         ),
       )}
 
-      {isEmpty && message.status === "streaming" && <TypingIndicator />}
+      {waitingForModel && <TypingIndicator />}
+
+      {message.notice && (
+        <p className="flex items-start gap-1.5 text-[12px] leading-snug text-subtle">
+          <Info size={13} className="mt-px shrink-0" /> <span>{message.notice}</span>
+        </p>
+      )}
+
+      {isLast && !running && hasUnansweredResults(message) && (
+        <button
+          type="button"
+          onClick={() => void summarize(message.id)}
+          className="flex items-center gap-1.5 rounded-lg border border-line bg-raised px-2.5 py-1.5 text-[12.5px] text-muted select-none hover:bg-sunken hover:text-fg"
+        >
+          <Sparkles size={13} /> {t("webResults.summarize")}
+        </button>
+      )}
 
       {message.status === "cancelled" && (
         <p className="flex items-center gap-1.5 text-[12px] text-subtle select-none">

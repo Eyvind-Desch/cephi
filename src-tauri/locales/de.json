@@ -2,6 +2,8 @@
   "_version": 1,
   "agent": {
     "busy": "Es läuft bereits eine Anfrage.",
+    "nothing_to_continue": "Es gibt keine Ergebnisse, aus denen ich antworten kann.",
+    "answer_unavailable": "Keine KI-Antwort: %{reason}",
     "too_many_rounds": "Abbruch nach %{rounds} Tool-Runden ohne abschließende Antwort.",
     "unknown_tool": "Unbekanntes Tool \"%{name}\".",
     "denied": "Der Nutzer hat die Ausführung abgelehnt.",

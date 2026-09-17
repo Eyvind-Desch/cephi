@@ -56,6 +56,7 @@ export const de: Locale = {
     more_one: "{{count}} weiteres Ergebnis",
     more_other: "{{count}} weitere Ergebnisse",
     less: "Weniger anzeigen",
+    summarize: "Mit KI zusammenfassen",
     open: "{{url}} öffnen",
   },
   header: {

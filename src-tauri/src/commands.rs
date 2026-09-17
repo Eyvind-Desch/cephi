@@ -7,7 +7,7 @@ use tauri::ipc::Channel;
 use tauri::{AppHandle, State};
 use tauri_plugin_opener::OpenerExt;
 
-use crate::agent::{self, AgentEvent};
+use crate::agent::{self, AgentEvent, Input};
 use crate::config::ConfigSnapshot;
 use crate::desktop::window::{self, WindowMode};
 use crate::error::{AppError, AppResult};
@@ -37,7 +37,18 @@ pub async fn agent_send(
     profile_id: Option<String>,
     on_event: Channel<AgentEvent>,
 ) -> AppResult<()> {
-    agent::run(&app, &state, text, profile_id, on_event).await
+    agent::run(&app, &state, Input::Message(text), profile_id, on_event).await
+}
+
+/// Lets the model answer from the latest tool results (e.g. summarize search results).
+#[tauri::command]
+pub async fn agent_continue(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    profile_id: Option<String>,
+    on_event: Channel<AgentEvent>,
+) -> AppResult<()> {
+    agent::run(&app, &state, Input::Continue, profile_id, on_event).await
 }
 
 /// Loads the profile's model into memory in the background (e.g. after switching profiles).

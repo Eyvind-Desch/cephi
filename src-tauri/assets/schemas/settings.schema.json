@@ -70,7 +70,8 @@
       "properties": {
         "searxngUrl": { "type": "string", "default": "http://127.0.0.1:8888" },
         "language": { "type": "string", "default": "auto", "description": "Result language: \"auto\" (detected from the query), \"all\" or a code such as \"de\", \"en-US\"." },
-        "maxResults": { "type": "integer", "minimum": 1, "maximum": 20, "default": 6, "description": "Results shown and passed to the model. Fewer = faster answers from small models." }
+        "maxResults": { "type": "integer", "minimum": 1, "maximum": 20, "default": 6, "description": "Results shown and passed to the model. Fewer = faster answers from small models." },
+        "summarize": { "type": "boolean", "default": true, "description": "After \"? query\": let the AI answer from the results. false = only result cards; a button asks the AI on demand. Either way, if the AI is not available the cards stay without an error." }
       }
     },
     "providers": {

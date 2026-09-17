@@ -6,9 +6,10 @@ use rust_i18n::t;
 use serde_json::Value;
 
 use super::args::{self, Args};
-use super::manifest::ToolManifest;
+use super::builtin::Builtin;
+use super::manifest::{Action, AfterTrigger, ToolManifest};
 use super::trigger::Trigger;
-use crate::config::Diagnostic;
+use crate::config::{Diagnostic, Settings};
 use crate::llm::ToolDef;
 
 /// A loaded, validated and enabled tool.
@@ -19,6 +20,16 @@ pub struct Tool {
 }
 
 impl Tool {
+    /// Whether the model should answer from the result after a trigger ran this tool.
+    /// Search results are only summarized when `search.summarize` is on.
+    pub fn answers_after_trigger(&self, settings: &Settings) -> bool {
+        match (&self.manifest.after_trigger, &self.manifest.action) {
+            (AfterTrigger::Show, _) => false,
+            (AfterTrigger::Answer, Action::Builtin { id: Builtin::WebSearch }) => settings.search.summarize,
+            (AfterTrigger::Answer, _) => true,
+        }
+    }
+
     /// Display title in the active language; falls back to the technical name.
     pub fn title(&self) -> String {
         match &self.manifest.title {
@@ -159,6 +170,25 @@ fn collect_json_files(dir: &Path, out: &mut Vec<PathBuf>) -> std::io::Result<()>
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn search_answers_follow_the_summarize_setting() {
+        let registry = default_registry();
+        let (search, open_app) = (registry.get("web_search").unwrap(), registry.get("open_app").unwrap());
+        let mut settings = Settings::default();
+        assert!(search.answers_after_trigger(&settings));
+        assert!(!open_app.answers_after_trigger(&settings));
+
+        settings.search.summarize = false;
+        assert!(!search.answers_after_trigger(&settings));
+        assert_eq!(
+            registry
+                .trigger_matches("? tauri")
+                .next()
+                .map(|(t, _)| t.manifest.name.as_str()),
+            Some("web_search")
+        );
+    }
 
     /// Loads the shipped default tools into a temporary folder.
     fn default_registry() -> ToolRegistry {

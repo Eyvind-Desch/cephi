@@ -58,6 +58,7 @@ export const en = {
     more_one: "Show {{count}} more result",
     more_other: "Show {{count}} more results",
     less: "Show fewer",
+    summarize: "Summarize with AI",
     open: "Open {{url}}",
   },
   header: {

@@ -15,9 +15,9 @@ use rust_i18n::t;
 
 use crate::config::Config;
 use crate::error::{AppError, AppResult};
-use crate::llm::{ChatMessage, LlmClient, LlmError, LlmRequest, ToolCall};
+use crate::llm::{ChatMessage, LlmClient, LlmError, LlmRequest, Role, ToolCall};
 use crate::state::AppState;
-use crate::tools::{self, AfterTrigger, ExecContext, Permission, ToolOutput};
+use crate::tools::{self, ExecContext, Permission, ToolOutput};
 
 pub use events::AgentEvent;
 
@@ -75,12 +75,21 @@ impl AgentController {
     }
 }
 
+/// What starts a run.
+pub enum Input {
+    /// A new user message.
+    Message(String),
+    /// Let the model answer from the tool results at the end of the history
+    /// (e.g. "summarize" on search results that were only shown).
+    Continue,
+}
+
 /// Handles one user message. Progress is reported through `events`; the future resolves
 /// when the run is finished, cancelled or failed.
 pub async fn run(
     app: &AppHandle,
     state: &AppState,
-    text: String,
+    input: Input,
     profile_id: Option<String>,
     events: Channel<AgentEvent>,
 ) -> AppResult<()> {
@@ -96,7 +105,7 @@ pub async fn run(
         cancel: &cancel,
         events: &events,
     };
-    let result = run.execute(&mut history, text, profile_id.as_deref()).await;
+    let result = run.execute(&mut history, input, profile_id.as_deref()).await;
 
     let event = match result {
         Ok(Outcome::Done) => AgentEvent::Done,
@@ -133,33 +142,49 @@ impl Run<'_> {
     async fn execute(
         &self,
         history: &mut Vec<ChatMessage>,
-        text: String,
+        input: Input,
         profile_id: Option<&str>,
     ) -> Result<Outcome, String> {
         let settings = &self.config.settings;
         let profile = settings.profile(profile_id);
+        // The answer after a fast path is a bonus: without a model the result still stands.
+        let mut answer_is_optional = false;
 
-        // Fast path: a trigger phrase runs its tool directly, without waiting for the model.
-        // Afterwards the model only gets involved if the tool asks for an answer from its result.
-        if let Some(call) = self.fast_path_call(&text) {
-            history.push(ChatMessage::user(text));
-            history.push(ChatMessage::assistant_tool_calls(vec![call.clone()]));
-            let output = self.run_tool_call(&call, true).await;
-            let answer = output.ok
-                && self
-                    .config
-                    .tools
-                    .get(&call.name)
-                    .is_some_and(|tool| tool.manifest.after_trigger == AfterTrigger::Answer);
-            history.push(ChatMessage::tool_result(&call, output.content, output.ok));
-            if !answer || self.cancel.is_cancelled() {
-                return Ok(Outcome::Done);
+        match input {
+            Input::Message(text) => {
+                // Fast path: a trigger phrase runs its tool directly, without waiting for the model.
+                // Afterwards the model only gets involved if the tool asks for an answer from its result.
+                if let Some(call) = self.fast_path_call(&text) {
+                    history.push(ChatMessage::user(text));
+                    history.push(ChatMessage::assistant_tool_calls(vec![call.clone()]));
+                    let output = self.run_tool_call(&call, true).await;
+                    let answer = output.ok
+                        && self
+                            .config
+                            .tools
+                            .get(&call.name)
+                            .is_some_and(|tool| tool.answers_after_trigger(settings));
+                    history.push(ChatMessage::tool_result(&call, output.content, output.ok));
+                    if !answer || self.cancel.is_cancelled() {
+                        return Ok(Outcome::Done);
+                    }
+                    answer_is_optional = true;
+                } else {
+                    history.push(ChatMessage::user(text));
+                }
             }
-        } else {
-            history.push(ChatMessage::user(text));
+            Input::Continue => {
+                if history.last().is_none_or(|m| m.role != Role::Tool) {
+                    return Err(t!("agent.nothing_to_continue").into());
+                }
+            }
         }
 
-        let client = LlmClient::for_profile(settings, profile, &self.state.http).map_err(|e| e.to_string())?;
+        let client = match LlmClient::for_profile(settings, profile, &self.state.http) {
+            Ok(client) => client,
+            Err(error) if answer_is_optional => return Ok(self.skip_answer(&error)),
+            Err(error) => return Err(error.to_string()),
+        };
         let tool_definitions = if profile.tools {
             self.config.tools.definitions()
         } else {
@@ -188,8 +213,12 @@ impl Run<'_> {
                     }
                     return Ok(Outcome::Cancelled);
                 }
+                Err(error @ (LlmError::Unreachable { .. } | LlmError::Auth { .. })) if answer_is_optional => {
+                    return Ok(self.skip_answer(&error));
+                }
                 Err(error) => return Err(error.to_string()),
             };
+            answer_is_optional = false;
 
             let calls = reply.tool_calls.clone();
             history.push(reply);
@@ -208,6 +237,15 @@ impl Run<'_> {
 
         let rounds = settings.agent.max_tool_rounds;
         Err(t!("agent.too_many_rounds", rounds = rounds).into())
+    }
+
+    /// The model is not available for an optional answer: keep the tool result, explain quietly.
+    fn skip_answer(&self, error: &LlmError) -> Outcome {
+        log::info!("optional answer skipped: {error}");
+        self.emit(AgentEvent::Notice {
+            message: t!("agent.answer_unavailable", reason = error.to_string()).into(),
+        });
+        Outcome::Done
     }
 
     /// The first trigger match whose arguments are valid and whose tool accepts the fast path.

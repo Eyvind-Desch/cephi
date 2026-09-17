@@ -38,6 +38,8 @@ export interface AssistantMessage {
   parts: Part[];
   status: "streaming" | "done" | "cancelled" | "error";
   error?: string;
+  /** Quiet information, e.g. why no AI answer follows the search results. */
+  notice?: string;
 }
 
 export type Message = UserMessage | AssistantMessage;
@@ -81,6 +83,8 @@ export function applyAgentEvent(message: AssistantMessage, event: AgentEvent): A
         missingSecrets: event.missingSecrets,
         display: event.display ?? undefined,
       });
+    case "notice":
+      return { ...message, notice: event.message };
     case "done":
       return { ...message, status: "done" };
     case "cancelled":
@@ -107,6 +111,12 @@ export function needsPanel(event: AgentEvent): boolean {
     default:
       return false;
   }
+}
+
+/** Search results at the end of the message that nothing has answered from yet. */
+export function hasUnansweredResults(message: AssistantMessage): boolean {
+  const last = message.parts.at(-1);
+  return message.status === "done" && last?.kind === "tool" && last.display?.kind === "webResults";
 }
 
 /**

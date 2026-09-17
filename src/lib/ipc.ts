@@ -95,6 +95,7 @@ export type AgentEvent =
       missingSecrets: string[];
       display: ToolDisplay | null;
     }
+  | { type: "notice"; message: string }
   | { type: "done" }
   | { type: "cancelled" }
   | { type: "error"; message: string };
@@ -110,7 +111,13 @@ export const api = {
     channel.onmessage = onEvent;
     return invoke<void>("agent_send", { text, profileId, onEvent: channel });
   },
-  agentPreload: (profileId: string) => invoke<void>("agent_preload", { profileId }),
+  /** Lets the model answer from the latest tool results (e.g. summarize search results). */
+  agentContinue: (profileId: string | null, onEvent: (event: AgentEvent) => void) => {
+    const channel = new Channel<AgentEvent>();
+    channel.onmessage = onEvent;
+    return invoke<void>("agent_continue", { profileId, onEvent: channel });
+  },
+  agentPreload:(profileId: string) => invoke<void>("agent_preload", { profileId }),
   agentCancel: () => invoke<void>("agent_cancel"),
   agentConfirm: (callId: string, approved: boolean) => invoke<boolean>("agent_confirm", { callId, approved }),
   agentReset: () => invoke<void>("agent_reset"),

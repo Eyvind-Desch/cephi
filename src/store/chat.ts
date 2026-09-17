@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { api } from "../lib/ipc";
+import { api, type AgentEvent } from "../lib/ipc";
 import { applyAgentEvent, needsPanel, type AssistantMessage, type Message } from "./chatModel";
 import { useUi } from "./ui";
 
@@ -11,6 +11,8 @@ interface ChatState {
   running: boolean;
 
   send: (text: string) => Promise<void>;
+  /** Asks the model to answer from the search results at the end of the last message. */
+  summarize: (messageId: string) => Promise<void>;
   cancel: () => void;
   confirm: (callId: string, approved: boolean) => void;
   reset: () => Promise<void>;
@@ -24,6 +26,21 @@ export const useChat = create<ChatState>()((set, get) => {
 
   const findAssistant = (id: string) =>
     get().messages.find((m): m is AssistantMessage => m.id === id && m.role === "assistant");
+
+  /** Runs a backend request and folds its events into the given assistant message. */
+  const stream = async (assistantId: string, start: (onEvent: (event: AgentEvent) => void) => Promise<void>) => {
+    try {
+      await start((event) => {
+        updateAssistant(assistantId, (message) => applyAgentEvent(message, event));
+        if (needsPanel(event)) useUi.getState().setMode("expanded");
+      });
+    } catch (error) {
+      updateAssistant(assistantId, (message) => applyAgentEvent(message, { type: "error", message: String(error) }));
+      useUi.getState().setMode("expanded");
+    } finally {
+      set({ running: false });
+    }
+  };
 
   return {
     messages: [],
@@ -45,17 +62,7 @@ export const useChat = create<ChatState>()((set, get) => {
         ],
       }));
 
-      try {
-        await api.agentSend(text, ui.profileId, (event) => {
-          updateAssistant(assistantId, (message) => applyAgentEvent(message, event));
-          if (needsPanel(event)) useUi.getState().setMode("expanded");
-        });
-      } catch (error) {
-        updateAssistant(assistantId, (message) => applyAgentEvent(message, { type: "error", message: String(error) }));
-        useUi.getState().setMode("expanded");
-      } finally {
-        set({ running: false });
-      }
+      await stream(assistantId, (onEvent) => api.agentSend(text, ui.profileId, onEvent));
 
       // Still compact means everything ran via the fast path: confirm briefly, then get out of the way.
       // Failures open the panel instead, where the full message (and e.g. the keys view) fits.
@@ -74,6 +81,16 @@ export const useChat = create<ChatState>()((set, get) => {
           }, AUTO_HIDE_MS);
         }
       }
+    },
+
+    summarize: async (messageId) => {
+      const message = findAssistant(messageId);
+      const last = get().messages.at(-1);
+      if (get().running || !message || last?.id !== messageId) return;
+
+      set({ running: true });
+      updateAssistant(messageId, (m) => ({ ...m, status: "streaming", notice: undefined }));
+      await stream(messageId, (onEvent) => api.agentContinue(useUi.getState().profileId, onEvent));
     },
 
     cancel: () => void api.agentCancel(),

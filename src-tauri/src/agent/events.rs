@@ -34,6 +34,10 @@ pub enum AgentEvent {
         /// Structured data for a richer view (e.g. search result cards).
         display: Option<ToolDisplay>,
     },
+    /// Quiet information, not an error (e.g. why an optional answer was skipped).
+    Notice {
+        message: String,
+    },
     Done,
     Cancelled,
     Error {

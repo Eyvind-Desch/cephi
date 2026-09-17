@@ -127,6 +127,9 @@ pub struct SearchSettings {
     /// SearXNG language: `auto`, `all` or a code such as `de`.
     pub language: String,
     pub max_results: usize,
+    /// Let the AI answer from the results after `? query`. Off: only the result cards
+    /// (a button asks the AI on demand).
+    pub summarize: bool,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -371,6 +374,7 @@ impl Default for SearchSettings {
             searxng_url: "http://127.0.0.1:8888".into(),
             language: "auto".into(),
             max_results: 6,
+            summarize: true,
         }
     }
 }

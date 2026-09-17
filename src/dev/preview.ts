@@ -159,6 +159,17 @@ export function installPreview() {
     view: (params.get("view") as PanelView | null) ?? "chat",
   });
   if (params.get("chat") === "demo") useChat.setState({ messages: demoChat });
+  // Search results without an AI answer (model unavailable).
+  if (params.get("chat") === "results") {
+    const [question, answer] = demoChat.slice(-2);
+    if (answer.role === "assistant") {
+      const notice =
+        lang === "de"
+          ? "Keine KI-Antwort: Ollama ist nicht erreichbar (http://localhost:11434)."
+          : "No AI answer: Ollama is not reachable (http://localhost:11434).";
+      useChat.setState({ messages: [question, { ...answer, parts: answer.parts.slice(0, 1), notice }] });
+    }
+  }
 
   // ?open=<text> clicks the first expandable row / button containing that text after rendering.
   const open = params.get("open");

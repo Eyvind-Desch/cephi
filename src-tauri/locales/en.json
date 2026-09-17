@@ -2,6 +2,8 @@
   "_version": 1,
   "agent": {
     "busy": "A request is already running.",
+    "nothing_to_continue": "There are no results to answer from.",
+    "answer_unavailable": "No AI answer: %{reason}",
     "too_many_rounds": "Stopped after %{rounds} tool rounds without a final answer.",
     "unknown_tool": "Unknown tool \"%{name}\".",
     "denied": "The user declined to run this.",

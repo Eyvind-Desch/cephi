@@ -28,8 +28,8 @@ export function MessageList() {
       className="selectable flex-1 overflow-y-auto px-4 py-4"
     >
       <div className="space-y-5">
-        {messages.map((message) => (
-          <MessageView key={message.id} message={message} />
+        {messages.map((message, index) => (
+          <MessageView key={message.id} message={message} isLast={index === messages.length - 1} />
         ))}
       </div>
     </div>

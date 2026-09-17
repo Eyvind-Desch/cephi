@@ -17,7 +17,8 @@
   "search": {
     "searxngUrl": "http://127.0.0.1:8888",
     "language": "auto",
-    "maxResults": 6
+    "maxResults": 6,
+    "summarize": true
   },
   "providers": [
     { "id": "anthropic", "type": "anthropic", "label": "Anthropic" },
