@@ -96,7 +96,6 @@ Rust types and their TypeScript mirrors must stay in sync:
 | `commands.rs` | `api` in `src/lib/ipc.ts` |
 | `agent/events.rs` → `AgentEvent` | `AgentEvent` |
 | `config/snapshot.rs` → `ConfigSnapshot` | `ConfigSnapshot` |
-
 | `desktop/web.rs` → `WebState` | `WebState` |
 
 Events: `orbit://shown` (window shown), `orbit://config-changed` (hot reload), `orbit://web-state`,
