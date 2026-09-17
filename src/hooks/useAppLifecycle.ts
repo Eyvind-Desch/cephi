@@ -1,7 +1,8 @@
 import { useEffect } from "react";
-import { api, onConfigChanged } from "../lib/ipc";
+import { api, onConfigChanged, onWebOpen, onWebState } from "../lib/ipc";
 import { useChat } from "../store/chat";
 import { useUi } from "../store/ui";
+import { useWeb } from "../store/web";
 
 /** Loads the configuration and keeps it in sync with hot reloads. */
 export function useConfigSync() {
@@ -10,6 +11,19 @@ export function useConfigSync() {
     void api.configSnapshot().then(applyConfig);
     const unlisten = onConfigChanged(applyConfig);
     return () => void unlisten.then((fn) => fn());
+  }, []);
+}
+
+/** Mirrors the web tab's page state and switches to the tab when a tool opens a page. */
+export function useWebSync() {
+  useEffect(() => {
+    void api.webState().then((state) => state && useWeb.setState(state));
+    const unlistenState = onWebState((state) => useWeb.setState(state));
+    const unlistenOpen = onWebOpen(() => useUi.getState().setView("web"));
+    return () => {
+      void unlistenState.then((fn) => fn());
+      void unlistenOpen.then((fn) => fn());
+    };
   }, []);
 }
 
@@ -24,7 +38,7 @@ export function useKeyboardShortcuts() {
         e.preventDefault();
         // Sub-views go back first; only the chat hides the window.
         const ui = useUi.getState();
-        if (ui.mode === "expanded" && ui.view !== "chat") ui.setView("chat");
+        if (ui.mode !== "compact" && ui.view !== "chat") ui.setView("chat");
         else void api.windowHide();
       } else if (ctrl && key === "c") {
         copySelectionOutsideFocus();

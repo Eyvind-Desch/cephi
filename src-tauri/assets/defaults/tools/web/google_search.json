@@ -2,7 +2,7 @@
   "$schema": "../../schemas/tool.schema.json",
   "name": "google_search",
   "title": { "en": "Google search", "de": "Google-Suche" },
-  "description": "Opens a Google search in the browser. Use this when the user wants to google something or look something up on the web.",
+  "description": "Shows a Google search in Orbit's web tab. Use this only when the user explicitly wants to google something or see Google. To answer a question from the web, use web_search instead.",
   "permission": "auto",
   "parameters": {
     "type": "object",
@@ -14,6 +14,7 @@
   "triggers": ["g {query}", "(google|googel|google mal) nach {query}", "(google|search google) for {query}"],
   "action": {
     "type": "open_url",
-    "url": "https://www.google.com/search?q={{query}}"
+    "url": "https://www.google.com/search?q={{query}}",
+    "target": "orbit"
   }
 }

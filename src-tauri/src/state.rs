@@ -2,6 +2,7 @@ use std::sync::{Arc, Mutex, RwLock};
 
 use crate::agent::AgentController;
 use crate::config::{Config, ConfigPaths};
+use crate::desktop::web::WebController;
 use crate::desktop::window::WindowController;
 use crate::integrations::spotify::SpotifyClient;
 use crate::launcher::AppIndex;
@@ -15,6 +16,7 @@ pub struct AppState {
     pub http: reqwest::Client,
     pub agent: AgentController,
     pub window: WindowController,
+    pub web: WebController,
     pub launcher: AppIndex,
     pub spotify: SpotifyClient,
     config: RwLock<Arc<Config>>,
@@ -28,6 +30,7 @@ impl AppState {
             http,
             agent: AgentController::default(),
             window: WindowController::default(),
+            web: WebController::default(),
             launcher,
             spotify: SpotifyClient::default(),
             config: RwLock::new(Arc::new(config)),

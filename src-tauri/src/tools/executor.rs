@@ -9,9 +9,10 @@ use tauri::AppHandle;
 use tauri_plugin_opener::OpenerExt;
 
 use super::args::Args;
-use super::manifest::{Action, HttpMethod};
+use super::manifest::{Action, HttpMethod, OpenTarget};
 use super::registry::Tool;
 use super::template::{self, Context, Secrets};
+use crate::desktop::web;
 use crate::search::WebResult;
 
 const DEFAULT_TIMEOUT_SECS: u64 = 30;
@@ -75,7 +76,7 @@ impl ToolOutput {
 pub async fn execute(ctx: &ExecContext<'_>, tool: &Tool, args: &Args) -> ToolOutput {
     log::info!("tool {} ({})", tool.manifest.name, tool.manifest.action.kind());
     let result = match &tool.manifest.action {
-        Action::OpenUrl { url } => open_url(ctx, url, args).map(Success::from),
+        Action::OpenUrl { url, target } => open_url(ctx, url, *target, args).await.map(Success::from),
         Action::Launch {
             program,
             args: argv,
@@ -112,7 +113,7 @@ pub fn accepts_fast_path(ctx: &ExecContext<'_>, tool: &Tool, args: &Args) -> boo
 pub fn preview(tool: &Tool, args: &Args) -> String {
     let render = |text: &str, context| template::render(text, context, args, Secrets::Mask).unwrap_or_else(|e| e);
     match &tool.manifest.action {
-        Action::OpenUrl { url } => t!("executor.preview_open", url = render(url, Context::Url)).into(),
+        Action::OpenUrl { url, .. } => t!("executor.preview_open", url = render(url, Context::Url)).into(),
         Action::Launch {
             program, args: argv, ..
         } => {
@@ -143,7 +144,12 @@ pub fn preview(tool: &Tool, args: &Args) -> String {
     }
 }
 
-fn open_url(ctx: &ExecContext<'_>, url_template: &str, args: &Args) -> Result<String, String> {
+async fn open_url(
+    ctx: &ExecContext<'_>,
+    url_template: &str,
+    target: OpenTarget,
+    args: &Args,
+) -> Result<String, String> {
     let rendered = template::render(url_template, Context::Url, args, Secrets::Resolve)?;
     // Messages go to the model and the UI, so they use the masked URL.
     let shown = template::render(url_template, Context::Url, args, Secrets::Mask)?;
@@ -161,6 +167,16 @@ fn open_url(ctx: &ExecContext<'_>, url_template: &str, args: &Args) -> Result<St
     };
     if !allowed {
         return Err(t!("executor.scheme_not_allowed", scheme = parsed.scheme()).into());
+    }
+
+    if target == OpenTarget::Orbit {
+        if !matches!(parsed.scheme(), "http" | "https") {
+            return Err(t!("executor.scheme_not_allowed", scheme = parsed.scheme()).into());
+        }
+        web::open(ctx.app, parsed)
+            .await
+            .map_err(|e| t!("executor.open_failed", error = e).to_string())?;
+        return Ok(t!("executor.opened_in_orbit", url = shown).into());
     }
 
     ctx.app

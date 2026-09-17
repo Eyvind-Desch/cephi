@@ -127,7 +127,8 @@
         "hideOnBlur": { "type": "boolean", "default": true, "description": "Hide when clicking elsewhere (unless pinned)." },
         "showOnStartup": { "type": "boolean", "default": true },
         "compact": { "$ref": "#/definitions/size", "description": "Size of the compact bar." },
-        "expanded": { "$ref": "#/definitions/size", "description": "Size of the large panel." }
+        "expanded": { "$ref": "#/definitions/size", "description": "Size of the large panel." },
+        "web": { "$ref": "#/definitions/size", "description": "Size of the panel while the web tab is open. Limited to the screen." }
       }
     }
   },

@@ -52,6 +52,20 @@ export const de: Locale = {
     durationMs: "{{value}} ms",
     durationS: "{{value}} s",
   },
+  tabs: {
+    chat: "Chat",
+    web: "Web",
+  },
+  web: {
+    back: "Zurück",
+    forward: "Vor",
+    reload: "Neu laden",
+    stop: "Laden stoppen",
+    openInBrowser: "Im Browser öffnen",
+    placeholder: "Google durchsuchen oder Adresse eingeben",
+    emptyTitle: "Im Web suchen, ohne Orbit zu verlassen",
+    emptyHint: "Oben eintippen oder überall in Orbit „g Suchbegriff“ nutzen.",
+  },
   webResults: {
     more_one: "{{count}} weiteres Ergebnis",
     more_other: "{{count}} weitere Ergebnisse",

@@ -3,7 +3,7 @@ use std::sync::Mutex;
 use std::time::Duration;
 
 use serde::Deserialize;
-use tauri::{AppHandle, Emitter, Manager, Monitor, PhysicalPosition, PhysicalSize, WebviewWindow};
+use tauri::{AppHandle, Emitter, Manager, Monitor, PhysicalPosition, PhysicalSize, Window};
 
 use crate::config::{Anchor, WindowSettings};
 use crate::error::{AppError, AppResult};
@@ -21,6 +21,8 @@ pub enum WindowMode {
     #[default]
     Compact,
     Expanded,
+    /// Wider panel for the web tab.
+    Web,
 }
 
 #[derive(Default)]
@@ -43,8 +45,9 @@ impl WindowController {
     }
 }
 
-fn main_window(app: &AppHandle) -> AppResult<WebviewWindow> {
-    app.get_webview_window(MAIN_LABEL)
+/// The window as such, not `WebviewWindow`: with the web tab it hosts more than one webview.
+fn main_window(app: &AppHandle) -> AppResult<Window> {
+    app.get_window(MAIN_LABEL)
         .ok_or_else(|| AppError::msg("main window not found"))
 }
 
@@ -101,10 +104,11 @@ pub fn on_focus_lost(app: &AppHandle) {
 
 /// Sizes the window for `mode` and anchors it inside the work area (excluding the taskbar)
 /// of the monitor under the mouse cursor.
-fn layout(app: &AppHandle, window: &WebviewWindow, mode: WindowMode, settings: &WindowSettings) -> AppResult<()> {
+fn layout(app: &AppHandle, window: &Window, mode: WindowMode, settings: &WindowSettings) -> AppResult<()> {
     let size = match mode {
         WindowMode::Compact => settings.compact,
         WindowMode::Expanded => settings.expanded,
+        WindowMode::Web => settings.web,
     };
 
     let Some(monitor) = target_monitor(app, window) else {
@@ -114,11 +118,13 @@ fn layout(app: &AppHandle, window: &WebviewWindow, mode: WindowMode, settings: &
 
     let scale = monitor.scale_factor();
     let px = |logical: u32| (f64::from(logical) * scale).round() as i32;
-    let (width, height, margin) = (px(size.width), px(size.height), px(settings.margin));
-
+    let margin = px(settings.margin);
     let area = monitor.work_area();
     let (left, top) = (area.position.x, area.position.y);
     let (area_width, area_height) = (area.size.width as i32, area.size.height as i32);
+    // Large sizes (the web tab) must still fit on small screens.
+    let width = px(size.width).min(area_width - 2 * margin);
+    let height = px(size.height).min(area_height - 2 * margin);
 
     let x = match settings.anchor {
         Anchor::BottomLeft | Anchor::TopLeft => left + margin,
@@ -136,7 +142,7 @@ fn layout(app: &AppHandle, window: &WebviewWindow, mode: WindowMode, settings: &
     Ok(())
 }
 
-fn target_monitor(app: &AppHandle, window: &WebviewWindow) -> Option<Monitor> {
+fn target_monitor(app: &AppHandle, window: &Window) -> Option<Monitor> {
     app.cursor_position()
         .ok()
         .and_then(|cursor| app.monitor_from_point(cursor.x, cursor.y).ok().flatten())

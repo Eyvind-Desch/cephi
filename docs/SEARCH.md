@@ -24,10 +24,10 @@ restarts with Docker. Config: [`infra/searxng/settings.yml`](../infra/searxng/se
 | `? what's new in tauri 2` | Result cards immediately, then a short AI answer with sources `[1]` |
 | `suche im web nach …` / "search the web for …" | same |
 | Any question that needs current information | The AI can call `web_search` by itself |
-| `g …` | Opens Google in the browser (`google_search` tool) |
+| `g …` | Opens Google in Orbit's web tab (`google_search` tool) |
 
 The answer only uses the excerpts of the results (fast, also with small local models) and comes from the
-model selected in the header, local or cloud. Click a card or a citation badge to open the page in the browser.
+model selected in the header, local or cloud. Click a card or a citation badge to open the page in the web tab.
 
 **Without AI:** the search itself never needs a model. If the model is not available (Ollama not running,
 API key missing), the cards stay and a quiet note explains why. **Summarize with AI** below the cards

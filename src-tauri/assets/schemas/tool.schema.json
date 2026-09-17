@@ -131,7 +131,12 @@
             "required": ["type", "url"],
             "properties": {
               "type": { "const": "open_url" },
-              "url": { "$ref": "#/definitions/template" }
+              "url": { "$ref": "#/definitions/template" },
+              "target": {
+                "enum": ["browser", "orbit"],
+                "default": "browser",
+                "description": "browser = default browser or the app for the scheme. orbit = Orbit's web tab (http/https only)."
+              }
             }
           }
         },

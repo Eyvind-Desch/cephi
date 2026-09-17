@@ -114,12 +114,27 @@ html[data-preview] {
   }
 }
 
+/* Stand-in for the native web page, which only exists in the desktop app. */
+html[data-preview] [data-web-page] {
+  background: repeating-linear-gradient(45deg, rgb(127 127 127 / 0.08) 0 12px, transparent 12px 24px);
+}
+
 /* Chat content can be selected (also across messages) and copied with Ctrl+C; controls stay unselectable. */
 .selectable {
   user-select: text;
 }
 .selectable :is(button, [role="button"], svg) {
   user-select: none;
+}
+
+/* Indeterminate progress bar (web tab loading). */
+@keyframes orbit-progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
 }
 
 @keyframes orbit-spin {

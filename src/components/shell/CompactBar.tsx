@@ -14,7 +14,7 @@ import { OrbitMark } from "../ui/OrbitMark";
 export function CompactBar() {
   const { t } = useTranslation();
   const running = useChat((s) => s.running);
-  const setMode = useUi((s) => s.setMode);
+  const expand = useUi((s) => s.expand);
   const flash = useUi((s) => s.flash);
   const showFlash = useUi((s) => s.showFlash);
   const profile = useUi((s) => s.config?.profiles.find((p) => p.id === s.profileId));
@@ -41,7 +41,7 @@ export function CompactBar() {
           icon={AlertTriangle}
           label={t("compact.problems", { count: problemCount })}
           className="text-warning"
-          onClick={() => setMode("expanded")}
+          onClick={expand}
         />
       )}
       {profile && !flash && (
@@ -49,7 +49,7 @@ export function CompactBar() {
           {profile.label}
         </span>
       )}
-      <IconButton icon={Maximize2} label={t("compact.expand")} onClick={() => setMode("expanded")} />
+      <IconButton icon={Maximize2} label={t("compact.expand")} onClick={expand} />
     </div>
   );
 }

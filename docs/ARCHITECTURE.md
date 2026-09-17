@@ -20,7 +20,7 @@
 │ secrets/      Windows Credential Manager + key catalog for the keys view        │
 │ launcher/ integrations/  app index, Spotify, media/volume, radios                │
 │ search/       SearXNG client, excerpts for the model                            │
-│ desktop/      window placement, tray, global hotkey                             │
+│ desktop/      window placement, web tab (child webview), tray, global hotkey     │
 └─────────────────────────────────────────────────────────────────────────────────┘
           │                       │                          │
     Ollama :11434      SearXNG :8888 (Docker/WSL)   %APPDATA%\Orbit\ (settings.json, tools/)
@@ -70,6 +70,20 @@ tool directly (`ToolCall { fast: true }`) and is recorded in the history like a 
 **Display data:** besides the text for the model, a tool may return `ToolDisplay` (e.g. web results).
 It travels only in the `ToolResult` event, so the UI can render cards without parsing text.
 
+## Web tab
+
+The web tab is a second, native webview (`web`) inside the Orbit window (`tauri` feature `unstable`,
+`Window::add_child`). The window is therefore handled as `Window`, not `WebviewWindow`.
+
+- **Layout:** the React `WebView` reserves the page area and reports its position (`web_set_bounds`)
+  on every resize; the backend moves the native view there. Native views are drawn above the HTML, so
+  the page hides while a menu is open (`ui.overlays`).
+- **State:** URL, title and loading state come from page load and title events (`orbit://web-state`).
+  Tools with `"target": "orbit"` navigate and emit `orbit://web-open`, which switches to the tab.
+- **Isolation:** the capability lists webviews (`"webviews": ["main"]`), not windows, so the web tab gets
+  no permissions; Tauri also rejects IPC from remote origins without an explicit `remote` capability.
+  Only `http`/`https` navigation is allowed, popups open in the same tab.
+
 ## IPC contracts
 
 Rust types and their TypeScript mirrors must stay in sync:
@@ -80,7 +94,10 @@ Rust types and their TypeScript mirrors must stay in sync:
 | `agent/events.rs` → `AgentEvent` | `AgentEvent` |
 | `config/snapshot.rs` → `ConfigSnapshot` | `ConfigSnapshot` |
 
-Events: `orbit://shown` (window shown), `orbit://config-changed` (hot reload).
+| `desktop/web.rs` → `WebState` | `WebState` |
+
+Events: `orbit://shown` (window shown), `orbit://config-changed` (hot reload), `orbit://web-state`,
+`orbit://web-open` (web tab).
 
 ## New action types / builtins
 

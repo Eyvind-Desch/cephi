@@ -9,6 +9,7 @@ use tauri_plugin_opener::OpenerExt;
 
 use crate::agent::{self, AgentEvent, Input};
 use crate::config::ConfigSnapshot;
+use crate::desktop::web::{self, WebState};
 use crate::desktop::window::{self, WindowMode};
 use crate::error::{AppError, AppResult};
 use crate::secrets::SecretGroupInfo;
@@ -107,6 +108,39 @@ pub fn window_hide(app: AppHandle) -> AppResult<()> {
 #[tauri::command]
 pub fn window_set_pinned(state: State<'_, AppState>, pinned: bool) {
     state.window.set_pinned(pinned);
+}
+
+#[tauri::command]
+pub fn web_state(state: State<'_, AppState>) -> WebState {
+    state.web.state()
+}
+
+/// Address bar: opens a URL or domain, or searches for the input.
+#[tauri::command]
+pub async fn web_navigate(app: AppHandle, input: String) -> AppResult<()> {
+    web::navigate_input(&app, &input).await
+}
+
+/// Opens a link (e.g. a search result) in the web tab and switches to it.
+#[tauri::command]
+pub async fn web_open(app: AppHandle, url: String) -> AppResult<()> {
+    let parsed = url::Url::parse(&url).map_err(|_| AppError::msg(t!("external.invalid_link")))?;
+    web::open(&app, parsed).await
+}
+
+#[tauri::command]
+pub fn web_set_bounds(app: AppHandle, bounds: web::Bounds) -> AppResult<()> {
+    web::set_bounds(&app, bounds)
+}
+
+#[tauri::command]
+pub fn web_set_visible(app: AppHandle, visible: bool) -> AppResult<()> {
+    web::set_visible(&app, visible)
+}
+
+#[tauri::command]
+pub fn web_command(app: AppHandle, command: web::WebCommand) -> AppResult<()> {
+    web::command(&app, command)
 }
 
 /// Opens a link from a chat message in the default browser. Web URLs only.

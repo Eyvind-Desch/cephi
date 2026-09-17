@@ -3,7 +3,8 @@ import { memo, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { api, type WebResult } from "../../lib/ipc";
+import type { WebResult } from "../../lib/ipc";
+import { openLink } from "../../lib/links";
 
 function CodeBlock({ children }: { children?: ReactNode }) {
   const { t } = useTranslation();
@@ -38,7 +39,7 @@ function CodeBlock({ children }: { children?: ReactNode }) {
 
 const components: Components = {
   pre: ({ children }) => <CodeBlock>{children}</CodeBlock>,
-  // Links must never navigate the app's webview; open them in the default browser.
+  // Links must never navigate the app's webview; they open in the web tab.
   a: ({ href, children }) => {
     const citation = typeof children === "string" && /^\d+$/.test(children);
     return (
@@ -48,7 +49,7 @@ const components: Components = {
         className={citation ? "citation" : undefined}
         onClick={(e) => {
           e.preventDefault();
-          if (href) void api.openExternal(href);
+          if (href) void openLink(href);
         }}
       >
         {children}

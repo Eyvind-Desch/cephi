@@ -110,7 +110,8 @@ request. Unambiguous commands ("open X") run through the quick action path witho
    excerpts only (fast), plus a Google tab in the panel
    - ✅ 3a: SearXNG in Docker/WSL (`infra/searxng`), `web_search` builtin, `? query` fast path with
      `afterTrigger: "answer"`, source grid + citation badges → [docs/SEARCH.md](docs/SEARCH.md)
-   - 3b: Google tab (child webview in the panel)
+   - ✅ 3b: Web tab: native child webview in the panel (wider window), Chat | Web tabs, address bar,
+     `g query` and chat links open there, `open_url` `target: "orbit"`
 4. **MCP** – `mcp.json`, tools from MCP servers
 5. **Polish** – settings UI, save history, code highlighting, autostart, installer
 6. **Extras** – pick up selected text, ask about a screenshot (vision model), voice
@@ -129,6 +130,8 @@ next stage begins. Whatever isn't a nuisance goes into the backlog instead of th
 - [ ] Check whether Spotify auto-plays albums/playlists
 - [ ] Search: DuckDuckGo fallback when SearXNG is not running; optionally start the container from Orbit
 - [ ] Search: `fetch_page` tool (read a result page when the excerpts are not enough)
+- [ ] Web tab: Esc and Orbit shortcuts don't work while the page has focus (keys go to the page)
+- [ ] Web tab: ask the AI about the open page
 
 ## Setup
 

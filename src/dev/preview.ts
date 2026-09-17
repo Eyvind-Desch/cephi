@@ -2,7 +2,8 @@
  * Design preview: runs the UI in a normal browser with sample data (dev server only).
  *
  * Open http://localhost:1420/?mode=expanded&view=keys&lang=de
- *   mode: compact | expanded   view: chat | keys   chat: demo   lang: en | de   keys: some
+ *   mode: compact | expanded   view: chat | keys | web   chat: demo | results   lang: en | de   keys: some
+ *   web: page (web tab with a loaded page)
  *
  * Used to review UI changes (and take headless screenshots) without touching the running app.
  */
@@ -146,6 +147,10 @@ export function installPreview() {
           return secretGroups;
         case "secrets_test":
           return lang === "de" ? "Verbindung funktioniert." : "Connection works.";
+        case "web_state":
+          return params.get("web") === "page"
+            ? { url: "https://www.google.com/search?q=tauri+child+webview", title: "tauri child webview - Google Suche", loading: true }
+            : { url: null, title: "", loading: false };
         default:
           return null;
       }
@@ -155,7 +160,7 @@ export function installPreview() {
 
   document.documentElement.dataset.preview = "true";
   useUi.setState({
-    mode: params.get("mode") === "compact" ? "compact" : "expanded",
+    mode: params.get("mode") === "compact" ? "compact" : params.get("view") === "web" ? "web" : "expanded",
     view: (params.get("view") as PanelView | null) ?? "chat",
   });
   if (params.get("chat") === "demo") useChat.setState({ messages: demoChat });

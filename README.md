@@ -24,6 +24,9 @@ One hotkey, one input field: answer, search, or action ("öffne die Bluetooth-Ei
 
 Clicking outside hides Orbit, unless it's pinned (⋯ menu). Tray icon: open, configuration, quit.
 
+The panel has two tabs: **Chat** and **Web**. The web tab shows Google and other pages inside Orbit
+(address bar: search terms or an address); links from the chat and search results open there too.
+
 ### Quick actions (no AI, instant)
 
 | Input | Action |
@@ -33,7 +36,8 @@ Clicking outside hides Orbit, unless it's pinned (⋯ menu). Tray icon: open, co
 | `pause` / "pause", `nächster song` / "next song", `stumm` / "mute", `ton an` / "unmute" | Playback |
 | `lautstärke auf 30` / "volume to 30", `mach 24 lauter` / "turn it up by 24", `mach es leiser` / "turn it down" | Volume (exact) |
 | `? search term` | Web search in Orbit: result cards + short AI answer with sources ([setup](docs/SEARCH.md)) |
-| `g search term`, `yt search term` | Google / YouTube in the browser |
+| `g search term` | Google in Orbit's web tab |
+| `yt search term` | YouTube in the browser |
 
 Everything else goes to the AI, which can call the same tools. Custom quick actions: `triggers` in the
 tool JSON files ([docs/TOOLS.md](docs/TOOLS.md)). API keys: ⋯ → *Keys & API Keys*.

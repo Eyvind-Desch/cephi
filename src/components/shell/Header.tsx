@@ -8,6 +8,7 @@ import { IconButton } from "../ui/IconButton";
 import { Menu, type MenuEntry } from "../ui/Menu";
 import { OrbitMark } from "../ui/OrbitMark";
 import { ProfileSwitch } from "./ProfileSwitch";
+import { ViewTabs } from "./ViewTabs";
 
 export function Header() {
   const { t } = useTranslation();
@@ -17,7 +18,7 @@ export function Header() {
   const view = useUi((s) => s.view);
   const setView = useUi((s) => s.setView);
   const togglePinned = useUi((s) => s.togglePinned);
-  const setMode = useUi((s) => s.setMode);
+  const collapse = useUi((s) => s.collapse);
   const applyConfig = useUi((s) => s.applyConfig);
 
   const entries: MenuEntry[] = [
@@ -49,9 +50,10 @@ export function Header() {
   return (
     <header className="flex items-center gap-1.5 border-b border-line py-2 pr-2 pl-3">
       <OrbitMark size={22} active={running} />
-      <span className="mr-1.5 text-[13.5px] font-medium tracking-tight">Orbit</span>
+      <span className="mr-2 text-[13.5px] font-medium tracking-tight">Orbit</span>
+      <ViewTabs />
       {pinned && (
-        <span title={t("header.pinned")} className="text-accent">
+        <span title={t("header.pinned")} className="ml-1 text-accent">
           <Pin size={13} className="fill-current" />
         </span>
       )}
@@ -71,7 +73,7 @@ export function Header() {
           />
         )}
       />
-      <IconButton icon={Minimize2} label={t("header.collapse")} onClick={() => setMode("compact")} />
+      <IconButton icon={Minimize2} label={t("header.collapse")} onClick={collapse} />
     </header>
   );
 }

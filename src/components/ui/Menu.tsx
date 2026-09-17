@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { Check } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useId, useRef, useState, type ComponentType, type KeyboardEvent, type ReactNode } from "react";
+import { useUi } from "../../store/ui";
 
 /** Lucide icons and `BrandIcon` wrappers both fit. */
 export type MenuIcon = ComponentType<{ size?: number; className?: string }>;
@@ -44,6 +45,14 @@ export function Menu({ trigger, entries, width = "w-60" }: MenuProps) {
   const id = useId();
 
   const items = entries.flatMap((entry, index) => (isSelectable(entry) ? [index] : []));
+
+  // The web page is drawn above the UI and would cover the popup.
+  useEffect(() => {
+    if (!open) return;
+    const { setOverlay } = useUi.getState();
+    setOverlay(true);
+    return () => setOverlay(false);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;

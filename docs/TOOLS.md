@@ -141,6 +141,12 @@ This can be changed with a filter: `{{name|raw}}`, `{{name|url}}`, `{{name|json}
 
 Also works with app protocols: `ms-settings:`, `spotify:`, `steam://`, `mailto:`, …
 
+`"target": "orbit"` opens a web page in Orbit's **web tab** instead of the browser (`http`/`https` only):
+
+```json
+"action": { "type": "open_url", "url": "https://www.google.com/search?q={{query}}", "target": "orbit" }
+```
+
 **Security:** If the scheme is fixed in the template (`ms-settings:{{page|raw}}`), only that scheme
 is allowed. If the whole URL comes from the model (`{{url|raw}}`), only `http`/`https` are allowed — no `file:`.
 
@@ -227,3 +233,7 @@ Numeric parameters also understand `30%`, `30 %`, `30 Prozent` ("30 percent"), a
 - Disable: `"enabled": false`
 - Delete: remove the file. Deleted default tools do **not** come back.
 - Restore all default tools: rename the `tools` folder and restart Orbit.
+
+**Updates:** default tools you never edited are updated automatically when Orbit ships a new version
+of them. As soon as you change a file, it is yours: Orbit never overwrites it again
+(`.seeded-tools.json` in the config folder remembers what Orbit wrote).

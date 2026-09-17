@@ -5,7 +5,25 @@
 import { Channel, invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 
-export type WindowMode = "compact" | "expanded";
+/** `web` is the wider panel for the web tab. */
+export type WindowMode = "compact" | "expanded" | "web";
+
+/** `src-tauri/src/desktop/web.rs` */
+export interface WebState {
+  url: string | null;
+  title: string;
+  loading: boolean;
+}
+
+/** Page area of the web tab in CSS pixels, relative to the window. */
+export interface WebBounds {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export type WebCommand = "back" | "forward" | "reload" | "stop" | "openExternal";
 export type Permission = "auto" | "confirm";
 
 export interface ProfileInfo {
@@ -128,6 +146,15 @@ export const api = {
 
   openExternal: (url: string) => invoke<void>("open_external", { url }),
 
+  webState: () => invoke<WebState>("web_state"),
+  /** Address bar input: URL, domain or search terms. */
+  webNavigate: (input: string) => invoke<void>("web_navigate", { input }),
+  /** Opens a link in the web tab; the backend then emits `orbit://web-open`. */
+  webOpen: (url: string) => invoke<void>("web_open", { url }),
+  webSetBounds: (bounds: WebBounds) => invoke<void>("web_set_bounds", { bounds }),
+  webSetVisible: (visible: boolean) => invoke<void>("web_set_visible", { visible }),
+  webCommand: (command: WebCommand) => invoke<void>("web_command", { command }),
+
   secretsList: () => invoke<SecretGroup[]>("secrets_list"),
   /** Resolves with a success message, rejects with the reason. */
   secretsTest: (groupId: string) => invoke<string>("secrets_test", { groupId }),
@@ -137,5 +164,11 @@ export const api = {
 
 export const onWindowShown = (handler: () => void): Promise<UnlistenFn> => listen("orbit://shown", handler);
 
-export const onConfigChanged = (handler: (snapshot: ConfigSnapshot) => void): Promise<UnlistenFn> =>
+export const onWebState = (handler: (state: WebState) => void): Promise<UnlistenFn> =>
+  listen<WebState>("orbit://web-state", (event) => handler(event.payload));
+
+/** A tool opened a page in the web tab. */
+export const onWebOpen = (handler: () => void): Promise<UnlistenFn> => listen("orbit://web-open", handler);
+
+export const onConfigChanged =(handler: (snapshot: ConfigSnapshot) => void): Promise<UnlistenFn> =>
   listen<ConfigSnapshot>("orbit://config-changed", (event) => handler(event.payload));

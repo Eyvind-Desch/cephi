@@ -100,8 +100,13 @@ pub enum ParamType {
     deny_unknown_fields
 )]
 pub enum Action {
-    /// Opens a URL or URI (`https:`, `ms-settings:`, `spotify:` …) with the default handler.
-    OpenUrl { url: String },
+    /// Opens a URL or URI (`https:`, `ms-settings:`, `spotify:` …) with the default handler,
+    /// or a web page in Orbit's web tab.
+    OpenUrl {
+        url: String,
+        #[serde(default)]
+        target: OpenTarget,
+    },
     /// Starts a program directly (no shell). Empty rendered arguments are dropped.
     Launch {
         program: String,
@@ -130,6 +135,17 @@ pub enum Action {
     },
     /// A function implemented inside Orbit.
     Builtin { id: Builtin },
+}
+
+/// Where `open_url` opens its URL.
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum OpenTarget {
+    /// Default browser or the app registered for the scheme.
+    #[default]
+    Browser,
+    /// Orbit's web tab (`http`/`https` only).
+    Orbit,
 }
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Eq)]
@@ -188,7 +204,7 @@ impl ToolManifest {
     /// Names of all secrets this tool needs (template references and builtin requirements).
     pub fn secrets(&self) -> Vec<String> {
         let mut names: Vec<String> = match &self.action {
-            Action::OpenUrl { url } => template::secret_names(url),
+            Action::OpenUrl { url, .. } => template::secret_names(url),
             Action::Launch { program, args, cwd } => std::iter::once(program)
                 .chain(args)
                 .chain(cwd)
@@ -229,7 +245,7 @@ impl ToolManifest {
         let known = |text: &str, context: Context| template::check(text, context, &self.parameters.properties);
 
         match &self.action {
-            Action::OpenUrl { url } => known(url, Context::Url),
+            Action::OpenUrl { url, .. } => known(url, Context::Url),
             Action::Launch { program, args, cwd } => {
                 known(program, Context::Arg)?;
                 args.iter().try_for_each(|a| known(a, Context::Arg))?;

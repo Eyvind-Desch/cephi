@@ -54,6 +54,20 @@ export const en = {
     durationMs: "{{value}} ms",
     durationS: "{{value}} s",
   },
+  tabs: {
+    chat: "Chat",
+    web: "Web",
+  },
+  web: {
+    back: "Back",
+    forward: "Forward",
+    reload: "Reload",
+    stop: "Stop loading",
+    openInBrowser: "Open in browser",
+    placeholder: "Search Google or enter an address",
+    emptyTitle: "Search the web without leaving Orbit",
+    emptyHint: "Type above, or use “g search term” anywhere in Orbit.",
+  },
   webResults: {
     more_one: "Show {{count}} more result",
     more_other: "Show {{count}} more results",

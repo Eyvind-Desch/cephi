@@ -2,7 +2,8 @@ import clsx from "clsx";
 import { ChevronDown, Globe } from "lucide-react";
 import { memo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { api, type WebResult } from "../../lib/ipc";
+import type { WebResult } from "../../lib/ipc";
+import { openLink } from "../../lib/links";
 
 /** Results shown before "show more" (two rows of the grid). */
 const INITIAL_COUNT = 4;
@@ -52,7 +53,7 @@ function SourceCard({ result, number }: { result: WebResult; number: number }) {
       title={tooltip}
       onClick={(e) => {
         e.preventDefault();
-        void api.openExternal(result.url);
+        void openLink(result.url);
       }}
       className="flex h-full flex-col gap-1 rounded-xl border border-line bg-raised px-2.5 py-2 transition-colors hover:bg-sunken"
     >

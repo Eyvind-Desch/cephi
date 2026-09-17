@@ -32,11 +32,11 @@ export const useChat = create<ChatState>()((set, get) => {
     try {
       await start((event) => {
         updateAssistant(assistantId, (message) => applyAgentEvent(message, event));
-        if (needsPanel(event)) useUi.getState().setMode("expanded");
+        if (needsPanel(event)) useUi.getState().expand();
       });
     } catch (error) {
       updateAssistant(assistantId, (message) => applyAgentEvent(message, { type: "error", message: String(error) }));
-      useUi.getState().setMode("expanded");
+      useUi.getState().expand();
     } finally {
       set({ running: false });
     }
@@ -52,6 +52,8 @@ export const useChat = create<ChatState>()((set, get) => {
 
       const ui = useUi.getState();
       ui.showFlash(null);
+      // Answers appear in the chat, even if the panel last showed another view.
+      if (ui.view !== "chat") useUi.setState({ view: "chat" });
       const assistantId = crypto.randomUUID();
       set((state) => ({
         running: true,
@@ -66,11 +68,11 @@ export const useChat = create<ChatState>()((set, get) => {
 
       // Still compact means everything ran via the fast path: confirm briefly, then get out of the way.
       // Failures open the panel instead, where the full message (and e.g. the keys view) fits.
-      const { mode, pinned, showFlash, setMode } = useUi.getState();
+      const { mode, pinned, showFlash, expand } = useUi.getState();
       const tool = findAssistant(assistantId)?.parts.find((p) => p.kind === "tool");
       if (mode === "compact" && tool?.kind === "tool") {
         if (tool.status !== "ok") {
-          setMode("expanded");
+          expand();
           return;
         }
         const text = tool.output ?? tool.title;

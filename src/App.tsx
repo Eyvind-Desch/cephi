@@ -1,13 +1,14 @@
 import { AnimatePresence, motion } from "motion/react";
 import { CompactBar } from "./components/shell/CompactBar";
 import { Panel } from "./components/shell/Panel";
-import { useConfigSync, useKeyboardShortcuts, useNativeContextMenu } from "./hooks/useAppLifecycle";
+import { useConfigSync, useKeyboardShortcuts, useNativeContextMenu, useWebSync } from "./hooks/useAppLifecycle";
 import { useUi } from "./store/ui";
 
 export function App() {
   const mode = useUi((s) => s.mode);
 
   useConfigSync();
+  useWebSync();
   useKeyboardShortcuts();
   useNativeContextMenu();
 
@@ -15,7 +16,8 @@ export function App() {
     <main className="h-full w-full overflow-hidden bg-surface text-fg">
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
-          key={mode}
+          // The web tab is the same panel, only wider: no fade between them.
+          key={mode === "compact" ? "compact" : "panel"}
           className="h-full"
           initial={{ opacity: 0, scale: 0.985 }}
           animate={{ opacity: 1, scale: 1 }}

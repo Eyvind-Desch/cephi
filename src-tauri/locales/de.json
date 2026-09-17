@@ -50,6 +50,7 @@
     "scheme_not_allowed": "Das Schema \"%{scheme}:\" ist für dieses Tool nicht erlaubt.",
     "open_failed": "Konnte nicht geöffnet werden: %{error}",
     "opened": "Geöffnet: %{url}",
+    "opened_in_orbit": "In Orbit geöffnet: %{url}",
     "launch_failed": "\"%{program}\" konnte nicht gestartet werden: %{error}",
     "launched": "Gestartet: %{program}",
     "powershell_start_failed": "PowerShell konnte nicht gestartet werden: %{error}",
