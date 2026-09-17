@@ -5,11 +5,12 @@ use serde::Deserialize;
 use tauri::Manager;
 
 use super::args::Args;
-use super::executor::ExecContext;
+use super::executor::{ExecContext, Success, ToolDisplay};
 use crate::integrations::media::MediaAction;
 use crate::integrations::radio;
 use crate::integrations::spotify::{self, SearchKind};
 use crate::launcher::{FAST_PATH_MIN_SCORE, TOOL_MIN_SCORE};
+use crate::search;
 use crate::state::AppState;
 
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq)]
@@ -22,6 +23,7 @@ pub enum Builtin {
     SpotifyPlay,
     MediaControl,
     Radio,
+    WebSearch,
 }
 
 impl Builtin {
@@ -34,6 +36,7 @@ impl Builtin {
             Builtin::SpotifyPlay => "spotify_play",
             Builtin::MediaControl => "media_control",
             Builtin::Radio => "radio",
+            Builtin::WebSearch => "web_search",
         }
     }
 
@@ -42,7 +45,7 @@ impl Builtin {
         match self {
             Builtin::ClipboardWrite => &["text"],
             Builtin::OpenApp => &["name"],
-            Builtin::SpotifyPlay => &["query"],
+            Builtin::SpotifyPlay | Builtin::WebSearch => &["query"],
             Builtin::MediaControl => &["action"],
             Builtin::Radio => &["device", "state"],
             Builtin::Datetime | Builtin::ClipboardRead => &[],
@@ -76,8 +79,9 @@ impl Builtin {
         }
     }
 
-    pub async fn run(self, ctx: &ExecContext<'_>, args: &Args) -> Result<String, String> {
-        match self {
+    pub async fn run(self, ctx: &ExecContext<'_>, args: &Args) -> Result<Success, String> {
+        let text = match self {
+            Builtin::WebSearch => return web_search(ctx, str_arg(args, "query")).await,
             Builtin::Datetime => Ok(chrono::Local::now().format("%A, %Y-%m-%d %H:%M:%S (%:z)").to_string()),
             Builtin::ClipboardRead => {
                 blocking(|| {
@@ -123,8 +127,21 @@ impl Builtin {
                 let command = radio::Command::parse(str_arg(args, "state"))?;
                 blocking(move || radio::run(device, command)).await
             }
-        }
+        };
+        text.map(Success::from)
     }
+}
+
+async fn web_search(ctx: &ExecContext<'_>, query: &str) -> Result<Success, String> {
+    let config = ctx.app.state::<AppState>().config();
+    let response = search::search(ctx.http, &config.settings.search, query).await?;
+    Ok(Success {
+        content: response.for_model(query),
+        display: Some(ToolDisplay::WebResults {
+            query: query.trim().to_string(),
+            results: response.results,
+        }),
+    })
 }
 
 async fn open_app(ctx: &ExecContext<'_>, name: &str) -> Result<String, String> {

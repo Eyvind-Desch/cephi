@@ -17,7 +17,9 @@ use serde::Serialize;
 use crate::tools::ToolRegistry;
 
 pub use paths::ConfigPaths;
-pub use settings::{Anchor, OllamaSettings, Profile, ProviderKind, ProviderSettings, Settings, WindowSettings};
+pub use settings::{
+    Anchor, OllamaSettings, Profile, ProviderKind, ProviderSettings, SearchSettings, Settings, WindowSettings,
+};
 pub use snapshot::ConfigSnapshot;
 
 /// A problem found while loading configuration, attributed to a file.

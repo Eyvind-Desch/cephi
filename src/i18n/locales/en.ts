@@ -54,6 +54,12 @@ export const en = {
     durationMs: "{{value}} ms",
     durationS: "{{value}} s",
   },
+  webResults: {
+    more_one: "Show {{count}} more result",
+    more_other: "Show {{count}} more results",
+    less: "Show fewer",
+    open: "Open {{url}}",
+  },
   header: {
     menu: "Menu",
     pinned: "Pinned: stays open",

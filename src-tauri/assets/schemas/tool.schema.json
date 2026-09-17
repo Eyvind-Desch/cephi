@@ -51,6 +51,11 @@
         ]
       }
     },
+    "afterTrigger": {
+      "enum": ["show", "answer"],
+      "default": "show",
+      "description": "After a trigger ran the tool: show = only show the result (fastest). answer = show the result, then let the AI answer from it (e.g. summarize search results)."
+    },
     "action": { "$ref": "#/definitions/action" }
   },
   "definitions": {
@@ -182,8 +187,8 @@
             "properties": {
               "type": { "const": "builtin" },
               "id": {
-                "enum": ["datetime", "clipboard_read", "clipboard_write", "open_app", "spotify_play", "media_control", "radio"],
-                "description": "Required parameters: clipboard_write → text · open_app → name · spotify_play → query (optional kind) · media_control → action (optional level, amount) · radio → device, state."
+                "enum": ["datetime", "clipboard_read", "clipboard_write", "open_app", "spotify_play", "media_control", "radio", "web_search"],
+                "description": "Required parameters: clipboard_write → text · open_app → name · spotify_play → query (optional kind) · media_control → action (optional level, amount) · radio → device, state · web_search → query."
               }
             }
           }

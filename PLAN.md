@@ -11,7 +11,7 @@ without opening an extra window. Runs locally with Ollama; cloud models (Claude,
 | Not: PowerToys extension (C#) | – | The Command Palette dictates a list UI: no free-form chat panel, no embedded Google, no custom design. Conceivable later as an *additional* entry point. |
 | UI | React + TypeScript + Tailwind + Framer Motion | Modern, fast iteration, smooth animations |
 | AI | Ollama (`localhost:11434`) | Models already available |
-| Web search | **SearXNG** (Docker), DuckDuckGo as fallback | See below |
+| Web search | **SearXNG** (Docker in WSL), DuckDuckGo as fallback (backlog) | See below |
 | Tools/actions | Built-in tools + **MCP client** (Rust, `rmcp`) | Actions like "open Spotify" plus arbitrary MCP servers |
 
 ### SearXNG vs. DuckDuckGo
@@ -108,6 +108,9 @@ request. Unambiguous commands ("open X") run through the quick action path witho
    the key vault; model picker grouped Local/Cloud → [docs/PROVIDERS.md](docs/PROVIDERS.md)
 3. **Web** – Decided: *both*. Result cards immediately (SearXNG) + AI summary from the
    excerpts only (fast), plus a Google tab in the panel
+   - ✅ 3a: SearXNG in Docker/WSL (`infra/searxng`), `web_search` builtin, `? query` fast path with
+     `afterTrigger: "answer"`, source grid + citation badges → [docs/SEARCH.md](docs/SEARCH.md)
+   - 3b: Google tab (child webview in the panel)
 4. **MCP** – `mcp.json`, tools from MCP servers
 5. **Polish** – settings UI, save history, code highlighting, autostart, installer
 6. **Extras** – pick up selected text, ask about a screenshot (vision model), voice
@@ -124,9 +127,11 @@ next stage begins. Whatever isn't a nuisance goes into the backlog instead of th
 - [ ] Save chat history
 - [ ] Volume indicator (brief overlay) after "louder/quieter"
 - [ ] Check whether Spotify auto-plays albums/playlists
+- [ ] Search: DuckDuckGo fallback when SearXNG is not running; optionally start the container from Orbit
+- [ ] Search: `fetch_page` tool (read a result page when the excerpts are not enough)
 
 ## Setup
 
 - [x] Git, Node LTS, Rustup, VS C++ Build Tools (winget)
 - [x] Project scaffold: `create-tauri-app` (React + TS)
-- [ ] Docker Desktop (from stage 3 onward)
+- [x] Docker: already available in WSL (Ubuntu), no Docker Desktop needed

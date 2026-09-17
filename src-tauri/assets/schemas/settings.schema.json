@@ -63,6 +63,16 @@
         "keepAlive": { "type": "string", "default": "10m", "description": "How long the model stays loaded after a request, e.g. \"10m\", \"1h\", \"-1\" (forever)." }
       }
     },
+    "search": {
+      "description": "Web search through a local SearXNG instance (start it with infra/searxng/start.ps1).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "searxngUrl": { "type": "string", "default": "http://127.0.0.1:8888" },
+        "language": { "type": "string", "default": "auto", "description": "Result language: \"auto\" (detected from the query), \"all\" or a code such as \"de\", \"en-US\"." },
+        "maxResults": { "type": "integer", "minimum": 1, "maximum": 20, "default": 6, "description": "Results shown and passed to the model. Fewer = faster answers from small models." }
+      }
+    },
     "providers": {
       "description": "Cloud AI providers. The API key is entered in Orbit under Keys (stored as <id>_api_key in the Windows Credential Manager).",
       "type": "array",

@@ -14,6 +14,11 @@
     "baseUrl": "http://localhost:11434",
     "keepAlive": "10m"
   },
+  "search": {
+    "searxngUrl": "http://127.0.0.1:8888",
+    "language": "auto",
+    "maxResults": 6
+  },
   "providers": [
     { "id": "anthropic", "type": "anthropic", "label": "Anthropic" },
     { "id": "gemini", "type": "openai", "label": "Google Gemini", "baseUrl": "https://generativelanguage.googleapis.com/v1beta/openai" },

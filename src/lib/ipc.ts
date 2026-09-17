@@ -70,6 +70,17 @@ export interface SecretGroup {
   secrets: SecretInfo[];
 }
 
+/** `src-tauri/src/search/mod.rs` */
+export interface WebResult {
+  title: string;
+  url: string;
+  snippet: string;
+  engines: string[];
+}
+
+/** `src-tauri/src/tools/executor.rs`: structured tool output the UI renders richer than text. */
+export type ToolDisplay = { kind: "webResults"; query: string; results: WebResult[] };
+
 /** `src-tauri/src/agent/events.rs` */
 export type AgentEvent =
   | { type: "token"; text: string }
@@ -82,6 +93,7 @@ export type AgentEvent =
       output: string;
       durationMs: number;
       missingSecrets: string[];
+      display: ToolDisplay | null;
     }
   | { type: "done" }
   | { type: "cancelled" }

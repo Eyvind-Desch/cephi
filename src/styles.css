@@ -188,6 +188,28 @@ html[data-preview] {
   text-underline-offset: 2px;
   cursor: pointer;
 }
+/* Source reference [n] from web search: small number badge instead of an underlined link. */
+.prose-orbit a.citation {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.35em;
+  height: 1.35em;
+  margin: 0 0.1em;
+  padding: 0 0.3em;
+  border-radius: 0.45em;
+  vertical-align: 0.12em;
+  font-size: 0.72em;
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  color: var(--fg-muted);
+  background: var(--surface-sunken);
+  font-variant-numeric: tabular-nums;
+}
+.prose-orbit a.citation:hover {
+  color: var(--accent-fg);
+  background: var(--accent);
+}
 .prose-orbit strong {
   font-weight: 600;
 }

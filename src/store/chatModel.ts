@@ -1,4 +1,5 @@
-import type { AgentEvent } from "../lib/ipc";
+import i18n from "../i18n";
+import type { AgentEvent, ToolDisplay, WebResult } from "../lib/ipc";
 
 export type ToolStatus = "running" | "awaiting" | "ok" | "error";
 
@@ -20,6 +21,7 @@ export interface ToolPart {
   output?: string;
   durationMs?: number;
   missingSecrets?: string[];
+  display?: ToolDisplay;
 }
 
 export type Part = TextPart | ToolPart;
@@ -77,6 +79,7 @@ export function applyAgentEvent(message: AssistantMessage, event: AgentEvent): A
         output: event.output,
         durationMs: event.durationMs,
         missingSecrets: event.missingSecrets,
+        display: event.display ?? undefined,
       });
     case "done":
       return { ...message, status: "done" };
@@ -99,9 +102,26 @@ export function needsPanel(event: AgentEvent): boolean {
       return true;
     case "toolCall":
       return !event.fast;
+    case "toolResult":
+      return event.display != null;
     default:
       return false;
   }
+}
+
+/**
+ * Sources that `[n]` citations in a text part refer to: the most recent web results before it.
+ * Returns one entry per part (undefined for tool parts and texts without preceding results).
+ */
+export function citationSources(parts: Part[]): (WebResult[] | undefined)[] {
+  let current: WebResult[] | undefined;
+  return parts.map((part) => {
+    if (part.kind === "tool") {
+      if (part.display?.kind === "webResults") current = part.display.results;
+      return undefined;
+    }
+    return current;
+  });
 }
 
 function updateTool(message: AssistantMessage, callId: string, patch: Partial<ToolPart>): AssistantMessage {
@@ -115,7 +135,7 @@ function updateTool(message: AssistantMessage, callId: string, patch: Partial<To
 function settleTools(parts: Part[]): Part[] {
   return parts.map((part) =>
     part.kind === "tool" && (part.status === "running" || part.status === "awaiting")
-      ? { ...part, status: "error", output: part.output ?? "Abgebrochen." }
+      ? { ...part, status: "error", output: part.output ?? i18n.t("chat.cancelled") }
       : part,
   );
 }

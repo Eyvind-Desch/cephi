@@ -17,7 +17,7 @@ use crate::config::Config;
 use crate::error::{AppError, AppResult};
 use crate::llm::{ChatMessage, LlmClient, LlmError, LlmRequest, ToolCall};
 use crate::state::AppState;
-use crate::tools::{self, ExecContext, Permission, ToolOutput};
+use crate::tools::{self, AfterTrigger, ExecContext, Permission, ToolOutput};
 
 pub use events::AgentEvent;
 
@@ -140,12 +140,23 @@ impl Run<'_> {
         let profile = settings.profile(profile_id);
 
         // Fast path: a trigger phrase runs its tool directly, without waiting for the model.
+        // Afterwards the model only gets involved if the tool asks for an answer from its result.
         if let Some(call) = self.fast_path_call(&text) {
             history.push(ChatMessage::user(text));
             history.push(ChatMessage::assistant_tool_calls(vec![call.clone()]));
             let output = self.run_tool_call(&call, true).await;
+            let answer = output.ok
+                && self
+                    .config
+                    .tools
+                    .get(&call.name)
+                    .is_some_and(|tool| tool.manifest.after_trigger == AfterTrigger::Answer);
             history.push(ChatMessage::tool_result(&call, output.content, output.ok));
-            return Ok(Outcome::Done);
+            if !answer || self.cancel.is_cancelled() {
+                return Ok(Outcome::Done);
+            }
+        } else {
+            history.push(ChatMessage::user(text));
         }
 
         let client = LlmClient::for_profile(settings, profile, &self.state.http).map_err(|e| e.to_string())?;
@@ -155,8 +166,6 @@ impl Run<'_> {
             Vec::new()
         };
         let system_prompt = self.system_prompt();
-
-        history.push(ChatMessage::user(text));
 
         for _ in 0..settings.agent.max_tool_rounds {
             let request = LlmRequest {
@@ -275,8 +284,13 @@ impl Run<'_> {
             output: content.clone(),
             duration_ms: started.elapsed().as_millis() as u64,
             missing_secrets,
+            display: output.display,
         });
-        ToolOutput { ok: output.ok, content }
+        ToolOutput {
+            ok: output.ok,
+            content,
+            display: None,
+        }
     }
 
     async fn await_confirmation(&self, call_id: &str, preview: String) -> bool {

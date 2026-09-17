@@ -19,10 +19,11 @@
 │ llm/          providers: Ollama, Anthropic, OpenAI-compatible (streaming, tools)│
 │ secrets/      Windows Credential Manager + key catalog for the keys view        │
 │ launcher/ integrations/  app index, Spotify, media/volume, radios                │
+│ search/       SearXNG client, excerpts for the model                            │
 │ desktop/      window placement, tray, global hotkey                             │
 └─────────────────────────────────────────────────────────────────────────────────┘
-          │                                    │
-    Ollama :11434                   %APPDATA%\Orbit\ (settings.json, tools/)
+          │                       │                          │
+    Ollama :11434      SearXNG :8888 (Docker/WSL)   %APPDATA%\Orbit\ (settings.json, tools/)
 ```
 
 ## Principles
@@ -61,6 +62,13 @@ Composer ─ agent_send(text, profileId, channel) ─▶ agent::run
 
 Cancellation (`agent_cancel`) acts via a `CancellationToken` on both the stream and
 pending confirmations.
+
+**Fast path:** before the model is asked, the input is matched against tool `triggers`. A match runs the
+tool directly (`ToolCall { fast: true }`) and is recorded in the history like a model tool call. With
+`afterTrigger: "answer"` the loop above then continues so the model answers from the result.
+
+**Display data:** besides the text for the model, a tool may return `ToolDisplay` (e.g. web results).
+It travels only in the `ToolResult` event, so the UI can render cards without parsing text.
 
 ## IPC contracts
 

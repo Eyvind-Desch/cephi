@@ -52,6 +52,12 @@ export const de: Locale = {
     durationMs: "{{value}} ms",
     durationS: "{{value}} s",
   },
+  webResults: {
+    more_one: "{{count}} weiteres Ergebnis",
+    more_other: "{{count}} weitere Ergebnisse",
+    less: "Weniger anzeigen",
+    open: "{{url}} öffnen",
+  },
   header: {
     menu: "Menü",
     pinned: "Angepinnt: bleibt offen",

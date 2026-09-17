@@ -147,7 +147,16 @@
     "duplicate_provider": "providers: duplicate id \"%{id}\".",
     "invalid_provider_url": "providers \"%{id}\": baseUrl \"%{url}\" is not a valid URL.",
     "provider_needs_url": "providers \"%{id}\": type \"openai\" needs a baseUrl.",
-    "unknown_provider": "Profile \"%{profile}\" uses the unknown provider \"%{provider}\"."
+    "unknown_provider": "Profile \"%{profile}\" uses the unknown provider \"%{provider}\".",
+    "invalid_searxng_url": "search.searxngUrl \"%{url}\" is not a valid URL.",
+    "max_results": "search.maxResults must be between 1 and 20."
+  },
+  "search": {
+    "empty_query": "What should I search for?",
+    "unreachable": "Web search is not running (SearXNG at %{url}). Start it with infra/searxng/start.ps1 in the Orbit folder.",
+    "json_disabled": "SearXNG does not allow JSON results. Add \"json\" to search.formats in its settings.yml.",
+    "failed": "Web search failed: %{error}",
+    "no_results": "No web results for \"%{query}\"."
   },
   "spotify": {
     "unknown_kind": "Unknown Spotify type \"%{kind}\".",

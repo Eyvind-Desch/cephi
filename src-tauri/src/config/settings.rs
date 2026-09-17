@@ -21,6 +21,7 @@ pub struct Settings {
     pub ollama: OllamaSettings,
     /// Cloud providers. API keys live in the vault as `<id>_api_key` (see `apiKeySecret`).
     pub providers: Vec<ProviderSettings>,
+    pub search: SearchSettings,
     pub agent: AgentSettings,
     pub window: WindowSettings,
 }
@@ -121,6 +122,15 @@ pub struct OllamaSettings {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(default, rename_all = "camelCase", deny_unknown_fields)]
+pub struct SearchSettings {
+    pub searxng_url: String,
+    /// SearXNG language: `auto`, `all` or a code such as `de`.
+    pub language: String,
+    pub max_results: usize,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(default, rename_all = "camelCase", deny_unknown_fields)]
 pub struct AgentSettings {
     pub system_prompt: String,
     pub max_tool_rounds: u32,
@@ -211,6 +221,12 @@ impl Settings {
         }
         if url::Url::parse(&self.ollama.base_url).is_err() {
             return Err(t!("settings.invalid_ollama_url", url = self.ollama.base_url).into());
+        }
+        if url::Url::parse(&self.search.searxng_url).is_err() {
+            return Err(t!("settings.invalid_searxng_url", url = self.search.searxng_url).into());
+        }
+        if !(1..=20).contains(&self.search.max_results) {
+            return Err(t!("settings.max_results").into());
         }
         if self.agent.max_tool_rounds == 0 {
             return Err(t!("settings.max_tool_rounds").into());
@@ -332,6 +348,7 @@ impl Default for Settings {
                     fallbacks: true,
                 },
             ],
+            search: SearchSettings::default(),
             agent: AgentSettings::default(),
             window: WindowSettings::default(),
         }
@@ -343,6 +360,17 @@ impl Default for OllamaSettings {
         Self {
             base_url: "http://localhost:11434".into(),
             keep_alive: "10m".into(),
+        }
+    }
+}
+
+impl Default for SearchSettings {
+    fn default() -> Self {
+        Self {
+            // Matches the port in infra/searxng/compose.yaml.
+            searxng_url: "http://127.0.0.1:8888".into(),
+            language: "auto".into(),
+            max_results: 6,
         }
     }
 }

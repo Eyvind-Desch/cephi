@@ -32,7 +32,8 @@ Clicking outside hides Orbit, unless it's pinned (⋯ menu). Tray icon: open, co
 | `spiele another love von tom odell auf spotify` / "play another love by tom odell on spotify" | Play song ([setup](docs/SPOTIFY.md)) |
 | `pause` / "pause", `nächster song` / "next song", `stumm` / "mute", `ton an` / "unmute" | Playback |
 | `lautstärke auf 30` / "volume to 30", `mach 24 lauter` / "turn it up by 24", `mach es leiser` / "turn it down" | Volume (exact) |
-| `g search term`, `yt search term` | Google / YouTube |
+| `? search term` | Web search in Orbit: result cards + short AI answer with sources ([setup](docs/SEARCH.md)) |
+| `g search term`, `yt search term` | Google / YouTube in the browser |
 
 Everything else goes to the AI, which can call the same tools. Custom quick actions: `triggers` in the
 tool JSON files ([docs/TOOLS.md](docs/TOOLS.md)). API keys: ⋯ → *Keys & API Keys*.
@@ -71,4 +72,5 @@ Logs: `%LOCALAPPDATA%\io.github.eyvind-desch.orbit\logs\`.
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): structure and data flow
 - [docs/TOOLS.md](docs/TOOLS.md): custom tools, quick actions, API keys
 - [docs/SPOTIFY.md](docs/SPOTIFY.md): Spotify setup
+- [docs/SEARCH.md](docs/SEARCH.md): web search (local SearXNG)
 - [docs/PROVIDERS.md](docs/PROVIDERS.md): cloud AI providers (Claude, Gemini, OpenAI-compatible)

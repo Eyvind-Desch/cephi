@@ -32,7 +32,20 @@ pub struct ToolManifest {
     /// Phrases that run the tool directly, without the model (see `trigger.rs`).
     #[serde(default)]
     pub triggers: Vec<TriggerSpec>,
+    /// What happens after a trigger ran the tool.
+    #[serde(default)]
+    pub after_trigger: AfterTrigger,
     pub action: Action,
+}
+
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum AfterTrigger {
+    /// Show the result; the model is not involved.
+    #[default]
+    Show,
+    /// Show the result, then let the model answer from it (e.g. summarize search results).
+    Answer,
 }
 
 /// Whether a tool runs immediately or asks the user first.

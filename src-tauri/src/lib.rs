@@ -11,6 +11,7 @@ mod i18n;
 mod integrations;
 mod launcher;
 mod llm;
+mod search;
 mod secrets;
 mod state;
 mod tools;

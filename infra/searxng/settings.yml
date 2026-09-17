@@ -1,0 +1,25 @@
+# SearXNG settings for Orbit. Only overrides; everything else uses the SearXNG defaults.
+# Docs: https://docs.searxng.org/admin/settings/index.html
+use_default_settings: true
+
+general:
+  instance_name: Orbit Search
+
+server:
+  # Only reachable from this PC (the port is bound to 127.0.0.1), so no bot limiter needed.
+  limiter: false
+  image_proxy: false
+  # Replaced with a random value by start.ps1.
+  secret_key: "__SECRET__"
+
+search:
+  safe_search: 0
+  autocomplete: ""
+  # Orbit reads the JSON API.
+  formats:
+    - html
+    - json
+
+outgoing:
+  request_timeout: 2.5
+  max_request_timeout: 4.0

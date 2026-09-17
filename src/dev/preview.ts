@@ -96,7 +96,44 @@ const demoChat: Message[] = [
       },
     ],
   },
+  { id: "5", role: "user", text: "? tauri 2 neueste version" },
+  {
+    id: "6",
+    role: "assistant",
+    status: "done",
+    parts: [
+      {
+        kind: "tool",
+        callId: "c3",
+        name: "web_search",
+        title: "Websuche",
+        args: { query: "tauri 2 neueste version" },
+        status: "ok",
+        fast: true,
+        output: "…",
+        durationMs: 912,
+        display: {
+          kind: "webResults",
+          query: "tauri 2 neueste version",
+          results: [
+            webResult("Tauri 2.0 Release", "https://v2.tauri.app/blog/tauri-20/", "Tauri 2.0 ist stabil: mobile Unterstützung für iOS und Android, ein neues Berechtigungssystem und Plugins."),
+            webResult("Releases · tauri-apps/tauri", "https://github.com/tauri-apps/tauri/releases", "Build smaller, faster, and more secure desktop and mobile applications with a web frontend."),
+            webResult("Tauri – Wikipedia", "https://de.wikipedia.org/wiki/Tauri_(Framework)", "Tauri ist ein Framework zur Entwicklung plattformübergreifender Anwendungen mit Webtechnologien."),
+            webResult("What's new in Tauri", "https://v2.tauri.app/release/", "Changelog of all Tauri packages."),
+          ],
+        },
+      },
+      {
+        kind: "text",
+        text: "Die aktuelle Hauptversion ist **Tauri 2** [1]. Einzelne Pakete bekommen laufend Patch-Releases, die Liste steht auf GitHub [2][4].",
+      },
+    ],
+  },
 ];
+
+function webResult(title: string, url: string, snippet: string) {
+  return { title, url, snippet, engines: ["google", "brave"] };
+}
 
 export function installPreview() {
   mockIPC(

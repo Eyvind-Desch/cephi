@@ -3,7 +3,7 @@ import { memo, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { api } from "../../lib/ipc";
+import { api, type WebResult } from "../../lib/ipc";
 
 function CodeBlock({ children }: { children?: ReactNode }) {
   const { t } = useTranslation();
@@ -39,25 +39,47 @@ function CodeBlock({ children }: { children?: ReactNode }) {
 const components: Components = {
   pre: ({ children }) => <CodeBlock>{children}</CodeBlock>,
   // Links must never navigate the app's webview; open them in the default browser.
-  a: ({ href, children }) => (
-    <a
-      href={href}
-      onClick={(e) => {
-        e.preventDefault();
-        if (href) void api.openExternal(href);
-      }}
-    >
-      {children}
-    </a>
-  ),
+  a: ({ href, children }) => {
+    const citation = typeof children === "string" && /^\d+$/.test(children);
+    return (
+      <a
+        href={href}
+        title={citation ? href : undefined}
+        className={citation ? "citation" : undefined}
+        onClick={(e) => {
+          e.preventDefault();
+          if (href) void api.openExternal(href);
+        }}
+      >
+        {children}
+      </a>
+    );
+  },
 };
 
-export const Markdown = memo(function Markdown({ text }: { text: string }) {
+interface MarkdownProps {
+  text: string;
+  /** Web results that `[n]` citations in the text refer to. */
+  sources?: WebResult[];
+}
+
+export const Markdown = memo(function Markdown({ text, sources }: MarkdownProps) {
   return (
     <div className="prose-orbit">
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-        {text}
+        {sources ? linkCitations(text, sources) : text}
       </ReactMarkdown>
     </div>
   );
 });
+
+/** Turns `[1]`, `[1, 3]` and `[1][2]` into links to the matching sources. Unknown numbers stay text. */
+export function linkCitations(text: string, sources: WebResult[]) {
+  return text.replace(/\[(\d+(?:\s*,\s*\d+)*)\](?!\()/g, (match, numbers: string) => {
+    const links = numbers.split(",").map((n) => {
+      const source = sources[Number(n.trim()) - 1];
+      return source ? `[${n.trim()}](<${source.url}>)` : null;
+    });
+    return links.every(Boolean) ? links.join("") : match;
+  });
+}

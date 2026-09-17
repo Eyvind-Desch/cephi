@@ -1,0 +1,20 @@
+{
+  "$schema": "../../schemas/tool.schema.json",
+  "name": "web_search",
+  "title": { "en": "Web search", "de": "Websuche" },
+  "description": "Searches the web and returns the top results with short excerpts. Use this for current events, news, prices, facts you are not sure about or anything that needs up-to-date information. Answer from the excerpts and cite sources as [1], [2].",
+  "permission": "auto",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "query": { "type": "string", "description": "Search terms, short and specific" }
+    },
+    "required": ["query"]
+  },
+  "triggers": ["?{query}", "(suche|such) im (web|internet|netz) nach {query}", "search the web for {query}"],
+  "afterTrigger": "answer",
+  "action": {
+    "type": "builtin",
+    "id": "web_search"
+  }
+}

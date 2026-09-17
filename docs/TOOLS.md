@@ -97,6 +97,8 @@ takes milliseconds instead of seconds and works regardless of how smart the mode
 - Avoid overly generic triggers like `{query} spotify`: they also catch sentences that mean
   something else.
 - In the chat, you can spot quick actions by the ⚡ on the tool card.
+- `"afterTrigger": "answer"` lets the AI answer from the result after a quick action (default `"show"`:
+  only the result). `web_search` uses it: the result cards appear immediately, the summary follows.
 
 ## API keys (`{{secret:…}}`)
 
@@ -205,6 +207,7 @@ is allowed. If the whole URL comes from the model (`{{url|raw}}`), only `http`/`
 | `spotify_play` | `query`, optional `kind` (`track`/`album`/`artist`/`playlist`) | Play music on Spotify, see [SPOTIFY.md](SPOTIFY.md) |
 | `media_control` | `action` (`play_pause`/`next`/`previous`/`set_volume`/`volume_up`/`volume_down`/`mute`/`unmute`), optional `level` (0–100), `amount` | Playback via media keys (any player), exact volume via Windows Core Audio |
 | `radio` | `device` (`bluetooth`/`wlan`/`wifi`), `state` (`on`/`off`/`toggle`/`status`) | Turn Bluetooth/Wi-Fi on or off, toggle it, or check its status |
+| `web_search` | `query` | Web search via the local SearXNG (`settings.search`), result cards in the chat, excerpts for the AI, see [SEARCH.md](SEARCH.md) |
 
 Numeric parameters also understand `30%`, `30 %`, `30 Prozent` ("30 percent"), and `2,5` (comma as decimal separator).
 

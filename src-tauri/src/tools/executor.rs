@@ -4,6 +4,7 @@ use std::sync::OnceLock;
 use std::time::Duration;
 
 use rust_i18n::t;
+use serde::Serialize;
 use tauri::AppHandle;
 use tauri_plugin_opener::OpenerExt;
 
@@ -11,6 +12,7 @@ use super::args::Args;
 use super::manifest::{Action, HttpMethod};
 use super::registry::Tool;
 use super::template::{self, Context, Secrets};
+use crate::search::WebResult;
 
 const DEFAULT_TIMEOUT_SECS: u64 = 30;
 /// Hides the console window of child processes.
@@ -26,12 +28,37 @@ pub struct ExecContext<'a> {
 pub struct ToolOutput {
     pub ok: bool,
     pub content: String,
+    /// Structured data the UI renders richer than plain text.
+    pub display: Option<ToolDisplay>,
+}
+
+/// Mirrored in `src/lib/ipc.ts` (`ToolDisplay`).
+#[derive(Clone, Debug, Serialize)]
+#[serde(tag = "kind", rename_all = "camelCase", rename_all_fields = "camelCase")]
+pub enum ToolDisplay {
+    WebResults { query: String, results: Vec<WebResult> },
+}
+
+/// A successful tool run: text for the model plus optional display data.
+pub struct Success {
+    pub content: String,
+    pub display: Option<ToolDisplay>,
+}
+
+impl From<String> for Success {
+    fn from(content: String) -> Self {
+        Self { content, display: None }
+    }
 }
 
 impl ToolOutput {
-    fn from_result(result: Result<String, String>) -> Self {
+    fn from_result(result: Result<Success, String>) -> Self {
         match result {
-            Ok(content) => Self { ok: true, content },
+            Ok(success) => Self {
+                ok: true,
+                content: success.content,
+                display: success.display,
+            },
             Err(content) => Self::error(content),
         }
     }
@@ -40,6 +67,7 @@ impl ToolOutput {
         Self {
             ok: false,
             content: message.into(),
+            display: None,
         }
     }
 }
@@ -47,20 +75,22 @@ impl ToolOutput {
 pub async fn execute(ctx: &ExecContext<'_>, tool: &Tool, args: &Args) -> ToolOutput {
     log::info!("tool {} ({})", tool.manifest.name, tool.manifest.action.kind());
     let result = match &tool.manifest.action {
-        Action::OpenUrl { url } => open_url(ctx, url, args),
+        Action::OpenUrl { url } => open_url(ctx, url, args).map(Success::from),
         Action::Launch {
             program,
             args: argv,
             cwd,
-        } => launch(program, argv, cwd.as_deref(), args),
-        Action::Powershell { script, timeout_secs } => powershell(script, args, *timeout_secs).await,
+        } => launch(program, argv, cwd.as_deref(), args).map(Success::from),
+        Action::Powershell { script, timeout_secs } => powershell(script, args, *timeout_secs).await.map(Success::from),
         Action::Http {
             method,
             url,
             headers,
             body,
             timeout_secs,
-        } => http(ctx, *method, url, headers, body.as_deref(), *timeout_secs, args).await,
+        } => http(ctx, *method, url, headers, body.as_deref(), *timeout_secs, args)
+            .await
+            .map(Success::from),
         Action::Builtin { id } => id.run(ctx, args).await,
     };
     if let Err(e) = &result {

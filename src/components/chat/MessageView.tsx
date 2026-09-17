@@ -1,10 +1,11 @@
 import { AlertCircle, Check, CircleSlash, Copy } from "lucide-react";
 import { motion } from "motion/react";
-import { memo, useState } from "react";
+import { Fragment, memo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { AssistantMessage, Message } from "../../store/chatModel";
+import { citationSources, type AssistantMessage, type Message } from "../../store/chatModel";
 import { Markdown } from "./Markdown";
 import { ToolCard } from "./ToolCard";
+import { WebResults } from "./WebResults";
 
 /**
  * Memoized: while a reply streams only the message being updated gets a new object,
@@ -25,11 +26,19 @@ export const MessageView = memo(function MessageView({ message }: { message: Mes
 
   const isEmpty = message.parts.length === 0;
   const text = plainText(message);
+  const sources = citationSources(message.parts);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="group space-y-2.5">
       {message.parts.map((part, index) =>
-        part.kind === "text" ? <Markdown key={index} text={part.text} /> : <ToolCard key={part.callId} part={part} />,
+        part.kind === "text" ? (
+          <Markdown key={index} text={part.text} sources={sources[index]} />
+        ) : (
+          <Fragment key={part.callId}>
+            <ToolCard part={part} />
+            {part.display?.kind === "webResults" && <WebResults results={part.display.results} />}
+          </Fragment>
+        ),
       )}
 
       {isEmpty && message.status === "streaming" && <TypingIndicator />}
