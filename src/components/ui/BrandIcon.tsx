@@ -28,7 +28,7 @@ export function BrandIcon({ name, size = 16, className }: BrandIconProps) {
       <svg
         role="img"
         aria-label={logo.title}
-        viewBox={logo.viewBox ?? "0 0 24 24"}
+        viewBox="0 0 24 24"
         width={size}
         height={size}
         fill="currentColor"
