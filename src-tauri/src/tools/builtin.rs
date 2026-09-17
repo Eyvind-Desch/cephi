@@ -6,6 +6,7 @@ use tauri::Manager;
 use super::args::Args;
 use super::executor::ExecContext;
 use crate::integrations::media::MediaAction;
+use crate::integrations::radio;
 use crate::integrations::spotify::{self, SearchKind};
 use crate::launcher::{FAST_PATH_MIN_SCORE, TOOL_MIN_SCORE};
 use crate::state::AppState;
@@ -19,6 +20,7 @@ pub enum Builtin {
     OpenApp,
     SpotifyPlay,
     MediaControl,
+    Radio,
 }
 
 impl Builtin {
@@ -30,6 +32,7 @@ impl Builtin {
             Builtin::OpenApp => "open_app",
             Builtin::SpotifyPlay => "spotify_play",
             Builtin::MediaControl => "media_control",
+            Builtin::Radio => "radio",
         }
     }
 
@@ -40,6 +43,7 @@ impl Builtin {
             Builtin::OpenApp => &["name"],
             Builtin::SpotifyPlay => &["query"],
             Builtin::MediaControl => &["action"],
+            Builtin::Radio => &["device", "state"],
             Builtin::Datetime | Builtin::ClipboardRead => &[],
         }
     }
@@ -52,9 +56,14 @@ impl Builtin {
     }
 
     /// Whether a trigger match may run this builtin without the model. `open_app` only does so
-    /// when an installed app matches confidently; otherwise the model gets a chance.
+    /// when an installed app matches confidently, `radio` only for known devices ("schalte das
+    /// Licht an" is not ours); otherwise the model gets a chance.
     pub fn accepts_fast_path(self, ctx: &ExecContext<'_>, args: &Args) -> bool {
         match self {
+            Builtin::Radio => {
+                radio::Device::parse(str_arg(args, "device")).is_ok()
+                    && radio::Command::parse(str_arg(args, "state")).is_ok()
+            }
             Builtin::OpenApp => {
                 let state = ctx.app.state::<AppState>();
                 state
@@ -107,6 +116,11 @@ impl Builtin {
                 let amount = args.get("amount").and_then(|v| v.as_i64());
                 // Core Audio is COM: keep it off the async runtime threads.
                 blocking(move || action.run(level, amount)).await
+            }
+            Builtin::Radio => {
+                let device = radio::Device::parse(str_arg(args, "device"))?;
+                let command = radio::Command::parse(str_arg(args, "state"))?;
+                blocking(move || radio::run(device, command)).await
             }
         }
     }

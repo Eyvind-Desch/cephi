@@ -192,6 +192,9 @@ mod tests {
             ("pause", "media_control"),
             ("lauter", "media_control"),
             ("mach es leiser", "media_control"),
+            ("schalte bluetooth jetzt an", "radio"),
+            ("WLAN aus", "radio"),
+            ("ist bluetooth an?", "radio"),
         ];
         for (input, expected) in cases {
             let (tool, _) = first_match(&registry, input).unwrap_or_else(|| panic!("no match for {input:?}"));
@@ -234,6 +237,20 @@ mod tests {
                 assert_eq!(args[key], value, "{input:?}");
             }
         }
+    }
+
+    #[test]
+    fn radio_trigger_only_accepts_known_devices() {
+        let registry = default_registry();
+        let (tool, args) = first_valid(&registry, "Schalte Bluetooth jetzt an").unwrap();
+        assert_eq!(
+            (tool.as_str(), args["device"].as_str(), args["state"].as_str()),
+            ("radio", Some("Bluetooth"), Some("on"))
+        );
+        // Matches the pattern, but "licht" is no radio: the builtin rejects the fast path (checked in builtin.rs).
+        assert!(crate::integrations::radio::Device::parse("das licht").is_err());
+        // "ton an" belongs to media control, which is more specific.
+        assert_eq!(first_valid(&registry, "ton an").unwrap().0, "media_control");
     }
 
     #[test]

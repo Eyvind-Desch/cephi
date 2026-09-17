@@ -171,8 +171,8 @@
             "properties": {
               "type": { "const": "builtin" },
               "id": {
-                "enum": ["datetime", "clipboard_read", "clipboard_write", "open_app", "spotify_play", "media_control"],
-                "description": "Benötigte Parameter: clipboard_write → text · open_app → name · spotify_play → query (optional kind) · media_control → action."
+                "enum": ["datetime", "clipboard_read", "clipboard_write", "open_app", "spotify_play", "media_control", "radio"],
+                "description": "Benötigte Parameter: clipboard_write → text · open_app → name · spotify_play → query (optional kind) · media_control → action (optional level, amount) · radio → device, state."
               }
             }
           }

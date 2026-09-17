@@ -1,0 +1,30 @@
+{
+  "$schema": "../../schemas/tool.schema.json",
+  "name": "radio",
+  "title": "Bluetooth & WLAN",
+  "description": "Schaltet Bluetooth oder WLAN an oder aus oder prüft den aktuellen Zustand. Nutze state=status, bevor du etwas über den Zustand behauptest.",
+  "permission": "auto",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "device": { "type": "string", "description": "bluetooth oder wlan" },
+      "state": {
+        "type": "string",
+        "description": "on = einschalten, off = ausschalten, toggle = umschalten, status = Zustand abfragen",
+        "enum": ["on", "off", "toggle", "status"]
+      }
+    },
+    "required": ["device", "state"]
+  },
+  "triggers": [
+    { "pattern": "[(schalte|schalt|mach|mache|stell)] {device} [jetzt] (an|ein|on)", "args": { "state": "on" } },
+    { "pattern": "[(schalte|schalt|mach|mache|stell)] {device} [jetzt] (aus|off)", "args": { "state": "off" } },
+    { "pattern": "(aktiviere|enable) {device}", "args": { "state": "on" } },
+    { "pattern": "(deaktiviere|disable) {device}", "args": { "state": "off" } },
+    { "pattern": "ist {device} (an|aus|ein|eingeschaltet|ausgeschaltet|on|off)", "args": { "state": "status" } }
+  ],
+  "action": {
+    "type": "builtin",
+    "id": "radio"
+  }
+}

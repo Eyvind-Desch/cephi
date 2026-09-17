@@ -116,7 +116,8 @@ mod tests {
 
     #[test]
     fn roundtrip_in_credential_manager() {
-        let name = "orbit_selftest_secret";
+        // Unique name: the test touches the real Credential Manager, runs must not interfere.
+        let name = &format!("orbit_test_{}", uuid::Uuid::new_v4().simple());
         set(name, "  wert-äöü  ").unwrap();
         assert_eq!(get(name).unwrap().as_deref(), Some("wert-äöü"));
         delete(name).unwrap();

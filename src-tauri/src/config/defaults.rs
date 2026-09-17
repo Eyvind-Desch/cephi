@@ -58,6 +58,7 @@ pub const TOOLS: &[(&str, &str)] = &[
         asset!("defaults/tools/system/system_info.json"),
     ),
     ("system/lock_pc.json", asset!("defaults/tools/system/lock_pc.json")),
+    ("system/radio.json", asset!("defaults/tools/system/radio.json")),
     (
         "system/run_powershell.json",
         asset!("defaults/tools/system/run_powershell.json"),

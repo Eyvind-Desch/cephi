@@ -129,6 +129,20 @@ pub fn load(path: &Path) -> Result<Settings, String> {
     Ok(settings)
 }
 
+/// Must match `agent.systemPrompt` in `assets/defaults/settings.json` (checked by a test).
+///
+/// Small models tend to invent device states ("Bluetooth ist bereits an") and then insist on
+/// them. The prompt makes tool results the only source of truth about the PC.
+pub const DEFAULT_SYSTEM_PROMPT: &str = "Du bist Orbit, ein Desktop-Assistent unter Windows. \
+Antworte knapp und in der Sprache des Nutzers.\n\
+Regeln:\n\
+- Über den PC weißt du nur, was dir Tools melden. Behaupte nie, etwas geprüft, eingeschaltet oder \
+erledigt zu haben, ohne dass ein Tool-Ergebnis in diesem Gespräch das belegt.\n\
+- Gibt es kein passendes Tool, sag ehrlich, dass du das nicht kannst, und schlage vor, wie der Nutzer \
+es selbst erledigt.\n\
+- Widerspricht der Nutzer, prüfe den Zustand erneut mit einem Tool, statt auf deiner Aussage zu beharren.\n\
+- Erfinde keine Tool-Ergebnisse.";
+
 fn default_true() -> bool {
     true
 }
@@ -185,10 +199,7 @@ impl Default for OllamaSettings {
 impl Default for AgentSettings {
     fn default() -> Self {
         Self {
-            system_prompt: "Du bist Orbit, ein hilfreicher Desktop-Assistent unter Windows. \
-                Antworte knapp und in der Sprache des Nutzers. Nutze Tools, wenn sie helfen, \
-                und erfinde keine Tool-Ergebnisse."
-                .into(),
+            system_prompt: DEFAULT_SYSTEM_PROMPT.into(),
             max_tool_rounds: 6,
             max_tool_output_chars: 8000,
             confirm_timeout_secs: 120,
@@ -220,6 +231,10 @@ mod tests {
     fn default_settings_file_is_valid() {
         let settings: Settings = serde_json::from_str(super::super::defaults::SETTINGS).unwrap();
         settings.validate().unwrap();
+        assert_eq!(
+            settings.agent.system_prompt, DEFAULT_SYSTEM_PROMPT,
+            "defaults/settings.json is out of sync"
+        );
     }
 
     #[test]

@@ -229,19 +229,21 @@ mod tests {
 
     #[test]
     fn secrets_are_masked_resolved_and_listed() {
-        let template = "Bearer {{secret:orbit_template_test}}";
-        assert_eq!(secret_names(template), vec!["orbit_template_test"]);
+        // Unique name: the test touches the real Credential Manager, runs must not interfere.
+        let name = format!("orbit_test_{}", uuid::Uuid::new_v4().simple());
+        let template = format!("Bearer {{{{secret:{name}}}}}");
+        assert_eq!(secret_names(&template), vec![name.clone()]);
         assert_eq!(
-            render(template, Context::Header, &Args::new(), Secrets::Mask).unwrap(),
+            render(&template, Context::Header, &Args::new(), Secrets::Mask).unwrap(),
             format!("Bearer {MASK}")
         );
-        assert!(render_resolved(template, Context::Header, &Args::new())
+        assert!(render_resolved(&template, Context::Header, &Args::new())
             .unwrap_err()
             .contains("fehlt"));
 
-        secrets::set("orbit_template_test", "abc123").unwrap();
-        let resolved = render_resolved(template, Context::Header, &Args::new());
-        secrets::delete("orbit_template_test").unwrap();
+        secrets::set(&name, "abc123").unwrap();
+        let resolved = render_resolved(&template, Context::Header, &Args::new());
+        secrets::delete(&name).unwrap();
         assert_eq!(resolved.unwrap(), "Bearer abc123");
     }
 
