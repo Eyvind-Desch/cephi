@@ -1,0 +1,28 @@
+{
+  "$schema": "./schemas/settings.schema.json",
+  "hotkey": "Ctrl+Alt+Space",
+  "defaultProfile": "fast",
+  "profiles": [
+    { "id": "fast", "label": "Schnell", "model": "assistant-fast:latest" },
+    { "id": "smart", "label": "Smart", "model": "assistant:latest", "think": false },
+    { "id": "deep", "label": "Gründlich", "model": "assistant-big:latest" }
+  ],
+  "ollama": {
+    "baseUrl": "http://localhost:11434",
+    "keepAlive": "10m"
+  },
+  "agent": {
+    "systemPrompt": "Du bist Orbit, ein hilfreicher Desktop-Assistent unter Windows. Antworte knapp und in der Sprache des Nutzers. Nutze Tools, wenn sie helfen, und erfinde keine Tool-Ergebnisse.",
+    "maxToolRounds": 6,
+    "maxToolOutputChars": 8000,
+    "confirmTimeoutSecs": 120
+  },
+  "window": {
+    "anchor": "bottom-right",
+    "margin": 16,
+    "hideOnBlur": true,
+    "showOnStartup": true,
+    "compact": { "width": 640, "height": 68 },
+    "expanded": { "width": 480, "height": 720 }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "$schema": "../../schemas/tool.schema.json",
+  "name": "youtube_search",
+  "title": "YouTube-Suche",
+  "description": "Sucht Videos auf YouTube und öffnet die Ergebnisse im Browser.",
+  "permission": "auto",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "query": { "type": "string", "description": "Wonach auf YouTube gesucht werden soll" }
+    },
+    "required": ["query"]
+  },
+  "action": {
+    "type": "open_url",
+    "url": "https://www.youtube.com/results?search_query={{query}}"
+  }
+}

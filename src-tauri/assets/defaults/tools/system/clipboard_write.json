@@ -1,0 +1,18 @@
+{
+  "$schema": "../../schemas/tool.schema.json",
+  "name": "clipboard_write",
+  "title": "In Zwischenablage kopieren",
+  "description": "Kopiert Text in die Zwischenablage.",
+  "permission": "auto",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "text": { "type": "string", "description": "Der zu kopierende Text" }
+    },
+    "required": ["text"]
+  },
+  "action": {
+    "type": "builtin",
+    "id": "clipboard_write"
+  }
+}

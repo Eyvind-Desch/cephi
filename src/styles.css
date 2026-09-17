@@ -1,0 +1,194 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Design tokens. The window has a Mica backdrop, so surfaces are translucent.
+   Light/dark follows the Windows app theme.
+   --------------------------------------------------------------------------- */
+
+:root {
+  --surface: rgb(250 250 252 / 0.78);
+  --surface-raised: rgb(255 255 255 / 0.72);
+  --surface-sunken: rgb(0 0 0 / 0.04);
+  --line: rgb(0 0 0 / 0.08);
+  --fg: #18181c;
+  --fg-muted: #62626e;
+  --fg-subtle: #9a9aa6;
+  --accent: #6b5cff;
+  --accent-fg: #ffffff;
+  --accent-soft: rgb(107 92 255 / 0.12);
+  --success: #18a058;
+  --warning: #c98a00;
+  --danger: #d6404e;
+  --glow-a: #6b5cff;
+  --glow-b: #21c7e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: rgb(22 22 27 / 0.72);
+    --surface-raised: rgb(255 255 255 / 0.06);
+    --surface-sunken: rgb(0 0 0 / 0.22);
+    --line: rgb(255 255 255 / 0.09);
+    --fg: #ececf1;
+    --fg-muted: #a4a4b0;
+    --fg-subtle: #6e6e7a;
+    --accent: #8b7dff;
+    --accent-fg: #0f0e17;
+    --accent-soft: rgb(139 125 255 / 0.16);
+    --success: #3ccf7f;
+    --warning: #e8b23a;
+    --danger: #ff6b78;
+  }
+}
+
+@theme inline {
+  --font-sans: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Cascadia Code", "Cascadia Mono", Consolas, monospace;
+
+  --color-surface: var(--surface);
+  --color-raised: var(--surface-raised);
+  --color-sunken: var(--surface-sunken);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-muted: var(--fg-muted);
+  --color-subtle: var(--fg-subtle);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+}
+
+/* Base styles live in the base layer so utilities (e.g. `outline-none`) can override them. */
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: transparent;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: var(--fg);
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+    cursor: default;
+  }
+
+  ::selection {
+    background: var(--accent-soft);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Thin overlay-style scrollbars */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+  }
+}
+
+@keyframes orbit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Markdown content in assistant messages
+   --------------------------------------------------------------------------- */
+
+.prose-orbit {
+  user-select: text;
+  cursor: text;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.prose-orbit > * + * {
+  margin-top: 0.6em;
+}
+.prose-orbit h1,
+.prose-orbit h2,
+.prose-orbit h3 {
+  font-weight: 600;
+  line-height: 1.3;
+  margin-top: 1em;
+}
+.prose-orbit h1 {
+  font-size: 1.25em;
+}
+.prose-orbit h2 {
+  font-size: 1.12em;
+}
+.prose-orbit h3 {
+  font-size: 1em;
+}
+.prose-orbit ul,
+.prose-orbit ol {
+  padding-left: 1.3em;
+}
+.prose-orbit ul {
+  list-style: disc;
+}
+.prose-orbit ol {
+  list-style: decimal;
+}
+.prose-orbit li + li {
+  margin-top: 0.2em;
+}
+.prose-orbit li::marker {
+  color: var(--fg-subtle);
+}
+.prose-orbit a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.prose-orbit strong {
+  font-weight: 600;
+}
+.prose-orbit blockquote {
+  border-left: 3px solid var(--line);
+  padding-left: 0.8em;
+  color: var(--fg-muted);
+}
+.prose-orbit :not(pre) > code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  padding: 0.1em 0.35em;
+  border-radius: 5px;
+  background: var(--surface-sunken);
+}
+.prose-orbit table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92em;
+}
+.prose-orbit th,
+.prose-orbit td {
+  border-bottom: 1px solid var(--line);
+  padding: 0.35em 0.5em;
+  text-align: left;
+}
+.prose-orbit hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+}

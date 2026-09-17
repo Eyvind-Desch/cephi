@@ -1,0 +1,22 @@
+{
+  "$schema": "../../schemas/tool.schema.json",
+  "name": "open_explorer",
+  "title": "Explorer öffnen",
+  "description": "Öffnet einen Ordner im Windows-Explorer. Ohne Pfad wird der Downloads-Ordner geöffnet.",
+  "permission": "auto",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "path": {
+        "type": "string",
+        "description": "Ordnerpfad, z. B. C:\\Users oder shell:Desktop, shell:Documents, shell:Downloads",
+        "default": "shell:Downloads"
+      }
+    }
+  },
+  "action": {
+    "type": "launch",
+    "program": "explorer.exe",
+    "args": ["{{path}}"]
+  }
+}

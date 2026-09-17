@@ -1,0 +1,39 @@
+{
+  "name": "orbit",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Always-available desktop assistant for Windows, powered by local Ollama models",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "app": "tauri dev",
+    "app:build": "tauri build",
+    "typecheck": "tsc --noEmit",
+    "check": "tsc --noEmit && cd src-tauri && cargo clippy --all-targets -- -D warnings && cargo test"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.46.0",
+    "motion": "^13.4.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@tauri-apps/cli": "^2",
+    "@types/node": "^22.20.3",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^6.0.2",
+    "tailwindcss": "^4.3.3",
+    "typescript": "~6.0.3",
+    "vite": "^8.0.16"
+  }
+}

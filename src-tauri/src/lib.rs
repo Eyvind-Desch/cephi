@@ -1,0 +1,59 @@
+mod agent;
+mod app;
+mod commands;
+mod config;
+mod desktop;
+mod error;
+mod llm;
+mod state;
+mod tools;
+
+use tauri::{Manager, WindowEvent};
+use tauri_plugin_log::{Target, TargetKind};
+
+use desktop::window;
+
+pub fn run() {
+    tauri::Builder::default()
+        // Must be registered first: a second launch just brings the running instance to front.
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            if let Err(e) = window::show(app) {
+                log::error!("show window: {e}");
+            }
+        }))
+        .plugin(
+            tauri_plugin_log::Builder::new()
+                .targets([
+                    Target::new(TargetKind::Stdout),
+                    Target::new(TargetKind::LogDir { file_name: None }),
+                ])
+                .level(log::LevelFilter::Info)
+                .build(),
+        )
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+        .plugin(tauri_plugin_opener::init())
+        .setup(|app| {
+            app::setup(app.handle())?;
+            Ok(())
+        })
+        .on_window_event(|window, event| {
+            if window.label() == window::MAIN_LABEL && matches!(event, WindowEvent::Focused(false)) {
+                window::on_focus_lost(window.app_handle());
+            }
+        })
+        .invoke_handler(tauri::generate_handler![
+            commands::config_snapshot,
+            commands::config_reload,
+            commands::config_open_folder,
+            commands::agent_send,
+            commands::agent_cancel,
+            commands::agent_confirm,
+            commands::agent_reset,
+            commands::window_set_mode,
+            commands::window_hide,
+            commands::window_set_pinned,
+            commands::open_external,
+        ])
+        .run(tauri::generate_context!())
+        .expect("error while running Orbit");
+}

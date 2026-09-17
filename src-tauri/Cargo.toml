@@ -1,0 +1,52 @@
+[package]
+name = "orbit"
+version = "0.1.0"
+description = "Always-available desktop assistant for Windows, powered by local Ollama models"
+authors = ["Eyvind"]
+edition = "2021"
+publish = false
+
+[lib]
+# The `_lib` suffix avoids a name clash between the lib and bin targets on Windows
+# (https://github.com/rust-lang/cargo/issues/8519).
+name = "orbit_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+# Tauri
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-global-shortcut = "2.3.2"
+tauri-plugin-log = "2.9.1"
+tauri-plugin-opener = "2.5.5"
+tauri-plugin-single-instance = "2.4.4"
+
+# Async / IO
+futures-util = "0.3.34"
+tokio = { version = "1.53.1", features = ["macros", "process", "sync", "time"] }
+tokio-util = "0.7.19"
+# Windows-native TLS (schannel) instead of aws-lc-rs: no CMake/NASM needed to build.
+reqwest = { version = "0.13.5", default-features = false, features = ["charset", "http2", "json", "native-tls", "stream", "system-proxy"] }
+
+# Serialization / errors / logging
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2.0.20"
+log = "0.4.34"
+
+# Utilities
+arboard = { version = "3.6.1", default-features = false }
+chrono = "0.4.45"
+notify-debouncer-mini = "0.7.0"
+url = "2.5.8"
+uuid = { version = "1.26.1", features = ["v4"] }
+
+# https://tauri.app/concept/size/#cargo-configuration
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+panic = "abort"
+strip = true

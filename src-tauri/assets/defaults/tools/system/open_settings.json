@@ -1,0 +1,22 @@
+{
+  "$schema": "../../schemas/tool.schema.json",
+  "name": "open_settings",
+  "title": "Windows-Einstellungen",
+  "description": "Öffnet eine Seite der Windows-Einstellungen.",
+  "permission": "auto",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "page": {
+        "type": "string",
+        "description": "display = Bildschirm, sound = Sound, bluetooth = Bluetooth, network = Netzwerk & WLAN, windowsupdate = Updates, appsfeatures = Apps, personalization = Personalisierung, defaultapps = Standard-Apps, powersleep = Energie",
+        "enum": ["display", "sound", "bluetooth", "network", "windowsupdate", "appsfeatures", "personalization", "defaultapps", "powersleep"]
+      }
+    },
+    "required": ["page"]
+  },
+  "action": {
+    "type": "open_url",
+    "url": "ms-settings:{{page|raw}}"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "../../schemas/tool.schema.json",
+  "name": "lock_pc",
+  "title": "PC sperren",
+  "description": "Sperrt den Windows-Bildschirm.",
+  "permission": "confirm",
+  "action": {
+    "type": "launch",
+    "program": "rundll32.exe",
+    "args": ["user32.dll,LockWorkStation"]
+  }
+}

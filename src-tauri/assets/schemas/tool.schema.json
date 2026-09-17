@@ -1,0 +1,160 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "orbit://schemas/tool.schema.json",
+  "title": "Orbit Tool",
+  "description": "Ein Tool, das Orbits KI aufrufen kann. Eine Datei pro Tool in %APPDATA%\\Orbit\\tools\\ (Unterordner erlaubt). Änderungen werden sofort geladen.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "description", "action"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "name": {
+      "description": "Eindeutiger technischer Name, den das Modell verwendet.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{1,63}$"
+    },
+    "title": {
+      "description": "Anzeigename in der Oberfläche.",
+      "type": "string"
+    },
+    "description": {
+      "description": "Wann und wofür das Tool genutzt wird. Das Modell entscheidet anhand dieses Textes – präzise formulieren!",
+      "type": "string",
+      "minLength": 1
+    },
+    "enabled": {
+      "description": "false = Tool wird nicht geladen.",
+      "type": "boolean",
+      "default": true
+    },
+    "permission": {
+      "description": "auto = sofort ausführen, confirm = vorher nachfragen (Standard).",
+      "enum": ["auto", "confirm"],
+      "default": "confirm"
+    },
+    "parameters": { "$ref": "#/definitions/parameters" },
+    "action": { "$ref": "#/definitions/action" }
+  },
+  "definitions": {
+    "parameters": {
+      "description": "Parameter, die das Modell ausfüllt (JSON-Schema-Objekt mit einfachen Werten).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "object" },
+        "properties": {
+          "type": "object",
+          "propertyNames": { "pattern": "^[A-Za-z_][A-Za-z0-9_]*$" },
+          "additionalProperties": { "$ref": "#/definitions/param" }
+        },
+        "required": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        }
+      }
+    },
+    "param": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "enum": ["string", "number", "integer", "boolean"] },
+        "description": { "type": "string", "description": "Hilft dem Modell, den Wert korrekt zu füllen." },
+        "enum": { "type": "array", "description": "Erlaubte Werte.", "minItems": 1 },
+        "default": { "description": "Wert, wenn das Modell den Parameter weglässt." }
+      }
+    },
+    "template": {
+      "type": "string",
+      "description": "Text mit Platzhaltern {{parameter}}. Filter: {{name|raw}}, {{name|url}}, {{name|json}}."
+    },
+    "timeoutSecs": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Zeitlimit in Sekunden (Standard 30)."
+    },
+    "action": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "description": "open_url | launch | powershell | http | builtin",
+          "enum": ["open_url", "launch", "powershell", "http", "builtin"]
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "open_url" } } },
+          "then": {
+            "description": "Öffnet eine URL/URI mit dem Standardprogramm. Platzhalter werden URL-kodiert. Steht das Schema fest im Template (z. B. ms-settings:), ist es erlaubt – sonst nur http/https.",
+            "additionalProperties": false,
+            "required": ["type", "url"],
+            "properties": {
+              "type": { "const": "open_url" },
+              "url": { "$ref": "#/definitions/template" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "type": { "const": "launch" } } },
+          "then": {
+            "description": "Startet ein Programm direkt (ohne Shell). %UMGEBUNGSVARIABLEN% werden ersetzt, leere Argumente entfernt.",
+            "additionalProperties": false,
+            "required": ["type", "program"],
+            "properties": {
+              "type": { "const": "launch" },
+              "program": { "$ref": "#/definitions/template" },
+              "args": { "type": "array", "items": { "$ref": "#/definitions/template" } },
+              "cwd": { "$ref": "#/definitions/template" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "type": { "const": "powershell" } } },
+          "then": {
+            "description": "Führt ein festes PowerShell-Skript aus. Parameter sind als $env:ORBIT_ARG_<NAME> verfügbar (keine {{Platzhalter}} – Schutz vor Code-Injection). Die Ausgabe geht an das Modell.",
+            "additionalProperties": false,
+            "required": ["type", "script"],
+            "properties": {
+              "type": { "const": "powershell" },
+              "script": { "type": "string", "not": { "pattern": "\\{\\{" } },
+              "timeoutSecs": { "$ref": "#/definitions/timeoutSecs" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "type": { "const": "http" } } },
+          "then": {
+            "description": "HTTP-Anfrage; der Antworttext geht an das Modell. Platzhalter: URL-kodiert in url, roh in headers, JSON in body.",
+            "additionalProperties": false,
+            "required": ["type", "url"],
+            "properties": {
+              "type": { "const": "http" },
+              "method": { "enum": ["GET", "POST"], "default": "GET" },
+              "url": { "allOf": [{ "$ref": "#/definitions/template" }, { "pattern": "^[Hh][Tt][Tt][Pp][Ss]?://" }] },
+              "headers": { "type": "object", "additionalProperties": { "$ref": "#/definitions/template" } },
+              "body": { "$ref": "#/definitions/template" },
+              "timeoutSecs": { "$ref": "#/definitions/timeoutSecs" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "type": { "const": "builtin" } } },
+          "then": {
+            "description": "In Orbit eingebaute Funktion.",
+            "additionalProperties": false,
+            "required": ["type", "id"],
+            "properties": {
+              "type": { "const": "builtin" },
+              "id": {
+                "enum": ["datetime", "clipboard_read", "clipboard_write"],
+                "description": "clipboard_write braucht den Parameter \"text\"."
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

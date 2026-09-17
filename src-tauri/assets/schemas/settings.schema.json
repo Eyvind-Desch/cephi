@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "orbit://schemas/settings.schema.json",
+  "title": "Orbit Einstellungen",
+  "description": "%APPDATA%\\Orbit\\settings.json – Änderungen werden sofort übernommen. Fehlende Werte nutzen Standardwerte.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "hotkey": {
+      "description": "Globales Tastenkürzel zum Ein-/Ausblenden, z. B. \"Ctrl+Alt+Space\", \"Alt+O\", \"Ctrl+Shift+K\". Achtung: Ctrl+Space ist in VS Code IntelliSense.",
+      "type": "string",
+      "default": "Ctrl+Alt+Space"
+    },
+    "defaultProfile": {
+      "description": "id des Profils, das beim Start ausgewählt ist.",
+      "type": "string",
+      "default": "fast"
+    },
+    "profiles": {
+      "description": "Modell-Profile, zwischen denen in der Oberfläche gewechselt werden kann.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "label", "model"],
+        "properties": {
+          "id": { "type": "string", "description": "Eindeutige Kennung." },
+          "label": { "type": "string", "description": "Anzeigename." },
+          "model": { "type": "string", "description": "Ollama-Modellname, z. B. \"assistant-fast:latest\" (siehe `ollama list`)." },
+          "tools": { "type": "boolean", "default": true, "description": "Darf das Modell Tools aufrufen?" },
+          "think": { "type": "boolean", "description": "Denkmodus an/aus (nur für Modelle mit 'thinking'). Weglassen = Modellstandard." },
+          "temperature": { "type": "number", "minimum": 0, "maximum": 2, "description": "Kreativität. Weglassen = Modellstandard." }
+        }
+      }
+    },
+    "ollama": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "baseUrl": { "type": "string", "default": "http://localhost:11434" },
+        "keepAlive": { "type": "string", "default": "10m", "description": "Wie lange das Modell nach einer Anfrage geladen bleibt, z. B. \"10m\", \"1h\", \"-1\" (immer)." }
+      }
+    },
+    "agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "systemPrompt": { "type": "string", "description": "Grundanweisung für das Modell. Datum und Uhrzeit werden automatisch angehängt." },
+        "maxToolRounds": { "type": "integer", "minimum": 1, "default": 6, "description": "Maximale Anzahl Tool-Runden pro Anfrage." },
+        "maxToolOutputChars": { "type": "integer", "minimum": 100, "default": 8000, "description": "Tool-Ausgaben werden auf diese Länge gekürzt." },
+        "confirmTimeoutSecs": { "type": "integer", "minimum": 5, "default": 120, "description": "Nach dieser Zeit ohne Bestätigung wird ein Tool-Aufruf abgelehnt." }
+      }
+    },
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "anchor": {
+          "enum": ["bottom-right", "bottom-center", "bottom-left", "top-right", "top-center", "top-left"],
+          "default": "bottom-right",
+          "description": "Bildschirmecke, an der Orbit erscheint (auf dem Monitor mit dem Mauszeiger)."
+        },
+        "margin": { "type": "integer", "minimum": 0, "default": 16, "description": "Abstand zum Bildschirmrand in Pixeln." },
+        "hideOnBlur": { "type": "boolean", "default": true, "description": "Ausblenden, wenn woanders hingeklickt wird (außer angepinnt)." },
+        "showOnStartup": { "type": "boolean", "default": true },
+        "compact": { "$ref": "#/definitions/size", "description": "Größe der kompakten Leiste." },
+        "expanded": { "$ref": "#/definitions/size", "description": "Größe des großen Panels." }
+      }
+    }
+  },
+  "definitions": {
+    "size": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width", "height"],
+      "properties": {
+        "width": { "type": "integer", "minimum": 200 },
+        "height": { "type": "integer", "minimum": 48 }
+      }
+    }
+  }
+}

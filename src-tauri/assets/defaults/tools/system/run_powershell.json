@@ -1,0 +1,19 @@
+{
+  "$schema": "../../schemas/tool.schema.json",
+  "name": "run_powershell",
+  "title": "PowerShell-Befehl",
+  "description": "Führt einen PowerShell-Befehl aus und gibt die Ausgabe zurück. Nur verwenden, wenn kein spezielleres Tool passt. Der Nutzer muss jeden Befehl bestätigen.",
+  "permission": "confirm",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "command": { "type": "string", "description": "Der auszuführende PowerShell-Befehl" }
+    },
+    "required": ["command"]
+  },
+  "action": {
+    "type": "powershell",
+    "timeoutSecs": 60,
+    "script": "Invoke-Expression $env:ORBIT_ARG_COMMAND | Out-String -Width 200"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "../../schemas/tool.schema.json",
+  "name": "datetime",
+  "title": "Datum & Uhrzeit",
+  "description": "Gibt das aktuelle Datum, den Wochentag und die Uhrzeit zurück.",
+  "permission": "auto",
+  "action": {
+    "type": "builtin",
+    "id": "datetime"
+  }
+}
