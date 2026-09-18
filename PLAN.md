@@ -132,7 +132,7 @@ next stage begins. Whatever isn't a nuisance goes into the backlog instead of th
 - [ ] When launched from the terminal, the window stays hidden (Windows foreground lock) → hotkey needed
 - [x] Code highlighting in responses (highlight.js core, ~20 languages, language label + copy)
 - [x] Browse archived chats: `/history`, ⋯ → *Earlier chats*, the two latest on the empty chat
-- [ ] Volume indicator (brief overlay) after "louder/quieter"
+- [x] Volume indicator after "louder/quieter": level bar in the compact bar
 - [ ] Check whether Spotify auto-plays albums/playlists
 - [ ] ~~Search: DuckDuckGo fallback~~ tested 2026-09-18: DuckDuckGo answers with a bot challenge after ~4 requests, not reliable. Alternative if needed: Brave Search API (own key)
 - [x] Search: `fetch_page` tool (reads a public page as text; local/private addresses refused, also via redirect)

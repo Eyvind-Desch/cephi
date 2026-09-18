@@ -6,7 +6,7 @@ use windows_sys::Win32::UI::Input::KeyboardAndMouse::{
     keybd_event, KEYEVENTF_EXTENDEDKEY, KEYEVENTF_KEYUP, VK_MEDIA_NEXT_TRACK, VK_MEDIA_PLAY_PAUSE, VK_MEDIA_PREV_TRACK,
 };
 
-use super::audio;
+use super::audio::{self, VolumeState};
 
 const DEFAULT_VOLUME_STEP: i32 = 10;
 
@@ -30,24 +30,26 @@ impl MediaAction {
     }
 
     /// `level`: target volume for `set_volume`; `amount`: step for `volume_up`/`volume_down`.
-    pub fn run(self, level: Option<i64>, amount: Option<i64>) -> Result<String, String> {
+    /// Volume actions also return the new volume (for the level bar).
+    pub fn run(self, level: Option<i64>, amount: Option<i64>) -> Result<(String, Option<VolumeState>), String> {
         let step = amount.map_or(DEFAULT_VOLUME_STEP, |a| a.clamp(1, 100) as i32);
-        match self {
-            MediaAction::PlayPause => Ok(press(VK_MEDIA_PLAY_PAUSE, t!("media.play_pause"))),
-            MediaAction::Next => Ok(press(VK_MEDIA_NEXT_TRACK, t!("media.next"))),
-            MediaAction::Previous => Ok(press(VK_MEDIA_PREV_TRACK, t!("media.previous"))),
+        let volume = match self {
+            MediaAction::PlayPause => return Ok((press(VK_MEDIA_PLAY_PAUSE, t!("media.play_pause")), None)),
+            MediaAction::Next => return Ok((press(VK_MEDIA_NEXT_TRACK, t!("media.next")), None)),
+            MediaAction::Previous => return Ok((press(VK_MEDIA_PREV_TRACK, t!("media.previous")), None)),
             MediaAction::SetVolume => {
                 let level = level.ok_or_else(|| t!("media.level_missing").to_string())?;
                 if !(0..=100).contains(&level) {
                     return Err(t!("media.level_out_of_range", level = level).into());
                 }
-                audio::set(level as i32).map(audio::describe)
+                audio::set(level as i32)?
             }
-            MediaAction::VolumeUp => audio::change(step).map(audio::describe),
-            MediaAction::VolumeDown => audio::change(-step).map(audio::describe),
-            MediaAction::Mute => audio::set_muted(None).map(audio::describe),
-            MediaAction::Unmute => audio::set_muted(Some(false)).map(audio::describe),
-        }
+            MediaAction::VolumeUp => audio::change(step)?,
+            MediaAction::VolumeDown => audio::change(-step)?,
+            MediaAction::Mute => audio::set_muted(None)?,
+            MediaAction::Unmute => audio::set_muted(Some(false))?,
+        };
+        Ok((audio::describe(volume), Some(volume)))
     }
 }
 

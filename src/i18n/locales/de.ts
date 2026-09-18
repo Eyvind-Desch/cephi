@@ -97,8 +97,8 @@ export const de: Locale = {
     auto: "Läuft ohne Rückfrage",
     openFolder: "Konfigurationsordner",
     mcpTitle: "MCP-Server",
-    mcpHint: "Tools aus anderen Apps, eingerichtet in mcp.json (gleiches Format wie Claude Desktop).",
-    mcpEmpty: "Noch keine MCP-Server. Trage sie in mcp.json im Konfigurationsordner ein, siehe docs/MCP.md.",
+    mcpHint: "Tools aus anderen Apps. Hinzufügen und einrichten unter ⋯ → Einstellungen → MCP.",
+    mcpEmpty: "Noch keine MCP-Server: ⋯ → Einstellungen → MCP → Server hinzufügen.",
     serverState: {
       running: "läuft",
       starting: "startet…",
@@ -166,6 +166,10 @@ export const de: Locale = {
     local: "Lokal",
     cloud: "Cloud",
     keyMissing: "Schlüssel fehlt",
+  },
+  volume: {
+    level: "Lautstärke {{percent}} %",
+    muted: "Stumm ({{percent}} %)",
   },
   compact: {
     expand: "Erweitern (Strg+E)",

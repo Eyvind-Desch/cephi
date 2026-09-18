@@ -99,8 +99,8 @@ export const en = {
     auto: "Runs without asking",
     openFolder: "Config folder",
     mcpTitle: "MCP servers",
-    mcpHint: "Tools from other apps, configured in mcp.json (same format as Claude Desktop).",
-    mcpEmpty: "No MCP servers yet. Add them to mcp.json in the config folder, see docs/MCP.md.",
+    mcpHint: "Tools from other apps. Add and configure them under ⋯ → Settings → MCP.",
+    mcpEmpty: "No MCP servers yet: ⋯ → Settings → MCP → Add server.",
     serverState: {
       running: "running",
       starting: "starting…",
@@ -168,6 +168,10 @@ export const en = {
     local: "Local",
     cloud: "Cloud",
     keyMissing: "Key missing",
+  },
+  volume: {
+    level: "Volume {{percent}} %",
+    muted: "Muted ({{percent}} %)",
   },
   compact: {
     expand: "Expand (Ctrl+E)",

@@ -175,7 +175,9 @@ export type ToolDisplay =
   | { kind: "webResults"; query: string; results: WebResult[] }
   /** A page opened in the web tab. */
   | { kind: "webPage"; url: string }
-  | ({ kind: "translation" } & Translation);
+  | ({ kind: "translation" } & Translation)
+  /** The system volume after a volume change. */
+  | { kind: "volume"; percent: number; muted: boolean };
 
 /** `src-tauri/src/agent/events.rs` */
 export type AgentEvent =

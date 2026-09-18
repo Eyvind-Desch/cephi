@@ -47,6 +47,11 @@ pub enum ToolDisplay {
         url: String,
     },
     Translation(Translation),
+    /// The system volume after a volume change (shown as a level bar).
+    Volume {
+        percent: u8,
+        muted: bool,
+    },
 }
 
 /// A successful tool run: text for the model plus optional display data.

@@ -98,7 +98,8 @@ export const useChat = create<ChatState>()((set, get) => {
           return;
         }
         const text = tool.output ?? tool.title;
-        showFlash({ ok: true, text });
+        const volume = tool.display?.kind === "volume" ? tool.display : undefined;
+        showFlash({ ok: true, text, volume });
         if (!pinned) {
           setTimeout(() => {
             if (useUi.getState().flash?.text === text) void api.windowHide();

@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { AlertTriangle, CheckCircle2, Maximize2, XCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Maximize2, Volume, Volume1, Volume2, VolumeX, XCircle } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -56,6 +56,7 @@ export function CompactBar() {
 }
 
 function FlashRow({ flash }: { flash: Flash }) {
+  if (flash.volume) return <VolumeRow {...flash.volume} />;
   const Icon = flash.ok ? CheckCircle2 : XCircle;
   return (
     <motion.div
@@ -69,6 +70,32 @@ function FlashRow({ flash }: { flash: Flash }) {
         {flash.text}
       </span>
       {flash.sticky && <CopyButton text={flash.text} />}
+    </motion.div>
+  );
+}
+
+/** After "louder"/"volume to 30": the new level as a bar, like the Windows volume flyout. */
+function VolumeRow({ percent, muted }: { percent: number; muted: boolean }) {
+  const { t } = useTranslation();
+  const Icon = muted || percent === 0 ? VolumeX : percent < 34 ? Volume : percent < 67 ? Volume1 : Volume2;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex min-w-0 flex-1 items-center gap-3"
+      role="status"
+      aria-label={muted ? t("volume.muted", { percent }) : t("volume.level", { percent })}
+    >
+      <Icon size={19} className={clsx("shrink-0", muted ? "text-subtle" : "text-fg")} />
+      <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-sunken ring-1 ring-line ring-inset">
+        <motion.div
+          initial={false}
+          animate={{ width: `${percent}%` }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          className={clsx("h-full rounded-full", muted ? "bg-subtle" : "bg-accent")}
+        />
+      </div>
+      <span className="w-10 shrink-0 text-right text-[14px] tabular-nums text-muted">{percent}</span>
     </motion.div>
   );
 }

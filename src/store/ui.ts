@@ -16,6 +16,8 @@ export interface Flash {
   text: string;
   /** Stays until the next interaction and can be copied (e.g. a translation). */
   sticky?: boolean;
+  /** After a volume change: shown as a level bar. */
+  volume?: { percent: number; muted: boolean };
 }
 
 interface UiState {

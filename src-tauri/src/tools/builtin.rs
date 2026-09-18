@@ -146,7 +146,16 @@ impl Builtin {
                 let level = args.get("level").and_then(|v| v.as_i64());
                 let amount = args.get("amount").and_then(|v| v.as_i64());
                 // Core Audio is COM: keep it off the async runtime threads.
-                blocking(move || action.run(level, amount)).await
+                let (content, volume) = tauri::async_runtime::spawn_blocking(move || action.run(level, amount))
+                    .await
+                    .map_err(|e| format!("internal error: {e}"))??;
+                return Ok(Success {
+                    content,
+                    display: volume.map(|v| ToolDisplay::Volume {
+                        percent: v.percent,
+                        muted: v.muted,
+                    }),
+                });
             }
             Builtin::Radio => {
                 let device = radio::Device::parse(str_arg(args, "device"))?;
