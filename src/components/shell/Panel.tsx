@@ -1,6 +1,7 @@
 import { useUi } from "../../store/ui";
 import { Composer } from "../chat/Composer";
 import { MessageList } from "../chat/MessageList";
+import { PageChip } from "../chat/PageChip";
 import { SelectionChip } from "../chat/SelectionChip";
 import { HistoryView } from "../history/HistoryView";
 import { SettingsView } from "../settings/SettingsView";
@@ -28,6 +29,7 @@ export function Panel() {
           <MessageList />
           <div className="p-3 pt-1">
             <SelectionChip />
+            <PageChip />
             <Composer />
           </div>
         </>

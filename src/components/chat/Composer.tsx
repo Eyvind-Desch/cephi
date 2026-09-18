@@ -60,10 +60,14 @@ export function Composer({ compact = false }: ComposerProps) {
 
   const submit = () => {
     if (running || !text.trim()) return;
-    // Picked-up text travels with the question as context.
-    const { selection, setSelection } = useUi.getState();
-    const message = selection ? t("selection.withContext", { question: text.trim(), text: selection }) : text;
+    // Picked-up text and the page from the web tab travel with the question as context.
+    const { selection, setSelection, pageContext, setPageContext } = useUi.getState();
+    let message = selection ? t("selection.withContext", { question: text.trim(), text: selection }) : text;
+    if (pageContext) {
+      message = t("pageChip.withContext", { question: message.trim(), url: pageContext.url, title: pageContext.title });
+    }
     setSelection(null);
+    setPageContext(null);
     void send(message);
     setText("");
   };

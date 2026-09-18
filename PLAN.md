@@ -137,7 +137,7 @@ next stage begins. Whatever isn't a nuisance goes into the backlog instead of th
 - [ ] ~~Search: DuckDuckGo fallback~~ tested 2026-09-18: DuckDuckGo answers with a bot challenge after ~4 requests, not reliable. Alternative if needed: Brave Search API (own key)
 - [x] Search: `fetch_page` tool (reads a public page as text; local/private addresses refused, also via redirect)
 - [ ] Web tab: Esc and Cephi shortcuts don't work while the page has focus (keys go to the page)
-- [ ] Web tab: ask the AI about the open page
+- [x] Web tab: ask the AI about the open page (✨ in the toolbar → page chip above the input, "Summarize" or own question, read via `fetch_page`)
 - [ ] MCP: servers that need a browser login (OAuth); resources and prompts
 - [ ] MCP: send only the tools that fit the request (many servers = many tools, small models get confused)
 - [x] Slash commands in the input (like Claude Code): `/clear`, `/web`, `/translate`, `/model`, `/tools`, `/settings`, `/mcp`, …

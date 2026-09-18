@@ -5,6 +5,11 @@ import { api, type ConfigSnapshot, type WindowMode } from "../lib/ipc";
 export type PanelView = "chat" | "history" | "settings" | "tools" | "web" | "translate";
 export type SettingsTab = "general" | "keys" | "mcp";
 
+export interface PageContext {
+  url: string;
+  title: string;
+}
+
 /** Short confirmation shown in the compact bar after a successful fast-path action. */
 export interface Flash {
   ok: boolean;
@@ -29,6 +34,8 @@ interface UiState {
   webLarge: boolean;
   /** Text picked up from another app via the selection hotkey. */
   selection: string | null;
+  /** The web tab's page the next question is about ("ask Cephi about this page"). */
+  pageContext: PageContext | null;
   /** Section shown on the settings page. */
   settingsTab: SettingsTab;
 
@@ -44,6 +51,7 @@ interface UiState {
   showFlash: (flash: Flash | null) => void;
   setOverlay: (open: boolean) => void;
   setSelection: (text: string | null) => void;
+  setPageContext: (page: PageContext | null) => void;
   toggleWebLarge: () => void;
 }
 
@@ -68,6 +76,7 @@ export const useUi = create<UiState>()((set, get) => {
     overlays: 0,
     webLarge: false,
     selection: null,
+    pageContext: null,
     settingsTab: "general",
 
     expand: () => {
@@ -111,6 +120,8 @@ export const useUi = create<UiState>()((set, get) => {
     showFlash: (flash) => set({ flash }),
 
     setSelection: (selection) => set({ selection }),
+
+    setPageContext: (pageContext) => set({ pageContext }),
 
     setOverlay: (open) => set((s) => ({ overlays: Math.max(0, s.overlays + (open ? 1 : -1)) })),
 

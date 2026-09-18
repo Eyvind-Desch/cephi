@@ -3,7 +3,7 @@
  *
  * Open http://localhost:1420/?mode=expanded&view=settings&tab=keys&lang=de
  *   mode: compact | expanded | large   view: chat | settings | tools | web | translate   tab: general | keys | mcp   chat: demo | results | code   lang: en | de   keys: some
- *   draft: text in the composer (e.g. "/" shows the commands)   web: page (web tab with a loaded page)   service: stopped (translator container down)   selection: 1 (text picked up from another app)
+ *   draft: text in the composer (e.g. "/" shows the commands)   web: page (web tab with a loaded page)   service: stopped (translator container down)   selection: 1 (text picked up from another app)   pageChip: 1 (question about the web tab's page)
  *
  * Used to review UI changes (and take headless screenshots) without touching the running app.
  */
@@ -294,6 +294,9 @@ export function installPreview() {
   });
   if (params.get("chat") === "demo") useChat.setState({ messages: demoChat });
   if (params.get("chat") === "code") useChat.setState({ messages: codeChat });
+  if (params.get("pageChip") === "1") {
+    useUi.setState({ pageContext: { url: "https://v2.tauri.app/start/", title: "What is Tauri? | Tauri" } });
+  }
   if (params.get("draft")) useChat.setState({ draft: params.get("draft") ?? "" });
   if (params.get("view") === "translate") useTranslate.setState({ text: params.get("text") ?? "renovated" });
   // Search results without an AI answer (model unavailable).

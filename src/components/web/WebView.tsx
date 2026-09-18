@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { ArrowLeft, ArrowRight, Expand, ExternalLink, Globe, Lock, RotateCw, Shrink, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Expand, ExternalLink, Globe, Lock, RotateCw, Shrink, Sparkles, X } from "lucide-react";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import { api, onWindowShown } from "../../lib/ipc";
@@ -51,6 +51,17 @@ function Toolbar() {
         onClick={() => void api.webCommand(loading ? "stop" : "reload")}
       />
       <AddressBar />
+      <IconButton
+        icon={Sparkles}
+        label={t("web.askAi")}
+        disabled={!hasPage}
+        onClick={() => {
+          const { url: pageUrl, title } = useWeb.getState();
+          if (!pageUrl) return;
+          useUi.getState().setPageContext({ url: pageUrl, title });
+          useUi.getState().setView("chat");
+        }}
+      />
       <IconButton
         icon={ExternalLink}
         label={t("web.openInBrowser")}

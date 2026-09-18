@@ -65,6 +65,11 @@ export const en = {
     explainPrompt: "Explain this briefly:\n\n{{text}}",
     withContext: "{{question}}\n\nSelected text:\n{{text}}",
   },
+  pageChip: {
+    summarize: "Summarize",
+    summarizePrompt: "Summarize this page briefly: {{title}}\n{{url}}",
+    withContext: "{{question}}\n\nAbout this page: {{title}}\n{{url}}",
+  },
   commands: {
     clear: "Start a new chat",
     history: "Earlier chats",
@@ -124,6 +129,7 @@ export const en = {
     aiPrompt: "How do you translate “{{text}}” into {{language}}? Fix typos first.",
   },
   web: {
+    askAi: "Ask Cephi about this page",
     back: "Back",
     forward: "Forward",
     reload: "Reload",

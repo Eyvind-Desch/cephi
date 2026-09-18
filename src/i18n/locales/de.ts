@@ -63,6 +63,11 @@ export const de: Locale = {
     explainPrompt: "Erkläre das kurz:\n\n{{text}}",
     withContext: "{{question}}\n\nMarkierter Text:\n{{text}}",
   },
+  pageChip: {
+    summarize: "Zusammenfassen",
+    summarizePrompt: "Fasse diese Seite kurz zusammen: {{title}}\n{{url}}",
+    withContext: "{{question}}\n\nZu dieser Seite: {{title}}\n{{url}}",
+  },
   commands: {
     clear: "Neuen Chat beginnen",
     history: "Frühere Chats",
@@ -122,6 +127,7 @@ export const de: Locale = {
     aiPrompt: "Wie übersetzt man „{{text}}“ ins {{language}}? Korrigiere vorher Tippfehler.",
   },
   web: {
+    askAi: "Cephi zu dieser Seite fragen",
     back: "Zurück",
     forward: "Vor",
     reload: "Neu laden",
