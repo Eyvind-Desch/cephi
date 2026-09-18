@@ -25,7 +25,7 @@ One hotkey, one input field: answer, search, or action ("öffne die Bluetooth-Ei
 | `Ctrl+E` | Compact bar ↔ large panel |
 | `Ctrl+N` | New chat (the previous one is archived) |
 | `Esc` | Hide |
-| `/` | Commands: `/clear`, `/web …`, `/translate …`, `/model …`, `/tools`, `/settings`, `/keys`, `/mcp`, `/pin`, `/config`, `/reload` |
+| `/` | Commands: `/clear`, `/web …`, `/translate …`, `/model …`, `/history`, `/tools`, `/settings`, `/keys`, `/mcp`, `/pin`, `/config`, `/reload` |
 
 Clicking outside hides Cephi, unless it's pinned (⋯ menu). Tray icon: open, configuration, quit.
 

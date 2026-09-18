@@ -24,6 +24,8 @@ interface ChatState {
   reset: () => Promise<void>;
   /** Shows the chat saved in the last session (at startup). */
   restore: () => Promise<void>;
+  /** Continues an archived chat; the current one goes to the archive. */
+  openArchived: (id: string) => Promise<void>;
 }
 
 export const useChat = create<ChatState>()((set, get) => {
@@ -134,6 +136,13 @@ export const useChat = create<ChatState>()((set, get) => {
     reset: async () => {
       await api.agentReset();
       set({ messages: [] });
+    },
+
+    openArchived: async (id) => {
+      if (get().running) return;
+      const saved = await api.chatArchiveOpen(id);
+      set({ messages: restoreMessages(saved) });
+      useUi.getState().setView("chat");
     },
 
     restore: async () => {

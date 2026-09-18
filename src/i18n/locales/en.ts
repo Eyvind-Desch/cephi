@@ -67,6 +67,7 @@ export const en = {
   },
   commands: {
     clear: "Start a new chat",
+    history: "Earlier chats",
     web: "Open the web tab or search",
     translate: "Open the translator",
     model: "Switch the model",
@@ -149,6 +150,7 @@ export const en = {
   menu: {
     newChat: "New chat",
     newChatShortcut: "Ctrl+N",
+    history: "Earlier chats",
     pin: "Pin",
     autostartUnavailable: "Only in the installed version",
     settings: "Settings",
@@ -170,6 +172,17 @@ export const en = {
     count_one: "{{count}} configuration problem",
     count_other: "{{count}} configuration problems",
     openFolder: "Open config folder",
+  },
+  history: {
+    title: "Earlier chats",
+    search: "Search…",
+    empty: "No earlier chats yet. \"New chat\" keeps the current one here.",
+    noMatch: "No chat matches.",
+    untitled: "Untitled",
+    delete: "Delete",
+    confirmDelete: "Really delete?",
+    busy: "Cephi is still answering; chats can be opened afterwards.",
+    showAll: "Earlier chats",
   },
   settings: {
     tabs: {

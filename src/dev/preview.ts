@@ -225,6 +225,14 @@ export function installPreview() {
         case "mcp_save_server":
         case "mcp_remove_server":
           return config;
+        case "chat_archive_list":
+          return [
+            { id: "2026-09-18_09-12-03", savedAt: new Date().toISOString(), title: lang === "de" ? "Wie ist das Wetter in Hamburg?" : "What is the weather in Hamburg?", messages: 4 },
+            { id: "2026-09-16_20-40-11", savedAt: "2026-09-16T20:40:11+02:00", title: "? tauri 2 neueste version", messages: 2 },
+            { id: "2026-07-02_08-00-00", savedAt: "2026-07-02T08:00:00+02:00", title: "tr nevertheless", messages: 2 },
+          ];
+        case "chat_archive_open":
+          return demoChat;
         case "chat_load":
           return null;
         case "web_state":

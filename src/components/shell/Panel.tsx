@@ -2,6 +2,7 @@ import { useUi } from "../../store/ui";
 import { Composer } from "../chat/Composer";
 import { MessageList } from "../chat/MessageList";
 import { SelectionChip } from "../chat/SelectionChip";
+import { HistoryView } from "../history/HistoryView";
 import { SettingsView } from "../settings/SettingsView";
 import { ToolsView } from "../tools/ToolsView";
 import { TranslateView } from "../translate/TranslateView";
@@ -17,6 +18,7 @@ export function Panel() {
     <div className="flex h-full flex-col">
       <Header />
       <DiagnosticsBanner />
+      {view === "history" && <HistoryView />}
       {view === "settings" && <SettingsView />}
       {view === "tools" && <ToolsView />}
       {view === "web" && <WebView />}

@@ -1,17 +1,31 @@
+import { History } from "lucide-react";
 import { motion } from "motion/react";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { api, type ArchivedChat } from "../../lib/ipc";
 import { useChat } from "../../store/chat";
 import { useUi } from "../../store/ui";
 import { CephiMark } from "../ui/CephiMark";
 
 const SUGGESTIONS = ["spotify", "calculator", "weather", "memory"] as const;
+/** Recent chats offered to continue on the empty screen. */
+const RECENT_CHATS = 2;
 
 export function EmptyState() {
   const { t } = useTranslation();
   const send = useChat((s) => s.send);
   const hotkey = useUi((s) => s.config?.hotkey);
   const toolCount = useUi((s) => s.config?.tools.length ?? 0);
+  const setView = useUi((s) => s.setView);
+  const openArchived = useChat((s) => s.openArchived);
+  const [recent, setRecent] = useState<ArchivedChat[]>([]);
+
+  useEffect(() => {
+    api
+      .chatArchiveList()
+      .then((chats) => setRecent(chats.slice(0, RECENT_CHATS)))
+      .catch(() => undefined);
+  }, []);
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6 text-center">
@@ -48,6 +62,28 @@ export function EmptyState() {
           );
         })}
       </div>
+      {recent.length > 0 && (
+        <div className="w-full space-y-1 text-left">
+          {recent.map((chat) => (
+            <button
+              key={chat.id}
+              type="button"
+              onClick={() => void openArchived(chat.id)}
+              className="flex w-full items-center gap-2 rounded-lg px-2 py-1 text-[12.5px] text-subtle transition-colors hover:bg-sunken hover:text-fg"
+            >
+              <History size={13} className="shrink-0" />
+              <span className="truncate">{chat.title || t("history.untitled")}</span>
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => setView("history")}
+            className="px-2 text-[12px] text-subtle underline-offset-2 hover:text-fg hover:underline"
+          >
+            {t("history.showAll")} →
+          </button>
+        </div>
+      )}
     </div>
   );
 }

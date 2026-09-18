@@ -13,6 +13,7 @@ use crate::desktop::autostart::{self, AutostartState};
 use crate::desktop::web::{self, WebState};
 use crate::desktop::window::{self, WindowMode};
 use crate::error::{AppError, AppResult};
+use crate::history::ArchivedChat;
 use crate::secrets::SecretGroupInfo;
 use crate::services::{self, Service, ServiceStatus};
 use crate::state::AppState;
@@ -128,6 +129,22 @@ pub fn chat_load(state: State<'_, AppState>) -> Option<serde_json::Value> {
 #[tauri::command]
 pub async fn chat_save(state: State<'_, AppState>, ui: serde_json::Value) -> AppResult<()> {
     crate::app::save_chat(&state, ui).await
+}
+
+#[tauri::command]
+pub fn chat_archive_list(state: State<'_, AppState>) -> Vec<ArchivedChat> {
+    state.chats.list_archive()
+}
+
+/// Returns the UI messages of the opened chat.
+#[tauri::command]
+pub async fn chat_archive_open(state: State<'_, AppState>, id: String) -> AppResult<serde_json::Value> {
+    crate::app::open_archived_chat(&state, &id).await
+}
+
+#[tauri::command]
+pub fn chat_archive_delete(state: State<'_, AppState>, id: String) -> AppResult<()> {
+    state.chats.delete_archived(&id).map_err(AppError::from)
 }
 
 #[tauri::command]

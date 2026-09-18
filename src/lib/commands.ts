@@ -14,6 +14,7 @@ export interface SlashCommand {
   arg?: "query" | "text" | "profile";
   description:
     | "commands.clear"
+    | "commands.history"
     | "commands.web"
     | "commands.translate"
     | "commands.model"
@@ -37,6 +38,7 @@ export const COMMANDS: SlashCommand[] = [
       void useChat.getState().reset();
     },
   },
+  { name: "history", aliases: ["chats"], description: "commands.history", run: () => useUi.getState().setView("history") },
   {
     name: "web",
     aliases: ["g"],

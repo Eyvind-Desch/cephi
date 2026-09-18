@@ -58,7 +58,7 @@ impl AgentController {
         self.history.lock().await.clear();
     }
 
-    /// Continues a saved conversation (at startup, before any run).
+    /// Continues a saved conversation (at startup, or an archived chat after `reset`).
     pub fn restore(&self, history: Vec<ChatMessage>) {
         match self.history.try_lock() {
             Ok(mut current) => *current = history,

@@ -2,7 +2,7 @@
 //!
 //! One file holds both halves of a chat: what the UI shows (`ui`, opaque to the backend: tool cards,
 //! search results, …) and what the model sees (`history`). "New chat" moves the file to the archive,
-//! which keeps the most recent [`ARCHIVE_LIMIT`] chats.
+//! which keeps the most recent [`ARCHIVE_LIMIT`] chats; an archived chat can be opened again.
 
 use std::fs;
 use std::io;
@@ -28,6 +28,26 @@ pub struct SavedChat {
     pub ui: Value,
     /// The conversation as sent to the model.
     pub history: Vec<ChatMessage>,
+}
+
+/// One entry of the chat archive (for the history list). Mirrored in `src/lib/ipc.ts`.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ArchivedChat {
+    /// File name without extension (the archive time).
+    pub id: String,
+    pub saved_at: String,
+    /// The first question, shortened.
+    pub title: String,
+    pub messages: usize,
+}
+
+/// Just what the list needs; the model history is not read.
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ArchiveHeader {
+    saved_at: String,
+    ui: Value,
 }
 
 pub struct ChatStore {
@@ -88,9 +108,80 @@ impl ChatStore {
         }
         let archive = self.dir.join(ARCHIVE_DIR);
         fs::create_dir_all(&archive)?;
-        let name = format!("{}.json", chrono::Local::now().format("%Y-%m-%d_%H-%M-%S"));
-        fs::rename(&current, archive.join(name))?;
+        let stamp = chrono::Local::now().format("%Y-%m-%d_%H-%M-%S").to_string();
+        // Two archives within a second (e.g. opening an old chat right after one) must not overwrite each other.
+        let target = (1..)
+            .map(|n| archive.join(if n == 1 { format!("{stamp}.json") } else { format!("{stamp}_{n}.json") }))
+            .find(|path| !path.exists())
+            .expect("some free name");
+        fs::rename(&current, target)?;
         prune(&archive, ARCHIVE_LIMIT)
+    }
+
+    fn archive_dir(&self) -> PathBuf {
+        self.dir.join(ARCHIVE_DIR)
+    }
+
+    /// Archived chats, newest first. Unreadable files are skipped.
+    pub fn list_archive(&self) -> Vec<ArchivedChat> {
+        let Ok(entries) = fs::read_dir(self.archive_dir()) else {
+            return Vec::new();
+        };
+        let mut chats: Vec<ArchivedChat> = entries
+            .filter_map(|entry| entry.ok().map(|e| e.path()))
+            .filter(|path| path.extension().is_some_and(|ext| ext == "json"))
+            .filter_map(|path| {
+                let id = path.file_stem()?.to_string_lossy().into_owned();
+                let header: ArchiveHeader = serde_json::from_slice(&fs::read(&path).ok()?).ok()?;
+                let messages = header.ui.as_array().map(Vec::len).unwrap_or_default();
+                let title = header
+                    .ui
+                    .as_array()
+                    .and_then(|messages| messages.iter().find(|m| m["role"] == "user"))
+                    .and_then(|m| m["text"].as_str())
+                    .map(title_from)
+                    .unwrap_or_default();
+                Some(ArchivedChat {
+                    id,
+                    saved_at: header.saved_at,
+                    title,
+                    messages,
+                })
+            })
+            .collect();
+        chats.sort_by(|a, b| b.id.cmp(&a.id));
+        chats
+    }
+
+    /// Makes an archived chat the current one; the current chat goes to the archive first.
+    pub fn open_archived(&self, id: &str) -> io::Result<SavedChat> {
+        let path = self.archived_path(id)?;
+        let chat: SavedChat = serde_json::from_slice(&fs::read(&path)?).map_err(io::Error::other)?;
+        if chat.version != VERSION {
+            return Err(io::Error::other(format!("chat file has version {}", chat.version)));
+        }
+        // Out of the archive first, so pruning after archiving the current chat can't remove it.
+        let opening = self.dir.join(format!("{CURRENT_FILE}.opening"));
+        fs::rename(&path, &opening)?;
+        if let Err(e) = self.archive() {
+            let _ = fs::rename(&opening, &path);
+            return Err(e);
+        }
+        fs::rename(&opening, self.current())?;
+        Ok(chat)
+    }
+
+    pub fn delete_archived(&self, id: &str) -> io::Result<()> {
+        fs::remove_file(self.archived_path(id)?)
+    }
+
+    /// Only names the archive itself creates, so an id can't point outside it.
+    fn archived_path(&self, id: &str) -> io::Result<PathBuf> {
+        let valid = !id.is_empty() && id.chars().all(|c| c.is_ascii_digit() || c == '-' || c == '_');
+        if !valid {
+            return Err(io::Error::new(io::ErrorKind::InvalidInput, "invalid chat id"));
+        }
+        Ok(self.archive_dir().join(format!("{id}.json")))
     }
 }
 
@@ -106,6 +197,17 @@ fn prune(dir: &Path, keep: usize) -> io::Result<()> {
         fs::remove_file(old)?;
     }
     Ok(())
+}
+
+const TITLE_CHARS: usize = 80;
+
+fn title_from(text: &str) -> String {
+    let line = text.lines().map(str::trim).find(|l| !l.is_empty()).unwrap_or_default();
+    if line.chars().count() > TITLE_CHARS {
+        format!("{}…", line.chars().take(TITLE_CHARS).collect::<String>().trim_end())
+    } else {
+        line.to_string()
+    }
 }
 
 fn set_aside(path: &Path) {
@@ -182,6 +284,37 @@ mod tests {
         left.sort();
         assert_eq!(left.len(), 3);
         assert!(!left.contains(&"2020-01-00.json".to_string()), "oldest removed first");
+    }
+
+    #[test]
+    fn archived_chats_can_be_listed_opened_and_deleted() {
+        let dir = TempDir::new();
+        let store = ChatStore::new(dir.0.clone());
+        let ui = |text: &str| serde_json::json!([{ "id": "1", "role": "user", "text": text }, { "id": "2", "role": "assistant" }]);
+        store.save(ui("first question
+more"), &conversation()).unwrap();
+        store.archive().unwrap();
+        store.save(ui("second"), &conversation()).unwrap();
+        store.archive().unwrap();
+
+        let list = store.list_archive();
+        assert_eq!(list.len(), 2, "same second gets a second name");
+        assert_eq!(list[0].title, "second", "newest first");
+        assert_eq!(list[1].title, "first question");
+        assert_eq!(list[1].messages, 2);
+
+        store.save(ui("current"), &conversation()).unwrap();
+        let opened = store.open_archived(&list[1].id).unwrap();
+        assert_eq!(opened.history.len(), 4);
+        assert_eq!(store.load().unwrap().ui, ui("first question
+more"));
+        let titles: Vec<String> = store.list_archive().into_iter().map(|c| c.title).collect();
+        assert!(titles.contains(&"current".to_string()), "the open chat was archived");
+        assert!(!titles.contains(&"first question".to_string()));
+
+        store.delete_archived(&list[0].id).unwrap();
+        assert_eq!(store.list_archive().len(), 1);
+        assert!(store.open_archived("../current").is_err());
     }
 
     #[test]

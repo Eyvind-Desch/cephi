@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { FolderCog, Minimize2, MoreHorizontal, Pin, RefreshCw, Settings, SquarePen } from "lucide-react";
+import { FolderCog, History, Minimize2, MoreHorizontal, Pin, RefreshCw, Settings, SquarePen } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { api } from "../../lib/ipc";
 import { useChat } from "../../store/chat";
@@ -31,6 +31,12 @@ export function Header() {
         setView("chat");
         void reset();
       },
+    },
+    {
+      label: t("menu.history"),
+      icon: History,
+      disabled: view === "history",
+      onSelect: () => setView("history"),
     },
     { label: t("menu.pin"), icon: Pin, checked: pinned, onSelect: togglePinned },
     { kind: "separator" },

@@ -23,6 +23,16 @@ export interface WebBounds {
   height: number;
 }
 
+/** `src-tauri/src/history.rs` */
+export interface ArchivedChat {
+  id: string;
+  /** RFC 3339 */
+  savedAt: string;
+  /** The first question, shortened. */
+  title: string;
+  messages: number;
+}
+
 /** `src-tauri/src/desktop/autostart.rs` */
 export interface AutostartState {
   enabled: boolean;
@@ -218,6 +228,10 @@ export const api = {
   /** The saved chat (UI messages) from the last session, or `null`. */
   chatLoad: () => invoke<unknown>("chat_load"),
   chatSave: (ui: unknown) => invoke<void>("chat_save", { ui }),
+  chatArchiveList: () => invoke<ArchivedChat[]>("chat_archive_list"),
+  /** Opens an archived chat (the current one is archived) and returns its UI messages. */
+  chatArchiveOpen: (id: string) => invoke<unknown>("chat_archive_open", { id }),
+  chatArchiveDelete: (id: string) => invoke<void>("chat_archive_delete", { id }),
 
   windowSetMode: (mode: WindowMode) => invoke<void>("window_set_mode", { mode }),
   windowHide: () => invoke<void>("window_hide"),

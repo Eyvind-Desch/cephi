@@ -130,7 +130,7 @@ next stage begins. Whatever isn't a nuisance goes into the backlog instead of th
 
 - [ ] When launched from the terminal, the window stays hidden (Windows foreground lock) → hotkey needed
 - [ ] Code highlighting in responses
-- [ ] Browse archived chats (they are saved, but there is no list in the UI yet)
+- [x] Browse archived chats: `/history`, ⋯ → *Earlier chats*, the two latest on the empty chat
 - [ ] Volume indicator (brief overlay) after "louder/quieter"
 - [ ] Check whether Spotify auto-plays albums/playlists
 - [ ] Search: DuckDuckGo fallback when SearXNG is not running

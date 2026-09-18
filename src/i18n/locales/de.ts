@@ -65,6 +65,7 @@ export const de: Locale = {
   },
   commands: {
     clear: "Neuen Chat beginnen",
+    history: "Frühere Chats",
     web: "Web-Tab öffnen oder suchen",
     translate: "Übersetzer öffnen",
     model: "Modell wechseln",
@@ -147,6 +148,7 @@ export const de: Locale = {
   menu: {
     newChat: "Neuer Chat",
     newChatShortcut: "Strg+N",
+    history: "Frühere Chats",
     pin: "Anpinnen",
     autostartUnavailable: "Nur in der installierten Version",
     settings: "Einstellungen",
@@ -168,6 +170,17 @@ export const de: Locale = {
     count_one: "{{count}} Konfigurationsproblem",
     count_other: "{{count}} Konfigurationsprobleme",
     openFolder: "Konfigurationsordner öffnen",
+  },
+  history: {
+    title: "Frühere Chats",
+    search: "Suchen…",
+    empty: "Noch keine früheren Chats. „Neuer Chat“ legt den aktuellen hier ab.",
+    noMatch: "Kein Chat passt.",
+    untitled: "Ohne Titel",
+    delete: "Löschen",
+    confirmDelete: "Wirklich löschen?",
+    busy: "Cephi antwortet noch; Chats lassen sich danach öffnen.",
+    showAll: "Frühere Chats",
   },
   settings: {
     tabs: {

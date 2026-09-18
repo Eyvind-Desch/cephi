@@ -264,6 +264,14 @@ pub async fn new_chat(state: &AppState) -> AppResult<()> {
     state.chats.archive().map_err(AppError::from)
 }
 
+/// Opens an archived chat: the current one is archived, the model continues the old conversation.
+pub async fn open_archived_chat(state: &AppState, id: &str) -> AppResult<serde_json::Value> {
+    let chat = state.chats.open_archived(id).map_err(AppError::from)?;
+    state.agent.reset().await;
+    state.agent.restore(chat.history);
+    Ok(chat.ui)
+}
+
 /// Settings page: merges `patch` into settings.json and applies it right away.
 pub fn update_settings(app: &AppHandle, patch: &serde_json::Value) -> AppResult<ConfigSnapshot> {
     let state = app.state::<AppState>();
