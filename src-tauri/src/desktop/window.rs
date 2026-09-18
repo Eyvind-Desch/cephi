@@ -4,8 +4,10 @@ use std::time::{Duration, Instant};
 
 use serde::Deserialize;
 use tauri::{AppHandle, Emitter, Manager, Monitor, Window};
+use windows_sys::Win32::System::Threading::AttachThreadInput;
 use windows_sys::Win32::UI::WindowsAndMessaging::{
-    GetForegroundWindow, SetWindowPos, SWP_NOACTIVATE, SWP_NOOWNERZORDER, SWP_NOZORDER,
+    BringWindowToTop, GetForegroundWindow, GetWindowThreadProcessId, SetForegroundWindow, SetWindowPos,
+    SWP_NOACTIVATE, SWP_NOOWNERZORDER, SWP_NOZORDER,
 };
 
 use crate::config::{Anchor, WindowSettings};
@@ -82,6 +84,9 @@ pub fn show(app: &AppHandle) -> AppResult<()> {
     }
     window.show()?;
     window.set_focus()?;
+    if !is_foreground(&window) {
+        force_foreground(&window);
+    }
     // Keyboard focus must reach the webview itself, otherwise the input field cannot receive it.
     if let Some(webview) = app.get_webview(MAIN_LABEL) {
         webview.set_focus()?;
@@ -206,6 +211,33 @@ fn is_foreground(window: &Window) -> bool {
     // SAFETY: plain query without arguments.
     let foreground = unsafe { GetForegroundWindow() };
     window.hwnd().is_ok_and(|hwnd| std::ptr::eq(foreground, hwnd.0))
+}
+
+/// Windows only lets the app the user is working in bring a window to the front ("foreground lock").
+/// Started from a terminal or by autostart, Cephi isn't that app, and `set_focus` leaves it behind.
+/// Sharing the input state with the current foreground window for a moment lifts the lock; this is
+/// only done when the user asked Cephi to show up (hotkey, tray, start).
+fn force_foreground(window: &Window) {
+    let Ok(hwnd) = window.hwnd() else { return };
+    let hwnd = hwnd.0 as windows_sys::Win32::Foundation::HWND;
+    // SAFETY: plain window and thread queries; `hwnd` belongs to a live window owned by this process,
+    // and the input attachment is undone before returning.
+    unsafe {
+        let foreground = GetForegroundWindow();
+        let foreground_thread = GetWindowThreadProcessId(foreground, std::ptr::null_mut());
+        let own_thread = GetWindowThreadProcessId(hwnd, std::ptr::null_mut());
+        let attached = foreground_thread != 0
+            && foreground_thread != own_thread
+            && AttachThreadInput(own_thread, foreground_thread, 1) != 0;
+        BringWindowToTop(hwnd);
+        SetForegroundWindow(hwnd);
+        if attached {
+            AttachThreadInput(own_thread, foreground_thread, 0);
+        }
+    }
+    if !is_foreground(window) {
+        log::warn!("could not bring the window to the front (foreground lock)");
+    }
 }
 
 /// Moves and resizes in one step, so the anchored edge does not jitter during animations.

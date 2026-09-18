@@ -129,7 +129,7 @@ next stage begins. Whatever isn't a nuisance goes into the backlog instead of th
 
 ### Backlog (polish)
 
-- [ ] When launched from the terminal, the window stays hidden (Windows foreground lock) → hotkey needed
+- [x] When launched from the terminal, the window stays hidden (Windows foreground lock): `AttachThreadInput` + `SetForegroundWindow` when `set_focus` loses (needs a real-world test)
 - [x] Code highlighting in responses (highlight.js core, ~20 languages, language label + copy)
 - [x] Browse archived chats: `/history`, ⋯ → *Earlier chats*, the two latest on the empty chat
 - [x] Volume indicator after "louder/quieter": level bar in the compact bar
