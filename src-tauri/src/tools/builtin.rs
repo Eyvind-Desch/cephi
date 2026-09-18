@@ -182,9 +182,7 @@ async fn web_search(ctx: &ExecContext<'_>, query: &str) -> Result<Success, Strin
 async fn fetch_page(url: &str) -> Result<Success, String> {
     let page = search::page::fetch(url).await?;
     // Model-facing, so English.
-    let content = format!("Page \"{}\" ({}):
-
-{}", page.title, page.url, page.text);
+    let content = format!("Page \"{}\" ({}):\n\n{}", page.title, page.url, page.text);
     Ok(Success {
         content,
         display: Some(ToolDisplay::WebPage { url: page.url }),

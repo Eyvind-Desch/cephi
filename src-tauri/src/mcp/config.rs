@@ -79,8 +79,21 @@ impl ServerConfig {
 
     /// Whether both start the same server (permissions aside, which apply without a restart).
     pub fn same_connection(&self, other: &ServerConfig) -> bool {
-        (&self.command, &self.args, &self.env, &self.cwd, &self.url, &self.headers)
-            == (&other.command, &other.args, &other.env, &other.cwd, &other.url, &other.headers)
+        (
+            &self.command,
+            &self.args,
+            &self.env,
+            &self.cwd,
+            &self.url,
+            &self.headers,
+        ) == (
+            &other.command,
+            &other.args,
+            &other.env,
+            &other.cwd,
+            &other.url,
+            &other.headers,
+        )
     }
 
     pub fn is_auto_approved(&self, tool: &str) -> bool {

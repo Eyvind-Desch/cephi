@@ -5,8 +5,9 @@
 //! unless the server or tool is approved in `mcp.json`.
 
 pub mod config;
+pub mod select;
 
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::process::Stdio;
 use std::sync::RwLock;
 use std::time::Duration;
@@ -105,8 +106,10 @@ impl McpManager {
             .cloned()
     }
 
-    pub fn definitions(&self) -> Vec<ToolDef> {
-        self.tools()
+    /// Definitions for the model; above `limit` tools only those relevant to `request`
+    /// (and the ones in `used`, called earlier in the chat).
+    pub fn definitions_for(&self, request: &str, used: &HashSet<String>, limit: usize) -> Vec<ToolDef> {
+        select::relevant(self.tools(), request, used, limit)
             .into_iter()
             .map(|tool| ToolDef {
                 name: tool.exposed,

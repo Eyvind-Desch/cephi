@@ -111,7 +111,13 @@ impl ChatStore {
         let stamp = chrono::Local::now().format("%Y-%m-%d_%H-%M-%S").to_string();
         // Two archives within a second (e.g. opening an old chat right after one) must not overwrite each other.
         let target = (1..)
-            .map(|n| archive.join(if n == 1 { format!("{stamp}.json") } else { format!("{stamp}_{n}.json") }))
+            .map(|n| {
+                archive.join(if n == 1 {
+                    format!("{stamp}.json")
+                } else {
+                    format!("{stamp}_{n}.json")
+                })
+            })
             .find(|path| !path.exists())
             .expect("some free name");
         fs::rename(&current, target)?;
@@ -291,8 +297,13 @@ mod tests {
         let dir = TempDir::new();
         let store = ChatStore::new(dir.0.clone());
         let ui = |text: &str| serde_json::json!([{ "id": "1", "role": "user", "text": text }, { "id": "2", "role": "assistant" }]);
-        store.save(ui("first question
-more"), &conversation()).unwrap();
+        store
+            .save(
+                ui("first question
+more"),
+                &conversation(),
+            )
+            .unwrap();
         store.archive().unwrap();
         store.save(ui("second"), &conversation()).unwrap();
         store.archive().unwrap();
@@ -306,8 +317,11 @@ more"), &conversation()).unwrap();
         store.save(ui("current"), &conversation()).unwrap();
         let opened = store.open_archived(&list[1].id).unwrap();
         assert_eq!(opened.history.len(), 4);
-        assert_eq!(store.load().unwrap().ui, ui("first question
-more"));
+        assert_eq!(
+            store.load().unwrap().ui,
+            ui("first question
+more")
+        );
         let titles: Vec<String> = store.list_archive().into_iter().map(|c| c.title).collect();
         assert!(titles.contains(&"current".to_string()), "the open chat was archived");
         assert!(!titles.contains(&"first question".to_string()));

@@ -62,6 +62,13 @@ there directly. Changes apply as soon as the file is saved (only servers whose s
 The AI sees a server's tools as `<server>__<tool>`, e.g. `github__search_code`, and the description starts with
 `[server]`. Server names: letters, digits, `-` and `_`.
 
+## Many servers
+
+Every tool costs context, and small local models choose worse the more tools they see. With more than
+**8 MCP tools** (local models) or **64** (cloud models), each request only gets the tools whose name, server
+or description share words with the question (the last two messages), plus those already used in the chat.
+Naming the server helps: "create a GitHub issue …", "search Notion for …".
+
 ## Not supported yet
 
 - Servers that require a browser login (OAuth), e.g. some hosted SaaS servers. Use their API-key variant if they

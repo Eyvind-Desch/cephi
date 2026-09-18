@@ -108,7 +108,9 @@ async fn ensure_public(url: &url::Url) -> Result<(), String> {
     if host_is_private(url) {
         return Err(refused());
     }
-    let Some(host) = url.host_str() else { return Err(refused()) };
+    let Some(host) = url.host_str() else {
+        return Err(refused());
+    };
     if host.parse::<IpAddr>().is_ok() || host.starts_with('[') {
         return Ok(());
     }
@@ -199,16 +201,19 @@ pub fn html_to_text(html: &str) -> String {
     static MAIN: LazyLock<Regex> =
         LazyLock::new(|| Regex::new(r"(?is)<(article|main)\b[^>]*>(.*)</\s*(?:article|main)\s*>").unwrap());
     static BLOCK: LazyLock<Regex> = LazyLock::new(|| {
-        Regex::new(r"(?i)</?(p|div|section|article|main|header|h[1-6]|ul|ol|tr|table|blockquote|pre|br|hr|dt|dd)\b[^>]*>").unwrap()
+        Regex::new(
+            r"(?i)</?(p|div|section|article|main|header|h[1-6]|ul|ol|tr|table|blockquote|pre|br|hr|dt|dd)\b[^>]*>",
+        )
+        .unwrap()
     });
     static HEADING: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?i)<h[1-6]\b[^>]*>").unwrap());
     static ITEM: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?i)<li\b[^>]*>").unwrap());
     // Quoted attribute values may contain ">" (e.g. JSON in data attributes).
     static TAG: LazyLock<Regex> = LazyLock::new(|| Regex::new(r#"<(?:[^>"']|"[^"]*"|'[^']*')*>"#).unwrap());
 
-    let cleaned = DROP
-        .iter()
-        .fold(html.to_string(), |text, pattern| pattern.replace_all(&text, " ").into_owned());
+    let cleaned = DROP.iter().fold(html.to_string(), |text, pattern| {
+        pattern.replace_all(&text, " ").into_owned()
+    });
     // Prefer the marked-up content; fall back to the whole body.
     let content = MAIN
         .captures(&cleaned)
@@ -314,7 +319,10 @@ mod tests {
 
     #[test]
     fn decodes_entities() {
-        assert_eq!(decode_entities("a &lt;b&gt; &#x27;c&#39; &uuml; &unknown;"), "a <b> 'c' ü &unknown;");
+        assert_eq!(
+            decode_entities("a &lt;b&gt; &#x27;c&#39; &uuml; &unknown;"),
+            "a <b> 'c' ü &unknown;"
+        );
     }
 
     #[test]
@@ -341,9 +349,19 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn live_fetch() {
-        let page = fetch("https://en.wikipedia.org/wiki/Rust_(programming_language)").await.unwrap();
-        assert!(page.text.contains("Rust") && page.title.contains("Rust"), "{}", page.text);
-        println!("{}
-{}", page.title, &page.text[..page.text.len().min(600)]);
+        let page = fetch("https://en.wikipedia.org/wiki/Rust_(programming_language)")
+            .await
+            .unwrap();
+        assert!(
+            page.text.contains("Rust") && page.title.contains("Rust"),
+            "{}",
+            page.text
+        );
+        println!(
+            "{}
+{}",
+            page.title,
+            &page.text[..page.text.len().min(600)]
+        );
     }
 }

@@ -2,7 +2,7 @@
 
 mod events;
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
@@ -15,8 +15,8 @@ use rust_i18n::t;
 
 use crate::config::Config;
 use crate::error::{AppError, AppResult};
-use crate::llm::{ChatMessage, LlmClient, LlmError, LlmRequest, Role, ToolCall};
-use crate::mcp::McpTool;
+use crate::llm::{ChatMessage, LlmClient, LlmError, LlmRequest, Role, ToolCall, LOCAL_PROVIDER_ID};
+use crate::mcp::{self, McpTool};
 use crate::services;
 use crate::state::AppState;
 use crate::tools::{self, ExecContext, Permission, ToolOutput};
@@ -202,7 +202,17 @@ impl Run<'_> {
         };
         let tool_definitions = if profile.tools {
             let mut definitions = self.config.tools.definitions();
-            definitions.extend(self.state.mcp.definitions());
+            // Small local models get only the MCP tools that fit the request (see `mcp::select`).
+            let limit = if profile.provider == LOCAL_PROVIDER_ID {
+                mcp::select::LOCAL_LIMIT
+            } else {
+                mcp::select::CLOUD_LIMIT
+            };
+            definitions.extend(
+                self.state
+                    .mcp
+                    .definitions_for(&recent_requests(history), &used_tools(history), limit),
+            );
             definitions
         } else {
             Vec::new()
@@ -440,6 +450,27 @@ fn truncate(mut text: String, max_chars: usize) -> String {
         text.push_str(&t!("agent.truncated"));
     }
     text
+}
+
+/// The last two user messages: a follow-up ("and in Notion?") still needs the words of the first.
+fn recent_requests(history: &[ChatMessage]) -> String {
+    let mut texts: Vec<&str> = history
+        .iter()
+        .rev()
+        .filter(|m| m.role == Role::User)
+        .take(2)
+        .map(|m| m.content.as_str())
+        .collect();
+    texts.reverse();
+    texts.join("\n")
+}
+
+/// Tools called earlier in this chat.
+fn used_tools(history: &[ChatMessage]) -> HashSet<String> {
+    history
+        .iter()
+        .flat_map(|m| m.tool_calls.iter().map(|call| call.name.clone()))
+        .collect()
 }
 
 #[cfg(test)]
