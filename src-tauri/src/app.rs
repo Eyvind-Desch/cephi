@@ -11,14 +11,18 @@ use crate::desktop::{autostart, hotkey, tray, window};
 use crate::error::{AppError, AppResult};
 use crate::history::ChatStore;
 use crate::launcher::AppIndex;
+use crate::migrate;
 use crate::llm::{LlmClient, OllamaClient, LOCAL_PROVIDER_ID};
 use crate::secrets::{self, SecretGroupInfo};
 use crate::state::AppState;
 
-pub const EVENT_CONFIG_CHANGED: &str = "orbit://config-changed";
+pub const EVENT_CONFIG_CHANGED: &str = "cephi://config-changed";
 
 pub fn setup(app: &AppHandle) -> AppResult<()> {
     let paths = ConfigPaths::resolve(app)?;
+    if !ConfigPaths::is_overridden() {
+        migrate::from_orbit(app, &paths.root);
+    }
     paths.ensure_initialized()?;
     log::info!("config folder: {}", paths.root.display());
 
@@ -28,7 +32,7 @@ pub fn setup(app: &AppHandle) -> AppResult<()> {
     let show_on_startup = config.settings.window.show_on_startup && !autostarted;
 
     let http = reqwest::Client::builder()
-        .user_agent(concat!("Orbit/", env!("CARGO_PKG_VERSION")))
+        .user_agent(concat!("Cephi/", env!("CARGO_PKG_VERSION")))
         .connect_timeout(Duration::from_secs(5))
         .build()
         .map_err(|e| AppError::msg(format!("failed to create HTTP client: {e}")))?;

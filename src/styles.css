@@ -21,7 +21,7 @@
   --success: #18a058;
   --warning: #c98a00;
   --danger: #d6404e;
-  --glow-a: #6b5cff;
+  --glow-a: #8b6bff;
   --glow-b: #21c7e6;
 }
 
@@ -129,7 +129,7 @@ html[data-preview] [data-web-page] {
 }
 
 /* Indeterminate progress bar (web tab loading). */
-@keyframes orbit-progress {
+@keyframes cephi-progress {
   from {
     transform: translateX(-100%);
   }
@@ -138,9 +138,13 @@ html[data-preview] [data-web-page] {
   }
 }
 
-@keyframes orbit-spin {
+/* Tentacles of the logo while Cephi is working. */
+@keyframes cephi-sway {
+  from {
+    transform: rotate(-5deg);
+  }
   to {
-    transform: rotate(360deg);
+    transform: rotate(5deg);
   }
 }
 
@@ -157,55 +161,55 @@ html[data-preview] [data-web-page] {
    Markdown content in assistant messages
    --------------------------------------------------------------------------- */
 
-.prose-orbit {
+.prose-cephi {
   user-select: text;
   cursor: text;
   line-height: 1.6;
   overflow-wrap: anywhere;
 }
-.prose-orbit > * + * {
+.prose-cephi > * + * {
   margin-top: 0.6em;
 }
-.prose-orbit h1,
-.prose-orbit h2,
-.prose-orbit h3 {
+.prose-cephi h1,
+.prose-cephi h2,
+.prose-cephi h3 {
   font-weight: 600;
   line-height: 1.3;
   margin-top: 1em;
 }
-.prose-orbit h1 {
+.prose-cephi h1 {
   font-size: 1.25em;
 }
-.prose-orbit h2 {
+.prose-cephi h2 {
   font-size: 1.12em;
 }
-.prose-orbit h3 {
+.prose-cephi h3 {
   font-size: 1em;
 }
-.prose-orbit ul,
-.prose-orbit ol {
+.prose-cephi ul,
+.prose-cephi ol {
   padding-left: 1.3em;
 }
-.prose-orbit ul {
+.prose-cephi ul {
   list-style: disc;
 }
-.prose-orbit ol {
+.prose-cephi ol {
   list-style: decimal;
 }
-.prose-orbit li + li {
+.prose-cephi li + li {
   margin-top: 0.2em;
 }
-.prose-orbit li::marker {
+.prose-cephi li::marker {
   color: var(--fg-subtle);
 }
-.prose-orbit a {
+.prose-cephi a {
   color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 2px;
   cursor: pointer;
 }
 /* Source reference [n] from web search: small number badge instead of an underlined link. */
-.prose-orbit a.citation {
+.prose-cephi a.citation {
   display: inline-grid;
   place-items: center;
   min-width: 1.35em;
@@ -222,37 +226,37 @@ html[data-preview] [data-web-page] {
   background: var(--surface-sunken);
   font-variant-numeric: tabular-nums;
 }
-.prose-orbit a.citation:hover {
+.prose-cephi a.citation:hover {
   color: var(--accent-fg);
   background: var(--accent);
 }
-.prose-orbit strong {
+.prose-cephi strong {
   font-weight: 600;
 }
-.prose-orbit blockquote {
+.prose-cephi blockquote {
   border-left: 3px solid var(--line);
   padding-left: 0.8em;
   color: var(--fg-muted);
 }
-.prose-orbit :not(pre) > code {
+.prose-cephi :not(pre) > code {
   font-family: var(--font-mono);
   font-size: 0.88em;
   padding: 0.1em 0.35em;
   border-radius: 5px;
   background: var(--surface-sunken);
 }
-.prose-orbit table {
+.prose-cephi table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.92em;
 }
-.prose-orbit th,
-.prose-orbit td {
+.prose-cephi th,
+.prose-cephi td {
   border-bottom: 1px solid var(--line);
   padding: 0.35em 0.5em;
   text-align: left;
 }
-.prose-orbit hr {
+.prose-cephi hr {
   border: 0;
   border-top: 1px solid var(--line);
 }

@@ -178,7 +178,7 @@ async fn open_url(
         return Err(t!("executor.scheme_not_allowed", scheme = parsed.scheme()).into());
     }
 
-    if target == OpenTarget::Orbit {
+    if target == OpenTarget::Cephi {
         if !matches!(parsed.scheme(), "http" | "https") {
             return Err(t!("executor.scheme_not_allowed", scheme = parsed.scheme()).into());
         }
@@ -187,7 +187,7 @@ async fn open_url(
             .await
             .map_err(|e| t!("executor.open_failed", error = e).to_string())?;
         return Ok(Success {
-            content: t!("executor.opened_in_orbit", url = shown).into(),
+            content: t!("executor.opened_in_cephi", url = shown).into(),
             // A URL with secrets must not reach the UI.
             display: template::secret_names(url_template)
                 .is_empty()
@@ -254,7 +254,10 @@ async fn powershell(script: &str, args: &Args, timeout_secs: Option<u64>) -> Res
         .creation_flags(CREATE_NO_WINDOW)
         .kill_on_drop(true);
     for (name, value) in args {
-        command.env(env_var_name(name), plain(value));
+        let value = plain(value);
+        command.env(env_var_name(name), &value);
+        // Scripts written before the rename use the old prefix.
+        command.env(legacy_env_var_name(name), value);
     }
 
     let child = command
@@ -329,6 +332,11 @@ async fn http(
 }
 
 pub fn env_var_name(param: &str) -> String {
+    format!("CEPHI_ARG_{}", param.to_ascii_uppercase())
+}
+
+/// Name used before the rename to Cephi; still set so existing tools keep working.
+fn legacy_env_var_name(param: &str) -> String {
     format!("ORBIT_ARG_{}", param.to_ascii_uppercase())
 }
 
@@ -397,6 +405,7 @@ mod tests {
 
     #[test]
     fn env_var_names() {
-        assert_eq!(env_var_name("command"), "ORBIT_ARG_COMMAND");
+        assert_eq!(env_var_name("command"), "CEPHI_ARG_COMMAND");
+        assert_eq!(legacy_env_var_name("command"), "ORBIT_ARG_COMMAND");
     }
 }

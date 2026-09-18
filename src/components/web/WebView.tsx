@@ -73,7 +73,7 @@ function AddressBar() {
   const inputRef = useRef<HTMLInputElement>(null);
   const editing = draft != null;
 
-  // Ready for input when the tab opens without a page and whenever Orbit is summoned.
+  // Ready for input when the tab opens without a page and whenever Cephi is summoned.
   useEffect(() => {
     if (!useWeb.getState().url) inputRef.current?.focus();
     const unlisten = onWindowShown(() => requestAnimationFrame(() => inputRef.current?.focus()));
@@ -132,7 +132,7 @@ function AddressBar() {
       />
       {loading && (
         <span className="absolute inset-x-0 bottom-0 h-0.5 overflow-hidden">
-          <span className="block h-full w-1/3 animate-[orbit-progress_1.1s_ease-in-out_infinite] rounded-full bg-accent" />
+          <span className="block h-full w-1/3 animate-[cephi-progress_1.1s_ease-in-out_infinite] rounded-full bg-accent" />
         </span>
       )}
     </label>

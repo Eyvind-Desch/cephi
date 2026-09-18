@@ -1,4 +1,4 @@
-//! The web tab: a child webview inside the Orbit window that shows Google and other pages.
+//! The web tab: a child webview inside the Cephi window that shows Google and other pages.
 //!
 //! The frontend owns the layout. It reports where the page area is (`set_bounds`) and whether the
 //! tab is visible; the webview is created lazily on the first navigation. Remote pages get no IPC
@@ -20,9 +20,9 @@ use crate::state::AppState;
 
 pub const WEB_LABEL: &str = "web";
 /// `WebState` changed (URL, title, loading).
-pub const EVENT_WEB_STATE: &str = "orbit://web-state";
+pub const EVENT_WEB_STATE: &str = "cephi://web-state";
 /// A tool opened a page: the frontend switches to the web tab.
-pub const EVENT_WEB_OPEN: &str = "orbit://web-open";
+pub const EVENT_WEB_OPEN: &str = "cephi://web-open";
 
 const SEARCH_URL: &str = "https://www.google.com/search";
 
@@ -80,7 +80,7 @@ impl WebController {
     }
 }
 
-/// Opens a page in the web tab and switches to it (used by tools with `"target": "orbit"`).
+/// Opens a page in the web tab and switches to it (used by tools with `"target": "cephi"`).
 pub async fn open(app: &AppHandle, url: Url) -> AppResult<()> {
     navigate(app, url).await?;
     app.emit_to(MAIN_LABEL, EVENT_WEB_OPEN, ())?;

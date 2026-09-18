@@ -66,7 +66,7 @@ interface MarkdownProps {
 
 export const Markdown = memo(function Markdown({ text, sources }: MarkdownProps) {
   return (
-    <div className="prose-orbit">
+    <div className="prose-cephi">
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
         {sources ? linkCitations(text, sources) : text}
       </ReactMarkdown>

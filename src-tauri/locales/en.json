@@ -54,7 +54,7 @@
     "scheme_not_allowed": "The scheme \"%{scheme}:\" is not allowed for this tool.",
     "open_failed": "Could not open: %{error}",
     "opened": "Opened: %{url}",
-    "opened_in_orbit": "Opened in Orbit: %{url}",
+    "opened_in_cephi": "Opened in Cephi: %{url}",
     "launch_failed": "Could not start \"%{program}\": %{error}",
     "launched": "Started: %{program}",
     "powershell_start_failed": "Could not start PowerShell: %{error}",
@@ -135,7 +135,7 @@
   },
   "secrets": {
     "invalid_name": "Invalid key name \"%{name}\": only a-z, 0-9 and _, starting with a letter.",
-    "missing": "Key \"%{name}\" is missing. Add it in Orbit under \"Keys\".",
+    "missing": "Key \"%{name}\" is missing. Add it in Cephi under \"Keys\".",
     "read_failed": "Could not read the credential (error %{code}).",
     "not_text": "The stored key is not valid text.",
     "empty": "The key must not be empty.",
@@ -148,7 +148,7 @@
     "translate": "Translator",
     "wsl_missing": "Could not reach Docker in WSL: %{error}",
     "start_failed": "Could not start the service: %{error}",
-    "timeout": "%{service} did not start in time. Check: wsl -- docker compose -f ~/.orbit/infra/compose.yaml logs"
+    "timeout": "%{service} did not start in time. Check: wsl -- docker compose -f ~/.cephi/infra/compose.yaml logs"
   },
   "settings": {
     "no_profiles": "At least one profile is required in \"profiles\".",
@@ -191,7 +191,7 @@
     "unreachable": "Spotify is not reachable: %{error}",
     "search_failed": "Spotify search failed (HTTP %{status}): %{details}",
     "nothing_found": "Nothing found on Spotify for \"%{query}\".",
-    "not_configured": "Spotify is not set up yet: add the Client ID and Client Secret in Orbit under \"Keys\".",
+    "not_configured": "Spotify is not set up yet: add the Client ID and Client Secret in Cephi under \"Keys\".",
     "credentials_rejected": "Spotify rejected the credentials. Check the Client ID and Client Secret.",
     "auth_failed": "Spotify sign-in failed (HTTP %{status})."
   },
@@ -210,12 +210,12 @@
     "parameters_not_object": "\"parameters.type\" must be \"object\".",
     "invalid_param_name": "Parameter \"%{name}\" is invalid: only letters, digits and _ are allowed.",
     "required_unknown": "\"required\" contains \"%{name}\", but that parameter is not defined.",
-    "powershell_placeholders": "PowerShell scripts do not support {{placeholders}}. Use $env:ORBIT_ARG_<NAME> instead (safe against code injection).",
+    "powershell_placeholders": "PowerShell scripts do not support {{placeholders}}. Use $env:CEPHI_ARG_<NAME> instead (safe against code injection).",
     "http_url_scheme": "\"action.url\" must start with http:// or https://.",
     "builtin_missing_param": "Builtin \"%{builtin}\" requires the parameter \"%{name}\"."
   },
   "tray": {
-    "show": "Open Orbit",
+    "show": "Open Cephi",
     "open_config": "Open configuration",
     "reload": "Reload configuration",
     "quit": "Quit"

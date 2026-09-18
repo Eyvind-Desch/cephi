@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "orbit://schemas/tool.schema.json",
-  "title": "Orbit Tool",
-  "description": "A tool Orbit's AI can call. One file per tool in %APPDATA%\\Orbit\\tools\\ (subfolders allowed). Changes are loaded immediately.",
+  "$id": "cephi://schemas/tool.schema.json",
+  "title": "Cephi Tool",
+  "description": "A tool Cephi's AI can call. One file per tool in %APPDATA%\\Cephi\\tools\\ (subfolders allowed). Changes are loaded immediately.",
   "type": "object",
   "additionalProperties": false,
   "required": ["name", "description", "action"],
@@ -133,9 +133,9 @@
               "type": { "const": "open_url" },
               "url": { "$ref": "#/definitions/template" },
               "target": {
-                "enum": ["browser", "orbit"],
+                "enum": ["browser", "cephi", "orbit"],
                 "default": "browser",
-                "description": "browser = default browser or the app for the scheme. orbit = Orbit's web tab (http/https only)."
+                "description": "browser = default browser or the app for the scheme. cephi = Cephi's web tab (http/https only). orbit = old name of cephi."
               }
             }
           }
@@ -157,7 +157,7 @@
         {
           "if": { "properties": { "type": { "const": "powershell" } } },
           "then": {
-            "description": "Runs a fixed PowerShell script. Parameters are available as $env:ORBIT_ARG_<NAME> ({{placeholders}} are not allowed, to prevent code injection). The output goes to the model.",
+            "description": "Runs a fixed PowerShell script. Parameters are available as $env:CEPHI_ARG_<NAME> ({{placeholders}} are not allowed, to prevent code injection). The output goes to the model.",
             "additionalProperties": false,
             "required": ["type", "script"],
             "properties": {
@@ -186,7 +186,7 @@
         {
           "if": { "properties": { "type": { "const": "builtin" } } },
           "then": {
-            "description": "A function built into Orbit.",
+            "description": "A function built into Cephi.",
             "additionalProperties": false,
             "required": ["type", "id"],
             "properties": {

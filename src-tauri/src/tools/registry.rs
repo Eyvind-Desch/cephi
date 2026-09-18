@@ -192,7 +192,7 @@ mod tests {
 
     /// Loads the shipped default tools into a temporary folder.
     fn default_registry() -> ToolRegistry {
-        let dir = std::env::temp_dir().join(format!("orbit-registry-test-{}", uuid::Uuid::new_v4()));
+        let dir = std::env::temp_dir().join(format!("cephi-registry-test-{}", uuid::Uuid::new_v4()));
         for (relative, content) in crate::config::defaults::TOOLS {
             let path = dir.join(relative);
             fs::create_dir_all(path.parent().unwrap()).unwrap();

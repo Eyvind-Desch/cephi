@@ -54,7 +54,7 @@
     "scheme_not_allowed": "Das Schema \"%{scheme}:\" ist für dieses Tool nicht erlaubt.",
     "open_failed": "Konnte nicht geöffnet werden: %{error}",
     "opened": "Geöffnet: %{url}",
-    "opened_in_orbit": "In Orbit geöffnet: %{url}",
+    "opened_in_cephi": "In Cephi geöffnet: %{url}",
     "launch_failed": "\"%{program}\" konnte nicht gestartet werden: %{error}",
     "launched": "Gestartet: %{program}",
     "powershell_start_failed": "PowerShell konnte nicht gestartet werden: %{error}",
@@ -135,7 +135,7 @@
   },
   "secrets": {
     "invalid_name": "Ungültiger Schlüsselname \"%{name}\": nur a-z, 0-9 und _, beginnend mit einem Buchstaben.",
-    "missing": "Schlüssel \"%{name}\" fehlt. In Orbit unter „Schlüssel“ hinterlegen.",
+    "missing": "Schlüssel \"%{name}\" fehlt. In Cephi unter „Schlüssel“ hinterlegen.",
     "read_failed": "Anmeldeinformation nicht lesbar (Fehler %{code}).",
     "not_text": "Gespeicherter Schlüssel ist kein gültiger Text.",
     "empty": "Der Schlüssel darf nicht leer sein.",
@@ -148,7 +148,7 @@
     "translate": "Übersetzer",
     "wsl_missing": "Docker in WSL nicht erreichbar: %{error}",
     "start_failed": "Dienst konnte nicht gestartet werden: %{error}",
-    "timeout": "%{service} ist nicht rechtzeitig gestartet. Prüfen: wsl -- docker compose -f ~/.orbit/infra/compose.yaml logs"
+    "timeout": "%{service} ist nicht rechtzeitig gestartet. Prüfen: wsl -- docker compose -f ~/.cephi/infra/compose.yaml logs"
   },
   "settings": {
     "no_profiles": "Mindestens ein Profil in \"profiles\" ist nötig.",
@@ -191,7 +191,7 @@
     "unreachable": "Spotify nicht erreichbar: %{error}",
     "search_failed": "Spotify-Suche fehlgeschlagen (HTTP %{status}): %{details}",
     "nothing_found": "Nichts gefunden in Spotify für \"%{query}\".",
-    "not_configured": "Spotify ist noch nicht eingerichtet: Client-ID und Client-Secret in Orbit unter „Schlüssel“ hinterlegen.",
+    "not_configured": "Spotify ist noch nicht eingerichtet: Client-ID und Client-Secret in Cephi unter „Schlüssel“ hinterlegen.",
     "credentials_rejected": "Spotify lehnt die Zugangsdaten ab. Client-ID und Client-Secret prüfen.",
     "auth_failed": "Spotify-Anmeldung fehlgeschlagen (HTTP %{status})."
   },
@@ -210,12 +210,12 @@
     "parameters_not_object": "\"parameters.type\" muss \"object\" sein.",
     "invalid_param_name": "Parameter \"%{name}\" ist ungültig: nur Buchstaben, Ziffern und _ erlaubt.",
     "required_unknown": "\"required\" enthält \"%{name}\", der Parameter ist aber nicht definiert.",
-    "powershell_placeholders": "PowerShell-Skripte unterstützen keine {{Platzhalter}}. Nutze stattdessen $env:ORBIT_ARG_<NAME> (sicher gegen Code-Injection).",
+    "powershell_placeholders": "PowerShell-Skripte unterstützen keine {{Platzhalter}}. Nutze stattdessen $env:CEPHI_ARG_<NAME> (sicher gegen Code-Injection).",
     "http_url_scheme": "\"action.url\" muss mit http:// oder https:// beginnen.",
     "builtin_missing_param": "Builtin \"%{builtin}\" braucht den Parameter \"%{name}\"."
   },
   "tray": {
-    "show": "Orbit öffnen",
+    "show": "Cephi öffnen",
     "open_config": "Konfiguration öffnen",
     "reload": "Konfiguration neu laden",
     "quit": "Beenden"

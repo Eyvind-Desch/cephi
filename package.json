@@ -1,5 +1,5 @@
 {
-  "name": "orbit",
+  "name": "cephi",
   "private": true,
   "version": "0.1.0",
   "description": "Always-available desktop assistant for Windows, powered by local Ollama models",

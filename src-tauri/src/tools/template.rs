@@ -228,7 +228,7 @@ mod tests {
             .lock()
             .unwrap_or_else(|e| e.into_inner());
         // Unique name: the test touches the real Credential Manager, runs must not interfere.
-        let name = format!("orbit_test_{}", uuid::Uuid::new_v4().simple());
+        let name = format!("cephi_test_{}", uuid::Uuid::new_v4().simple());
         let template = format!("Bearer {{{{secret:{name}}}}}");
         assert_eq!(secret_names(&template), vec![name.clone()]);
         assert_eq!(

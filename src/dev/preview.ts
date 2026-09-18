@@ -20,7 +20,7 @@ const someKeys = params.get("keys") === "some";
 
 const config: ConfigSnapshot = {
   language: lang,
-  configDir: "C:\\Users\\you\\AppData\\Roaming\\Orbit",
+  configDir: "C:\\Users\\you\\AppData\\Roaming\\Cephi",
   hotkey: "Ctrl+Alt+Space",
   defaultProfile: "fast",
   profiles: [

@@ -1,7 +1,7 @@
 //! Reads the text selected in the foreground app.
 //!
 //! Windows has no reliable way to *read* a selection across all apps (UI Automation only works where
-//! the focused element exposes text, which browsers often don't). So Orbit does what comparable tools
+//! the focused element exposes text, which browsers often don't). So Cephi does what comparable tools
 //! do: it sends Ctrl+C to the foreground app and **restores the previous clipboard afterwards**.
 //! This only happens on the separate selection hotkey, never on the normal one.
 

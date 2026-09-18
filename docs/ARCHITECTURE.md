@@ -26,7 +26,7 @@
 │ desktop/      window placement, web tab (child webview), tray, global hotkey     │
 └─────────────────────────────────────────────────────────────────────────────────┘
           │                       │                          │
-    Ollama :11434      SearXNG :8888, LibreTranslate :8890   %APPDATA%\Orbit\ (settings.json, tools/)
+    Ollama :11434      SearXNG :8888, LibreTranslate :8890   %APPDATA%\Cephi\ (settings.json, tools/)
                        (Docker in WSL, infra/compose.yaml)
 ```
 
@@ -40,7 +40,7 @@
   agent run keeps working with its own snapshot, without holding locks across `await`.
 - **Secure by default.** Tools ask for confirmation by default (`confirm`). PowerShell receives parameters
   only as environment variables, `launch` doesn't use a shell, `open_url` restricts schemes. The WebView has
-  only `core:default`; every system access goes through Orbit's own commands.
+  only `core:default`; every system access goes through Cephi's own commands.
 - **The backend owns history.** The frontend only renders events; the chat history for the model
   lives in `AgentController`.
 
@@ -76,7 +76,7 @@ It travels only in the `ToolResult` event, so the UI can render cards without pa
 
 ## Web tab
 
-The web tab is a second, native webview (`web`) inside the Orbit window (`tauri` feature `unstable`,
+The web tab is a second, native webview (`web`) inside the Cephi window (`tauri` feature `unstable`,
 `Window::add_child`). The window is therefore handled as `Window`, not `WebviewWindow`.
 
 - **Layout:** the React `WebView` reserves the page area and reports position and visibility together
@@ -85,8 +85,8 @@ The web tab is a second, native webview (`web`) inside the Orbit window (`tauri`
   menu is open (`ui.overlays`).
 - **Window size:** the web tab uses the normal panel size; *enlarge* switches the window to mode `large`.
   Mode changes are animated in the backend (`SetWindowPos` per frame, position and size in one call).
-- **State:** URL, title and loading state come from page load and title events (`orbit://web-state`).
-  Tools with `"target": "orbit"` navigate and emit `orbit://web-open`, which switches to the tab.
+- **State:** URL, title and loading state come from page load and title events (`cephi://web-state`).
+  Tools with `"target": "cephi"` navigate and emit `cephi://web-open`, which switches to the tab.
 - **Isolation:** the capability lists webviews (`"webviews": ["main"]`), not windows, so the web tab gets
   no permissions; Tauri also rejects IPC from remote origins without an explicit `remote` capability.
   Only `http`/`https` navigation is allowed, popups open in the same tab.
@@ -102,8 +102,8 @@ Rust types and their TypeScript mirrors must stay in sync:
 | `config/snapshot.rs` → `ConfigSnapshot` | `ConfigSnapshot` |
 | `desktop/web.rs` → `WebState` | `WebState` |
 
-Events: `orbit://shown` (window shown), `orbit://config-changed` (hot reload), `orbit://web-state`,
-`orbit://web-open` (web tab).
+Events: `cephi://shown` (window shown), `cephi://config-changed` (hot reload), `cephi://web-state`,
+`cephi://web-open` (web tab).
 
 ## New action types / builtins
 

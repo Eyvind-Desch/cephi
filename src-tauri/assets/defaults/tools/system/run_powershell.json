@@ -14,6 +14,6 @@
   "action": {
     "type": "powershell",
     "timeoutSecs": 60,
-    "script": "Invoke-Expression $env:ORBIT_ARG_COMMAND | Out-String -Width 200"
+    "script": "Invoke-Expression $env:CEPHI_ARG_COMMAND | Out-String -Width 200"
   }
 }

@@ -1,4 +1,4 @@
-# Orbit – Plan
+# Cephi – Plan
 
 Always-available desktop assistant for Windows: ask AI, search the web, and get things done on your PC,
 without opening an extra window. Runs locally with Ollama; cloud models (Claude, Gemini, OpenAI-compatible) are optional.
@@ -71,7 +71,7 @@ without opening an extra window. Runs locally with Ollama; cloud models (Claude,
 
 ## Tools / Actions
 
-Tools are **JSON files** in `%APPDATA%\Orbit\tools\` with a JSON schema (editor autocompletion)
+Tools are **JSON files** in `%APPDATA%\Cephi\tools\` with a JSON schema (editor autocompletion)
 and hot reload. Action types: `open_url`, `launch`, `powershell`, `http`, `builtin`. Details: [docs/TOOLS.md](docs/TOOLS.md).
 
 Shipped: `google_search`, `youtube_search`, `open_website`, `weather`, `datetime`,
@@ -111,7 +111,7 @@ request. Unambiguous commands ("open X") run through the quick action path witho
    - ✅ 3a: SearXNG in Docker/WSL (`infra/searxng`), `web_search` builtin, `? query` fast path with
      `afterTrigger: "answer"`, source grid + citation badges → [docs/SEARCH.md](docs/SEARCH.md)
    - ✅ 3b: Web tab: native child webview in the panel (normal size, animated enlarge), icon tabs, address bar,
-     `g query` and chat links open there, `open_url` `target: "orbit"`
+     `g query` and chat links open there, `open_url` `target: "cephi"`
 3c. ✅ **Translator** – offline via LibreTranslate (Docker, CPU): `tr …` fast path, translator tab, chat card
    → [docs/TRANSLATE.md](docs/TRANSLATE.md). Local LLMs were tested first: ~2.5 s per request, 2–3 GB VRAM,
    unreliable for single words.
@@ -134,7 +134,7 @@ next stage begins. Whatever isn't a nuisance goes into the backlog instead of th
 - [ ] Check whether Spotify auto-plays albums/playlists
 - [ ] Search: DuckDuckGo fallback when SearXNG is not running
 - [ ] Search: `fetch_page` tool (read a result page when the excerpts are not enough)
-- [ ] Web tab: Esc and Orbit shortcuts don't work while the page has focus (keys go to the page)
+- [ ] Web tab: Esc and Cephi shortcuts don't work while the page has focus (keys go to the page)
 - [ ] Web tab: ask the AI about the open page
 - [x] Slash commands in the input (like Claude Code): `/clear`, `/web`, `/translate`, `/model`, `/tools`, `/keys`, …
 

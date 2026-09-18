@@ -118,7 +118,7 @@ mod tests {
 
     impl TempDir {
         fn new() -> Self {
-            Self(std::env::temp_dir().join(format!("orbit-chat-test-{}", uuid::Uuid::new_v4())))
+            Self(std::env::temp_dir().join(format!("cephi-chat-test-{}", uuid::Uuid::new_v4())))
         }
     }
 

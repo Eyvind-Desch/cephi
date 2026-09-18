@@ -106,7 +106,7 @@ export interface WebResult {
   engines: string[];
 }
 
-/** `src-tauri/src/services/mod.rs`: Orbit's local containers (Docker in WSL). */
+/** `src-tauri/src/services/mod.rs`: Cephi's local containers (Docker in WSL). */
 export type ServiceId = "search" | "translate";
 
 export interface ServiceStatus {
@@ -192,7 +192,7 @@ export const api = {
   webState: () => invoke<WebState>("web_state"),
   /** Address bar input: URL, domain or search terms. */
   webNavigate: (input: string) => invoke<void>("web_navigate", { input }),
-  /** Opens a link in the web tab; the backend then emits `orbit://web-open`. */
+  /** Opens a link in the web tab; the backend then emits `cephi://web-open`. */
   webOpen: (url: string) => invoke<void>("web_open", { url }),
   /** `seq` must increase with every call: IPC calls can arrive out of order. */
   webSetLayout: (bounds: WebBounds, visible: boolean, seq: number) =>
@@ -213,17 +213,17 @@ export const api = {
   secretsDelete: (name: string) => invoke<void>("secrets_delete", { name }),
 };
 
-export const onWindowShown = (handler: () => void): Promise<UnlistenFn> => listen("orbit://shown", handler);
+export const onWindowShown = (handler: () => void): Promise<UnlistenFn> => listen("cephi://shown", handler);
 
 export const onWebState = (handler: (state: WebState) => void): Promise<UnlistenFn> =>
-  listen<WebState>("orbit://web-state", (event) => handler(event.payload));
+  listen<WebState>("cephi://web-state", (event) => handler(event.payload));
 
 /** Text picked up by the selection hotkey; `null` = nothing was selected. */
 export const onSelection = (handler: (text: string | null) => void): Promise<UnlistenFn> =>
-  listen<string | null>("orbit://selection", (event) => handler(event.payload));
+  listen<string | null>("cephi://selection", (event) => handler(event.payload));
 
 /** A tool opened a page in the web tab. */
-export const onWebOpen = (handler: () => void): Promise<UnlistenFn> => listen("orbit://web-open", handler);
+export const onWebOpen = (handler: () => void): Promise<UnlistenFn> => listen("cephi://web-open", handler);
 
 export const onConfigChanged = (handler: (snapshot: ConfigSnapshot) => void): Promise<UnlistenFn> =>
-  listen<ConfigSnapshot>("orbit://config-changed", (event) => handler(event.payload));
+  listen<ConfigSnapshot>("cephi://config-changed", (event) => handler(event.payload));

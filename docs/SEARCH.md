@@ -1,20 +1,20 @@
 # Web search
 
-Orbit searches the web through **SearXNG**, a metasearch engine running locally in Docker. It queries
+Cephi searches the web through **SearXNG**, a metasearch engine running locally in Docker. It queries
 Google, Bing, Brave, DuckDuckGo, Wikipedia, … at once and returns a clean JSON list: no account, no key,
 no tracking. A search takes about one second.
 
 ## Setup
 
-Docker must be available in WSL (the default distro). Orbit then starts the container itself: a failed
+Docker must be available in WSL (the default distro). Cephi then starts the container itself: a failed
 search offers a **Start service** button. Manually:
 
 ```powershell
-.\infra\start.ps1           # copies the config to ~/.orbit/infra in WSL and starts the containers
+.\infra\start.ps1           # copies the config to ~/.cephi/infra in WSL and starts the containers
 .\infra\start.ps1 -Update   # pull the newest images first
 ```
 
-The container `orbit-searxng` listens on `http://127.0.0.1:8888` (only reachable from this PC) and
+The container `cephi-searxng` listens on `http://127.0.0.1:8888` (only reachable from this PC) and
 restarts with Docker. Config: [`infra/searxng/settings.yml`](../infra/searxng/settings.yml); run
 `infra/start.ps1` again after changing it. The same script also starts the [translator](TRANSLATE.md).
 
@@ -25,7 +25,7 @@ restarts with Docker. Config: [`infra/searxng/settings.yml`](../infra/searxng/se
 | `? what's new in tauri 2` | Result cards immediately, then a short AI answer with sources `[1]` |
 | `suche im web nach …` / "search the web for …" | same |
 | Any question that needs current information | The AI can call `web_search` by itself |
-| `g …` | Opens Google in Orbit's web tab (`google_search` tool) |
+| `g …` | Opens Google in Cephi's web tab (`google_search` tool) |
 
 The answer only uses the excerpts of the results (fast, also with small local models) and comes from the
 model selected in the header, local or cloud. Click a card or a citation badge to open the page in the web tab.
@@ -55,4 +55,4 @@ asks the model later, e.g. after switching to another model.
 
 - *"Web search is not running"*: use the **Start service** button, or `.\infra\start.ps1`; check `wsl -- docker ps`.
 - *"SearXNG does not allow JSON results"*: `json` is missing under `search.formats` in `settings.yml`.
-- Logs: `wsl -- docker logs orbit-searxng`.
+- Logs: `wsl -- docker logs cephi-searxng`.

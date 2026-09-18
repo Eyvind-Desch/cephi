@@ -6,7 +6,7 @@ use super::window::{self, MAIN_LABEL};
 use crate::integrations::selection;
 
 /// Selected text picked up by the selection hotkey (`None` = nothing was selected).
-pub const EVENT_SELECTION: &str = "orbit://selection";
+pub const EVENT_SELECTION: &str = "cephi://selection";
 
 /// (Re-)registers the global hotkeys: toggling the window, and picking up the selected text.
 pub fn register(app: &AppHandle, hotkey: &str, selection_hotkey: Option<&str>) -> Result<(), String> {
@@ -40,7 +40,7 @@ pub fn register(app: &AppHandle, hotkey: &str, selection_hotkey: Option<&str>) -
     Ok(())
 }
 
-/// Copies the selection *before* Orbit takes focus, then shows the window with it.
+/// Copies the selection *before* Cephi takes focus, then shows the window with it.
 fn pick_up_selection(app: AppHandle) {
     tauri::async_runtime::spawn(async move {
         let text = selection::capture().await;

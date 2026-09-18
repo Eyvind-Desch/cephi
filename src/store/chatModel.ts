@@ -144,7 +144,7 @@ function updateTool(message: AssistantMessage, callId: string, patch: Partial<To
 }
 
 /**
- * Messages saved in an earlier session. Anything that was still in progress when Orbit closed
+ * Messages saved in an earlier session. Anything that was still in progress when Cephi closed
  * counts as cancelled; a file that isn't a message list yields an empty chat.
  */
 export function restoreMessages(saved: unknown): Message[] {

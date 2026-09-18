@@ -12,6 +12,7 @@ mod i18n;
 mod integrations;
 mod launcher;
 mod llm;
+mod migrate;
 mod search;
 mod secrets;
 mod services;
@@ -84,5 +85,5 @@ pub fn run() {
             commands::secrets_test,
         ])
         .run(tauri::generate_context!())
-        .expect("error while running Orbit");
+        .expect("error while running Cephi");
 }

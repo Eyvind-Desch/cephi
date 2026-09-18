@@ -1,7 +1,7 @@
 # Writing custom tools
 
-Tools are JSON files in **`%APPDATA%\Orbit\tools\`**, one file per tool. Subfolders for organizing
-are allowed (`web/`, `system/`, `apps/`, …). Orbit loads changes **immediately**; a restart isn't necessary.
+Tools are JSON files in **`%APPDATA%\Cephi\tools\`**, one file per tool. Subfolders for organizing
+are allowed (`web/`, `system/`, `apps/`, …). Cephi loads changes **immediately**; a restart isn't necessary.
 
 > Open the folder: tray icon → *Open configuration*, or the folder icon in the panel.
 
@@ -65,12 +65,12 @@ in the panel, with the file name and reason. A broken tool doesn't take down the
 - `enum`: only these values are allowed
 - `default`: used when the model omits the parameter
 
-Orbit validates the arguments before executing anything. On errors, the model gets a message and
+Cephi validates the arguments before executing anything. On errors, the model gets a message and
 can try again.
 
 ## Quick actions (triggers)
 
-Triggers are phrases where Orbit **doesn't** ask the model but runs the tool directly. This
+Triggers are phrases where Cephi **doesn't** ask the model but runs the tool directly. This
 takes milliseconds instead of seconds and works regardless of how smart the model is.
 
 ```json
@@ -102,7 +102,7 @@ takes milliseconds instead of seconds and works regardless of how smart the mode
 
 ## API keys (`{{secret:…}}`)
 
-API keys don't belong **in** the JSON file. Orbit stores them in the Windows Credential Manager
+API keys don't belong **in** the JSON file. Cephi stores them in the Windows Credential Manager
 and inserts them via `{{secret:name}}`:
 
 ```json
@@ -115,7 +115,7 @@ and inserts them via `{{secret:name}}`:
 ```
 
 As soon as a tool uses a key, it appears in the panel under **🔑 Keys**. There you enter the
-value once. Orbit never shows stored values again and masks them in confirmation dialogs.
+value once. Cephi never shows stored values again and masks them in confirmation dialogs.
 Key names: `a-z`, `0-9`, `_`.
 
 ## Placeholders
@@ -141,10 +141,10 @@ This can be changed with a filter: `{{name|raw}}`, `{{name|url}}`, `{{name|json}
 
 Also works with app protocols: `ms-settings:`, `spotify:`, `steam://`, `mailto:`, …
 
-`"target": "orbit"` opens a web page in Orbit's **web tab** instead of the browser (`http`/`https` only):
+`"target": "cephi"` opens a web page in Cephi's **web tab** instead of the browser (`http`/`https` only):
 
 ```json
-"action": { "type": "open_url", "url": "https://www.google.com/search?q={{query}}", "target": "orbit" }
+"action": { "type": "open_url", "url": "https://www.google.com/search?q={{query}}", "target": "cephi" }
 ```
 
 **Security:** If the scheme is fixed in the template (`ms-settings:{{page|raw}}`), only that scheme
@@ -171,11 +171,11 @@ is allowed. If the whole URL comes from the model (`{{url|raw}}`), only `http`/`
 "action": {
   "type": "powershell",
   "timeoutSecs": 20,
-  "script": "Get-Process -Name $env:ORBIT_ARG_NAME | Select-Object Name, CPU, WS | Format-Table | Out-String"
+  "script": "Get-Process -Name $env:CEPHI_ARG_NAME | Select-Object Name, CPU, WS | Format-Table | Out-String"
 }
 ```
 
-- Parameters arrive as **environment variables**: `$env:ORBIT_ARG_<NAME IN UPPERCASE>`
+- Parameters arrive as **environment variables**: `$env:CEPHI_ARG_<NAME IN UPPERCASE>`
 - `{{placeholders}}` are **deliberately forbidden** here. This way the model can't smuggle its own code into your
   script (code injection).
 - Output (stdout) goes to the model; errors (stderr, exit code ≠ 0) as an error message
@@ -233,8 +233,8 @@ Numeric parameters also understand `30%`, `30 %`, `30 Prozent` ("30 percent"), a
 
 - Disable: `"enabled": false`
 - Delete: remove the file. Deleted default tools do **not** come back.
-- Restore all default tools: rename the `tools` folder and restart Orbit.
+- Restore all default tools: rename the `tools` folder and restart Cephi.
 
-**Updates:** default tools you never edited are updated automatically when Orbit ships a new version
-of them. As soon as you change a file, it is yours: Orbit never overwrites it again
-(`.seeded-tools.json` in the config folder remembers what Orbit wrote).
+**Updates:** default tools you never edited are updated automatically when Cephi ships a new version
+of them. As soon as you change a file, it is yours: Cephi never overwrites it again
+(`.seeded-tools.json` in the config folder remembers what Cephi wrote).

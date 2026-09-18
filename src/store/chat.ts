@@ -5,7 +5,7 @@ import { applyAgentEvent, needsPanel, restoreMessages, type AssistantMessage, ty
 import { isUntranslated } from "./translate";
 import { useUi } from "./ui";
 
-/** How long a successful fast-path confirmation stays visible before Orbit hides itself. */
+/** How long a successful fast-path confirmation stays visible before Cephi hides itself. */
 const AUTO_HIDE_MS = 1400;
 
 interface ChatState {

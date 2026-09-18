@@ -1,5 +1,5 @@
 [package]
-name = "orbit"
+name = "cephi"
 version = "0.1.0"
 description = "Always-available desktop assistant for Windows, powered by local Ollama models"
 authors = ["Eyvind"]
@@ -9,7 +9,7 @@ publish = false
 [lib]
 # The `_lib` suffix avoids a name clash between the lib and bin targets on Windows
 # (https://github.com/rust-lang/cargo/issues/8519).
-name = "orbit_lib"
+name = "cephi_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

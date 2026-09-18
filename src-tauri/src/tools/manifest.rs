@@ -102,7 +102,7 @@ pub enum ParamType {
 )]
 pub enum Action {
     /// Opens a URL or URI (`https:`, `ms-settings:`, `spotify:` …) with the default handler,
-    /// or a web page in Orbit's web tab.
+    /// or a web page in Cephi's web tab.
     OpenUrl {
         url: String,
         #[serde(default)]
@@ -116,7 +116,7 @@ pub enum Action {
         #[serde(default)]
         cwd: Option<String>,
     },
-    /// Runs a fixed PowerShell script. Parameters arrive as `$env:ORBIT_ARG_<NAME>`.
+    /// Runs a fixed PowerShell script. Parameters arrive as `$env:CEPHI_ARG_<NAME>`.
     Powershell {
         script: String,
         #[serde(default)]
@@ -134,7 +134,7 @@ pub enum Action {
         #[serde(default)]
         timeout_secs: Option<u64>,
     },
-    /// A function implemented inside Orbit.
+    /// A function implemented inside Cephi.
     Builtin { id: Builtin },
 }
 
@@ -145,8 +145,9 @@ pub enum OpenTarget {
     /// Default browser or the app registered for the scheme.
     #[default]
     Browser,
-    /// Orbit's web tab (`http`/`https` only).
-    Orbit,
+    /// Cephi's web tab (`http`/`https` only). `"orbit"` is the name from before the rename.
+    #[serde(alias = "orbit")]
+    Cephi,
 }
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Eq)]
@@ -362,7 +363,7 @@ mod tests {
                  "action": { "type": "powershell", "script": "echo {{a}}" } }"#,
         )
         .unwrap_err();
-        assert!(err.contains("ORBIT_ARG_"), "{err}");
+        assert!(err.contains("CEPHI_ARG_"), "{err}");
     }
 
     #[test]

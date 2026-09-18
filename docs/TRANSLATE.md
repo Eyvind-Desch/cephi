@@ -1,12 +1,12 @@
 # Translator
 
-Orbit translates offline with **LibreTranslate** (Argos Translate models), running locally in Docker next to
+Cephi translates offline with **LibreTranslate** (Argos Translate models), running locally in Docker next to
 SearXNG. No AI model and no graphics card are needed: a translation takes about 0.05–0.5 s on the CPU.
 Only German and English are loaded (about 1.6 GB RAM in the container, no CPU load while idle).
 
 ## Setup
 
-Orbit starts the container itself: if the translator is not running, the error message comes with a
+Cephi starts the container itself: if the translator is not running, the error message comes with a
 **Start service** button (the first start pulls the image, which takes a few minutes). Manually:
 
 ```powershell
@@ -14,7 +14,7 @@ Orbit starts the container itself: if the translator is not running, the error m
 .\infra\start.ps1 -Update   # pull newer images first
 ```
 
-The container `orbit-libretranslate` listens on `http://127.0.0.1:8890` (only reachable from this PC).
+The container `cephi-libretranslate` listens on `http://127.0.0.1:8890` (only reachable from this PC).
 
 ## Usage
 
@@ -30,7 +30,7 @@ The container `orbit-libretranslate` listens on `http://127.0.0.1:8890` (only re
 also force "→ English" or "→ German". For single words LibreTranslate also returns alternatives
 ("dennoch · trotzdem · gleichwohl").
 
-**Unknown words:** LibreTranslate returns words it does not know (typos, rare terms) unchanged. Orbit detects
+**Unknown words:** LibreTranslate returns words it does not know (typos, rare terms) unchanged. Cephi detects
 that, says so, and offers **Translate with AI**, which also fixes typos ("awkard" → "awkward" → "unbeholfen").
 
 A click on the translation card in the chat opens it in the translator tab.
@@ -54,4 +54,4 @@ and run `start.ps1` again. `übersetze … ins Spanische` then works too.
 ## Troubleshooting
 
 - *"The translator is not running"*: `.\infra\start.ps1`, check `wsl -- docker ps`.
-- Logs: `wsl -- docker logs orbit-libretranslate`.
+- Logs: `wsl -- docker logs cephi-libretranslate`.

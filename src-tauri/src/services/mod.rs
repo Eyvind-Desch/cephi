@@ -1,7 +1,7 @@
-//! Orbit's local helper services: SearXNG (web search) and LibreTranslate (translation).
+//! Cephi's local helper services: SearXNG (web search) and LibreTranslate (translation).
 //!
-//! They run as Docker containers inside WSL. Orbit ships their configuration ([`COMPOSE`]), writes it
-//! to `~/.orbit/infra` in the default distro and starts them on demand, so nobody has to run a script.
+//! They run as Docker containers inside WSL. Cephi ships their configuration ([`COMPOSE`]), writes it
+//! to `~/.cephi/infra` in the default distro and starts them on demand, so nobody has to run a script.
 
 use std::process::Stdio;
 use std::time::Duration;
@@ -16,7 +16,9 @@ use crate::config::Settings;
 const COMPOSE: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../infra/compose.yaml"));
 const SEARXNG_SETTINGS: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../infra/searxng/settings.yml"));
 /// Folder inside WSL that holds the configuration.
-const TARGET_DIR: &str = "~/.orbit/infra";
+const TARGET_DIR: &str = "~/.cephi/infra";
+/// Containers of the app's old name "Orbit"; removed before starting the new ones.
+const LEGACY_CONTAINERS: [&str; 2] = ["orbit-searxng", "orbit-libretranslate"];
 
 const PROBE_TIMEOUT: Duration = Duration::from_secs(2);
 /// Starting may include pulling images and downloading translation models.
@@ -105,6 +107,10 @@ pub async fn stopped(http: &reqwest::Client, settings: &Settings, services: &[Se
 pub async fn start(http: &reqwest::Client, settings: &Settings, service: Service) -> Result<(), String> {
     write_config().await?;
 
+    // Containers from before the rename hold the same ports.
+    let legacy = LEGACY_CONTAINERS.join(" ");
+    wsl(&format!("docker rm -f {legacy} >/dev/null 2>&1 || true"), None).await?;
+
     let up = format!("cd {TARGET_DIR} && docker compose up -d {}", service.container());
     let output = tokio::time::timeout(START_TIMEOUT, wsl(&up, None))
         .await
@@ -181,7 +187,7 @@ mod tests {
 
     #[test]
     fn shipped_config_matches_the_repository() {
-        assert!(COMPOSE.contains("orbit-searxng") && COMPOSE.contains("orbit-libretranslate"));
+        assert!(COMPOSE.contains("cephi-searxng") && COMPOSE.contains("cephi-libretranslate"));
         assert!(SEARXNG_SETTINGS.contains("__SECRET__"), "the secret placeholder is filled in on start");
     }
 

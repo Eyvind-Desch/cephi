@@ -1,7 +1,7 @@
 //! Web search through a local SearXNG instance (`infra/searxng`).
 //!
 //! SearXNG queries Google, Bing, Brave, DuckDuckGo, … at once and returns deduplicated results
-//! as JSON. Orbit shows them as cards and hands short excerpts to the model.
+//! as JSON. Cephi shows them as cards and hands short excerpts to the model.
 
 mod searxng;
 

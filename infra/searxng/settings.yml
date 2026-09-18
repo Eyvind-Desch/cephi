@@ -1,9 +1,9 @@
-# SearXNG settings for Orbit. Only overrides; everything else uses the SearXNG defaults.
+# SearXNG settings for Cephi. Only overrides; everything else uses the SearXNG defaults.
 # Docs: https://docs.searxng.org/admin/settings/index.html
 use_default_settings: true
 
 general:
-  instance_name: Orbit Search
+  instance_name: Cephi Search
 
 server:
   # Only reachable from this PC (the port is bound to 127.0.0.1), so no bot limiter needed.
@@ -15,7 +15,7 @@ server:
 search:
   safe_search: 0
   autocomplete: ""
-  # Orbit reads the JSON API.
+  # Cephi reads the JSON API.
   formats:
     - html
     - json

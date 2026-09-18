@@ -8,7 +8,7 @@ import { useChat } from "../../store/chat";
 import { useUi, type Flash } from "../../store/ui";
 import { Composer } from "../chat/Composer";
 import { IconButton } from "../ui/IconButton";
-import { OrbitMark } from "../ui/OrbitMark";
+import { CephiMark } from "../ui/CephiMark";
 import { CopyButton } from "../translate/TranslationView";
 
 /** Compact mode: a single input line, Spotlight-style. */
@@ -35,7 +35,7 @@ export function CompactBar() {
 
   return (
     <div className="flex h-full items-center gap-3 pr-3 pl-4">
-      <OrbitMark size={26} active={running} />
+      <CephiMark size={26} active={running} />
       {flash ? <FlashRow flash={flash} /> : <Composer compact />}
       {problemCount > 0 && (
         <IconButton

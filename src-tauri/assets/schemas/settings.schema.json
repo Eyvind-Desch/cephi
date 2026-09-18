@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "orbit://schemas/settings.schema.json",
-  "title": "Orbit settings",
-  "description": "%APPDATA%\\Orbit\\settings.json – changes apply immediately. Missing values use defaults.",
+  "$id": "cephi://schemas/settings.schema.json",
+  "title": "Cephi settings",
+  "description": "%APPDATA%\\Cephi\\settings.json – changes apply immediately. Missing values use defaults.",
   "type": "object",
   "additionalProperties": false,
   "properties": {
@@ -13,12 +13,12 @@
       "default": "system"
     },
     "hotkey": {
-      "description": "Global shortcut to show/hide Orbit, e.g. \"Ctrl+Alt+Space\", \"Alt+O\", \"Ctrl+Shift+K\". Note: Ctrl+Space is IntelliSense in VS Code.",
+      "description": "Global shortcut to show/hide Cephi, e.g. \"Ctrl+Alt+Space\", \"Alt+O\", \"Ctrl+Shift+K\". Note: Ctrl+Space is IntelliSense in VS Code.",
       "type": "string",
       "default": "Ctrl+Alt+Space"
     },
     "selectionHotkey": {
-      "description": "Picks up the text selected in another app and shows it in Orbit. Copies the selection (Ctrl+C) and restores the clipboard afterwards. null or \"\" disables it.",
+      "description": "Picks up the text selected in another app and shows it in Cephi. Copies the selection (Ctrl+C) and restores the clipboard afterwards. null or \"\" disables it.",
       "type": ["string", "null"],
       "default": "Ctrl+Alt+T"
     },
@@ -90,7 +90,7 @@
       }
     },
     "providers": {
-      "description": "Cloud AI providers. The API key is entered in Orbit under Keys (stored as <id>_api_key in the Windows Credential Manager).",
+      "description": "Cloud AI providers. The API key is entered in Cephi under Keys (stored as <id>_api_key in the Windows Credential Manager).",
       "type": "array",
       "items": {
         "type": "object",
@@ -136,7 +136,7 @@
         "anchor": {
           "enum": ["bottom-right", "bottom-center", "bottom-left", "top-right", "top-center", "top-left"],
           "default": "bottom-right",
-          "description": "Screen corner where Orbit appears (on the monitor with the mouse cursor)."
+          "description": "Screen corner where Cephi appears (on the monitor with the mouse cursor)."
         },
         "margin": { "type": "integer", "minimum": 0, "default": 16, "description": "Distance to the screen edge in pixels." },
         "hideOnBlur": { "type": "boolean", "default": true, "description": "Hide when clicking elsewhere (unless pinned)." },

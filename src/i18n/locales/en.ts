@@ -14,7 +14,7 @@ export const en = {
   },
   composer: {
     placeholder: "Ask me anything…",
-    placeholderRunning: "Orbit is working…",
+    placeholderRunning: "Cephi is working…",
     stop: "Stop",
     send: "Send (Enter)",
   },
@@ -32,7 +32,7 @@ export const en = {
   },
   chat: {
     cancelled: "Cancelled",
-    thinking: "Orbit is thinking",
+    thinking: "Cephi is thinking",
   },
   toolCard: {
     status: {
@@ -42,7 +42,7 @@ export const en = {
       error: "Failed",
     },
     fastPath: "Fast path: run directly, without AI",
-    confirmPrompt: "Orbit wants to run the following:",
+    confirmPrompt: "Cephi wants to run the following:",
     deny: "Deny",
     run: "Run",
     enterKeys: "Enter keys",
@@ -72,7 +72,7 @@ export const en = {
     model: "Switch the model",
     tools: "Show all tools and quick phrases",
     keys: "Keys & API keys",
-    pin: "Keep Orbit open",
+    pin: "Keep Cephi open",
     config: "Open the config folder",
     reload: "Reload the configuration",
     unknown: "Unknown command",
@@ -120,8 +120,8 @@ export const en = {
     enlarge: "Enlarge",
     shrink: "Make smaller",
     placeholder: "Search Google or enter an address",
-    emptyTitle: "Search the web without leaving Orbit",
-    emptyHint: "Type above, or use “g search term” anywhere in Orbit.",
+    emptyTitle: "Search the web without leaving Cephi",
+    emptyHint: "Type above, or use “g search term” anywhere in Cephi.",
   },
   webResults: {
     more_one: "Show {{count}} more result",
@@ -192,7 +192,7 @@ export const en = {
     spotify: {
       title: "How to get the keys (2 minutes, Premium required)",
       step1: "Sign in to the <b>Spotify Developer Dashboard</b> (button below) with your Premium account.",
-      step2: "<b>Create app</b>: name “Orbit”, redirect URI <uri/>, tick <b>Web API</b> under APIs, save.",
+      step2: "<b>Create app</b>: name “Cephi”, redirect URI <uri/>, tick <b>Web API</b> under APIs, save.",
       step3: "In the app under <b>Settings</b>, copy the Client ID and Client Secret and paste them here.",
     },
   },

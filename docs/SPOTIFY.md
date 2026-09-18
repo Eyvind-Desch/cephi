@@ -5,8 +5,8 @@
 ## How it works
 
 1. A **trigger** recognizes the sentence; the model isn't asked.
-2. Orbit looks up the song via the **Spotify Web API** (search only, no login window needed).
-3. Orbit opens `spotify:track:<id>`, and the **Spotify app** plays the song immediately.
+2. Cephi looks up the song via the **Spotify Web API** (search only, no login window needed).
+3. Cephi opens `spotify:track:<id>`, and the **Spotify app** plays the song immediately.
 
 Pause, next track, and volume up/down run via Windows **media keys** (`media_control`)
 and don't need any API.
@@ -21,15 +21,15 @@ and don't need any API.
 
 1. Open [developer.spotify.com/dashboard](https://developer.spotify.com/dashboard) and sign in.
 2. **Create app**
-   - App name: `Orbit`, Description: anything
+   - App name: `Cephi`, Description: anything
    - Redirect URI: `http://127.0.0.1:43821/callback` (required field, not currently used)
    - API: check **Web API**
    - Save
 3. In the app → **Settings**: copy the **Client ID** and **Client secret** (*View client secret*).
-4. In Orbit: large panel → **🔑 Keys** → paste both values → *Save*.
+4. In Cephi: large panel → **🔑 Keys** → paste both values → *Save*.
 
-Done. The keys live in the Windows Credential Manager (`Orbit/spotify_client_id`,
-`Orbit/spotify_client_secret`), not in files.
+Done. The keys live in the Windows Credential Manager (`Cephi/spotify_client_id`,
+`Cephi/spotify_client_secret`), not in files.
 
 ## Examples
 
@@ -47,7 +47,7 @@ is up to the Spotify app. For individual songs, it starts reliably.
 
 ## Adding your own phrases
 
-Add to `triggers` in `%APPDATA%\Orbit\tools\media\spotify_play.json`, e.g.:
+Add to `triggers` in `%APPDATA%\Cephi\tools\media\spotify_play.json`, e.g.:
 
 ```json
 "(mach|leg) {query} (auf|in) spotify an"

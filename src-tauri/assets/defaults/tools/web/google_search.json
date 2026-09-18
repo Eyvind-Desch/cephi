@@ -2,7 +2,7 @@
   "$schema": "../../schemas/tool.schema.json",
   "name": "google_search",
   "title": { "en": "Google search", "de": "Google-Suche" },
-  "description": "Shows a Google search in Orbit's web tab. Use this only when the user explicitly wants to google something or see Google. To answer a question from the web, use web_search instead.",
+  "description": "Shows a Google search in Cephi's web tab. Use this only when the user explicitly wants to google something or see Google. To answer a question from the web, use web_search instead.",
   "permission": "auto",
   "parameters": {
     "type": "object",
@@ -15,6 +15,6 @@
   "action": {
     "type": "open_url",
     "url": "https://www.google.com/search?q={{query}}",
-    "target": "orbit"
+    "target": "cephi"
   }
 }

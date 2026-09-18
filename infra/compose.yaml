@@ -1,12 +1,12 @@
-# Local services for Orbit. Both are only reachable from this PC and restart with Docker.
+# Local services for Cephi. Both are only reachable from this PC and restart with Docker.
 # Started by start.ps1 (Docker runs in WSL, see docs/SEARCH.md and docs/TRANSLATE.md).
-name: orbit
+name: cephi
 
 services:
   # Web search: queries Google, Bing, Brave, DuckDuckGo, … and returns JSON.
   searxng:
     image: searxng/searxng:latest
-    container_name: orbit-searxng
+    container_name: cephi-searxng
     restart: unless-stopped
     ports:
       - "127.0.0.1:8888:8080"
@@ -18,7 +18,7 @@ services:
   # Offline translation (Argos Translate models, CPU only). Only German and English are loaded.
   libretranslate:
     image: libretranslate/libretranslate:latest
-    container_name: orbit-libretranslate
+    container_name: cephi-libretranslate
     restart: unless-stopped
     ports:
       - "127.0.0.1:8890:5000"

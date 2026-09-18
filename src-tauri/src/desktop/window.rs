@@ -13,7 +13,7 @@ use crate::error::{AppError, AppResult};
 use crate::state::AppState;
 
 pub const MAIN_LABEL: &str = "main";
-pub const EVENT_SHOWN: &str = "orbit://shown";
+pub const EVENT_SHOWN: &str = "cephi://shown";
 
 /// Focus changes inside WebView2 can briefly report the window as unfocused; wait before hiding.
 const BLUR_HIDE_DELAY: Duration = Duration::from_millis(150);
@@ -200,7 +200,7 @@ fn current_rect(window: &Window) -> AppResult<Rect> {
     })
 }
 
-/// Whether Orbit is the active app. Unlike `is_focused`, this stays true while the keyboard focus is in a
+/// Whether Cephi is the active app. Unlike `is_focused`, this stays true while the keyboard focus is in a
 /// child webview (the web tab): focus moving *inside* the window must not count as clicking elsewhere.
 fn is_foreground(window: &Window) -> bool {
     // SAFETY: plain query without arguments.

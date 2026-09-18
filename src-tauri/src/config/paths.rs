@@ -10,15 +10,15 @@ use super::defaults;
 use crate::error::{AppError, AppResult};
 
 /// Environment variable to override the config folder (useful for development).
-const CONFIG_DIR_ENV: &str = "ORBIT_CONFIG_DIR";
+const CONFIG_DIR_ENV: &str = "CEPHI_CONFIG_DIR";
 /// Remembers which default tools were offered and what was written, see [`sync_default_tools`].
 const SEEDED_TOOLS_FILE: &str = ".seeded-tools.json";
 
 /// Locations of all user-editable configuration files.
 ///
-/// Default root: `%APPDATA%\Orbit`
+/// Default root: `%APPDATA%\Cephi`
 /// ```text
-/// Orbit/
+/// Cephi/
 /// ├── settings.json
 /// ├── tools/          one JSON file per tool, subfolders allowed
 /// └── schemas/        JSON schemas for editor autocompletion (regenerated on start)
@@ -39,9 +39,14 @@ impl ConfigPaths {
                 .path()
                 .config_dir()
                 .map_err(|e| AppError::msg(format!("config directory not found: {e}")))?
-                .join("Orbit"),
+                .join("Cephi"),
         };
         Ok(Self::from_root(root))
+    }
+
+    /// Whether a custom folder was set via the environment (e.g. for testing).
+    pub fn is_overridden() -> bool {
+        std::env::var_os(CONFIG_DIR_ENV).is_some()
     }
 
     pub fn from_root(root: PathBuf) -> Self {
@@ -73,7 +78,7 @@ impl ConfigPaths {
     }
 }
 
-/// What Orbit last wrote for each default tool: `path → content hash`.
+/// What Cephi last wrote for each default tool: `path → content hash`.
 /// `None` = the user owns the file (it existed before, or was edited before hashes were recorded).
 #[derive(Default, Deserialize, Serialize)]
 struct SeedRecord {
@@ -167,7 +172,7 @@ mod tests {
 
     impl Sandbox {
         fn new() -> Self {
-            Self(std::env::temp_dir().join(format!("orbit-seed-test-{}", uuid::Uuid::new_v4())))
+            Self(std::env::temp_dir().join(format!("cephi-seed-test-{}", uuid::Uuid::new_v4())))
         }
         fn sync(&self, defaults: &[(&str, &str)]) {
             sync_default_tools(&self.0.join("record.json"), &self.0.join("tools"), defaults).unwrap();

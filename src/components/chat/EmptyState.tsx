@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useChat } from "../../store/chat";
 import { useUi } from "../../store/ui";
-import { OrbitMark } from "../ui/OrbitMark";
+import { CephiMark } from "../ui/CephiMark";
 
 const SUGGESTIONS = ["spotify", "calculator", "weather", "memory"] as const;
 
@@ -16,7 +16,7 @@ export function EmptyState() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6 text-center">
       <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
-        <OrbitMark size={56} />
+        <CephiMark size={56} />
       </motion.div>
       <div className="space-y-1.5">
         <h1 className="text-[17px] font-medium">{t("emptyState.title")}</h1>

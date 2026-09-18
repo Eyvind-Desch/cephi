@@ -1,10 +1,10 @@
 <#
 .SYNOPSIS
-  Starts (or updates) Orbit's local services: SearXNG (web search) and LibreTranslate (translation).
+  Starts (or updates) Cephi's local services: SearXNG (web search) and LibreTranslate (translation).
 
 .DESCRIPTION
   Docker runs inside WSL. The Dev Drive is not mounted there, so the config is copied to
-  ~/.orbit/infra in the default WSL distro and started with docker compose from there.
+  ~/.cephi/infra in the default WSL distro and started with docker compose from there.
   The containers restart automatically with Docker. Run again after changing the config.
 
 .PARAMETER Update
@@ -13,7 +13,7 @@
 param([switch]$Update)
 
 $ErrorActionPreference = 'Stop'
-$target = '~/.orbit/infra'
+$target = '~/.cephi/infra'
 # WSL cannot translate a working directory on the Dev Drive.
 Push-Location $env:USERPROFILE
 
@@ -41,7 +41,7 @@ function Wait-Http([string]$name, [string]$url, [int]$seconds) {
       Start-Sleep -Seconds 2
     }
   }
-  throw "$name did not respond at $url. Check: wsl -- docker logs orbit-$($name.ToLower())"
+  throw "$name did not respond at $url. Check: wsl -- docker logs cephi-$($name.ToLower())"
 }
 
 try {
@@ -55,12 +55,14 @@ try {
   Invoke-Wsl "cat > $target/compose.yaml" (Read-Text "$PSScriptRoot\compose.yaml")
 
   if ($Update) { Invoke-Wsl "cd $target && docker compose pull" }
+  # Containers from before the rename to Cephi hold the same ports.
+  Invoke-Wsl "docker rm -f orbit-searxng orbit-libretranslate >/dev/null 2>&1 || true"
   Invoke-Wsl "cd $target && docker compose up -d --remove-orphans"
 
   Write-Host 'Waiting for the services (the first start downloads the translation models, a few minutes):'
-  Wait-Http 'SearXNG' 'http://127.0.0.1:8888/search?q=orbit&format=json' 60
+  Wait-Http 'SearXNG' 'http://127.0.0.1:8888/search?q=cephi&format=json' 60
   Wait-Http 'LibreTranslate' 'http://127.0.0.1:8890/languages' 600
-  Write-Host 'Orbit services are running: search http://127.0.0.1:8888, translation http://127.0.0.1:8890'
+  Write-Host 'Cephi services are running: search http://127.0.0.1:8888, translation http://127.0.0.1:8890'
 } finally {
   Pop-Location
 }

@@ -12,7 +12,7 @@ export const de: Locale = {
   },
   composer: {
     placeholder: "Frag mich was…",
-    placeholderRunning: "Orbit arbeitet…",
+    placeholderRunning: "Cephi arbeitet…",
     stop: "Stoppen",
     send: "Senden (Enter)",
   },
@@ -30,7 +30,7 @@ export const de: Locale = {
   },
   chat: {
     cancelled: "Abgebrochen",
-    thinking: "Orbit denkt nach",
+    thinking: "Cephi denkt nach",
   },
   toolCard: {
     status: {
@@ -40,7 +40,7 @@ export const de: Locale = {
       error: "Fehlgeschlagen",
     },
     fastPath: "Schnellweg: direkt ausgeführt, ohne KI",
-    confirmPrompt: "Orbit möchte Folgendes ausführen:",
+    confirmPrompt: "Cephi möchte Folgendes ausführen:",
     deny: "Ablehnen",
     run: "Ausführen",
     enterKeys: "Schlüssel eintragen",
@@ -70,7 +70,7 @@ export const de: Locale = {
     model: "Modell wechseln",
     tools: "Alle Tools und Schnellphrasen anzeigen",
     keys: "Schlüssel & API-Keys",
-    pin: "Orbit offen halten",
+    pin: "Cephi offen halten",
     config: "Konfigurationsordner öffnen",
     reload: "Konfiguration neu laden",
     unknown: "Unbekannter Befehl",
@@ -118,8 +118,8 @@ export const de: Locale = {
     enlarge: "Vergrößern",
     shrink: "Verkleinern",
     placeholder: "Google durchsuchen oder Adresse eingeben",
-    emptyTitle: "Im Web suchen, ohne Orbit zu verlassen",
-    emptyHint: "Oben eintippen oder überall in Orbit „g Suchbegriff“ nutzen.",
+    emptyTitle: "Im Web suchen, ohne Cephi zu verlassen",
+    emptyHint: "Oben eintippen oder überall in Cephi „g Suchbegriff“ nutzen.",
   },
   webResults: {
     more_one: "{{count}} weiteres Ergebnis",
@@ -190,7 +190,7 @@ export const de: Locale = {
     spotify: {
       title: "So bekommst du die Schlüssel (2 Minuten, Premium nötig)",
       step1: "Im <b>Spotify Developer Dashboard</b> (Button unten) mit deinem Premium-Konto anmelden.",
-      step2: "<b>Create app</b>: Name „Orbit“, Redirect URI <uri/>, bei APIs <b>Web API</b> anhaken, speichern.",
+      step2: "<b>Create app</b>: Name „Cephi“, Redirect URI <uri/>, bei APIs <b>Web API</b> anhaken, speichern.",
       step3: "In der App unter <b>Settings</b> Client ID und Client Secret kopieren und hier einfügen.",
     },
   },

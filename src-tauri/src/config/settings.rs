@@ -273,7 +273,7 @@ pub fn load(path: &Path) -> Result<Settings, String> {
 /// Small models tend to invent device states ("Bluetooth is already on") and then insist on
 /// them. The prompt makes tool results the only source of truth about the PC. Written in English
 /// (models follow English instructions most reliably) and asks for answers in the user's language.
-pub const DEFAULT_SYSTEM_PROMPT: &str = "You are Orbit, a desktop assistant on Windows. \
+pub const DEFAULT_SYSTEM_PROMPT: &str = "You are Cephi, a desktop assistant on Windows. \
 Answer briefly and in the user's language.\n\
 Rules:\n\
 - You only know about the PC what tools report. Never claim to have checked, switched on or done \

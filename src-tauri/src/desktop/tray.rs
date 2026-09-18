@@ -6,7 +6,7 @@ use tauri::{AppHandle, Wry};
 use super::window;
 use crate::error::{AppError, AppResult};
 
-const TRAY_ID: &str = "orbit";
+const TRAY_ID: &str = "cephi";
 const SHOW: &str = "show";
 const OPEN_CONFIG: &str = "open-config";
 const RELOAD: &str = "reload";
@@ -45,7 +45,7 @@ pub fn create(app: &AppHandle) -> AppResult<()> {
 
     TrayIconBuilder::with_id(TRAY_ID)
         .icon(icon)
-        .tooltip("Orbit")
+        .tooltip("Cephi")
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| {

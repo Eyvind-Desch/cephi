@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Orbit",
+  "productName": "Cephi",
   "version": "0.1.0",
-  "identifier": "io.github.eyvind-desch.orbit",
+  "identifier": "io.github.eyvind-desch.cephi",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Orbit",
+        "title": "Cephi",
         "width": 640,
         "height": 68,
         "visible": false,
