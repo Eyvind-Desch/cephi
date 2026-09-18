@@ -116,8 +116,8 @@ request. Unambiguous commands ("open X") run through the quick action path witho
    → [docs/TRANSLATE.md](docs/TRANSLATE.md). Local LLMs were tested first: ~2.5 s per request, 2–3 GB VRAM,
    unreliable for single words.
 4. **MCP** – `mcp.json`, tools from MCP servers
-5. **Polish** – ✅ save chat history (restored on start, archived on "new chat") · ✅ start with Windows · settings UI,
-   code highlighting, installer
+5. **Polish** – ✅ save chat history (restored on start, archived on "new chat") · ✅ start with Windows · ✅ installer
+   (NSIS, per-user, own icon) · ✅ slash commands + tools overview · settings UI, code highlighting
 6. **Extras** – ✅ pick up selected text (`Ctrl+Alt+T`, clipboard is restored) · ask about a screenshot (vision model), voice
 
 ## Approach
