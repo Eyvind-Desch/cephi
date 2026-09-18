@@ -1,8 +1,8 @@
 /**
  * Design preview: runs the UI in a normal browser with sample data (dev server only).
  *
- * Open http://localhost:1420/?mode=expanded&view=keys&lang=de
- *   mode: compact | expanded | large   view: chat | keys | web | translate   chat: demo | results   lang: en | de   keys: some
+ * Open http://localhost:1420/?mode=expanded&view=settings&tab=keys&lang=de
+ *   mode: compact | expanded | large   view: chat | settings | tools | web | translate   tab: general | keys | mcp   chat: demo | results   lang: en | de   keys: some
  *   draft: text in the composer (e.g. "/" shows the commands)   web: page (web tab with a loaded page)   service: stopped (translator container down)   selection: 1 (text picked up from another app)
  *
  * Used to review UI changes (and take headless screenshots) without touching the running app.
@@ -12,7 +12,7 @@ import type { ConfigSnapshot, SecretGroup } from "../lib/ipc";
 import { useChat } from "../store/chat";
 import type { Message } from "../store/chatModel";
 import { useTranslate } from "../store/translate";
-import { useUi, type PanelView } from "../store/ui";
+import { useUi, type PanelView, type SettingsTab } from "../store/ui";
 
 const params = new URLSearchParams(location.search);
 const lang = params.get("lang") === "en" ? "en" : "de";
@@ -40,6 +40,19 @@ const config: ConfigSnapshot = {
     { name: "github", state: "running", error: null, tools: 1 },
     { name: "notion", state: "failed", error: "\"npx\" wurde nicht gefunden. Ist es installiert (z. B. Node.js für npx, uv für uvx)?", tools: 0 },
   ],
+  mcpConfig: {
+    github: {
+      command: null, args: [], env: {}, cwd: null,
+      url: "https://api.githubcopilot.com/mcp/",
+      headers: { Authorization: "Bearer {{secret:mcp_github_authorization}}" },
+      disabled: false, permission: "confirm", autoApprove: ["search_code"],
+    },
+    notion: {
+      command: "npx", args: ["-y", "@notionhq/notion-mcp-server"], env: { NOTION_TOKEN: "{{secret:mcp_notion_notion_token}}" },
+      cwd: null, url: null, headers: {}, disabled: false, permission: "confirm", autoApprove: [],
+    },
+  },
+  general: { language: "system", selectionHotkey: "Ctrl+Alt+T", hideOnBlur: true, summarizeSearch: true },
   diagnostics: [],
 };
 
@@ -208,6 +221,10 @@ export function installPreview() {
           ];
         case "autostart_state":
           return { enabled: false, available: true };
+        case "settings_update":
+        case "mcp_save_server":
+        case "mcp_remove_server":
+          return config;
         case "chat_load":
           return null;
         case "web_state":
@@ -226,6 +243,7 @@ export function installPreview() {
     mode: params.get("mode") === "compact" ? "compact" : params.get("mode") === "large" ? "large" : "expanded",
     webLarge: params.get("mode") === "large",
     view: (params.get("view") as PanelView | null) ?? "chat",
+    settingsTab: (params.get("tab") as SettingsTab | null) ?? "general",
     selection:
       params.get("selection") === "1"
         ? "Nevertheless, the committee agreed that the proposal was somewhat awkward to implement."

@@ -6,6 +6,7 @@
 ┌──────────────────── Frontend: React + TypeScript (WebView2) ────────────────────┐
 │ components/shell   CompactBar · Panel · Header · ProfileSwitch · Diagnostics    │
 │ components/chat    Composer · MessageList · MessageView · ToolCard · Markdown   │
+│ components/…       settings (general · keys · MCP) · tools · web · translate    │
 │ store/             zustand: ui (mode, pin, config) · chat (messages, run)       │
 │ lib/ipc.ts         typed bridge to all Rust commands and events                 │
 └─────────────── invoke() · Channel<AgentEvent> · Events ─────────────────────────┘
@@ -17,7 +18,7 @@
 │ tools/        manifest format, validation, templates, execution                 │
 │ agent/        loop: model → tools → model, confirmations, cancellation          │
 │ llm/          providers: Ollama, Anthropic, OpenAI-compatible (streaming, tools)│
-│ secrets/      Windows Credential Manager + key catalog for the keys view        │
+│ secrets/      Windows Credential Manager + key catalog for the settings page        │
 │ launcher/ integrations/  app index, Spotify, media/volume, radios, selection     │
 │ search/       SearXNG client, excerpts for the model                            │
 │ translate/    LibreTranslate client, automatic direction                        │

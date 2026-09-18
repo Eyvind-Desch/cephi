@@ -60,6 +60,27 @@ export interface ToolInfo {
   triggers: string[];
 }
 
+/** `src-tauri/src/mcp/config.rs`: one entry of `mcp.json`. */
+export interface McpServerConfig {
+  command: string | null;
+  args: string[];
+  env: Record<string, string>;
+  cwd: string | null;
+  url: string | null;
+  headers: Record<string, string>;
+  disabled: boolean;
+  permission: Permission;
+  autoApprove: string[];
+}
+
+/** `src-tauri/src/config/snapshot.rs` */
+export interface GeneralSettings {
+  language: "system" | "en" | "de";
+  selectionHotkey: string | null;
+  hideOnBlur: boolean;
+  summarizeSearch: boolean;
+}
+
 /** `src-tauri/src/mcp/mod.rs` */
 export interface McpServerStatus {
   name: string;
@@ -83,6 +104,9 @@ export interface ConfigSnapshot {
   tools: ToolInfo[];
   /** Servers from `mcp.json`. */
   mcpServers: McpServerStatus[];
+  /** `mcp.json` as configured (for the settings page). */
+  mcpConfig: Record<string, McpServerConfig>;
+  general: GeneralSettings;
   diagnostics: Diagnostic[];
 }
 
@@ -168,6 +192,11 @@ export const api = {
   configSnapshot: () => invoke<ConfigSnapshot>("config_snapshot"),
   configReload: () => invoke<ConfigSnapshot>("config_reload"),
   configOpenFolder: () => invoke<void>("config_open_folder"),
+  /** Changes keys in settings.json (objects merge, `null` removes). Rejects with the reason if invalid. */
+  settingsUpdate: (patch: Record<string, unknown>) => invoke<ConfigSnapshot>("settings_update", { patch }),
+  mcpSaveServer: (name: string, previousName: string | null, server: Partial<McpServerConfig>) =>
+    invoke<ConfigSnapshot>("mcp_save_server", { name, previousName, server }),
+  mcpRemoveServer: (name: string) => invoke<ConfigSnapshot>("mcp_remove_server", { name }),
 
   /** Resolves when the run has finished, been cancelled or failed. */
   agentSend: (text: string, profileId: string | null, onEvent: (event: AgentEvent) => void) => {

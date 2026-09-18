@@ -26,7 +26,7 @@ export function ProfileSwitch() {
   const profiles = useUi((s) => s.config?.profiles ?? NO_PROFILES);
   const profileId = useUi((s) => s.profileId);
   const setProfile = useUi((s) => s.setProfile);
-  const setView = useUi((s) => s.setView);
+  const openSettings = useUi((s) => s.openSettings);
   const running = useChat((s) => s.running);
 
   const current = profiles.find((p) => p.id === profileId);
@@ -40,7 +40,7 @@ export function ProfileSwitch() {
     checked: profile.id === profileId,
     hint: profile.available ? undefined : t("profile.keyMissing"),
     disabled: running,
-    onSelect: () => (profile.available ? setProfile(profile.id) : setView("keys")),
+    onSelect: () => (profile.available ? setProfile(profile.id) : openSettings("keys")),
   });
 
   const local = profiles.filter((p) => p.local);

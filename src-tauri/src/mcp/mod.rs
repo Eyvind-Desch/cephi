@@ -121,13 +121,25 @@ impl McpManager {
     pub async fn sync(&self, config: &McpConfig) {
         let mut connections = self.connections.lock().await;
 
+        // Changed permissions apply to the running server; no restart needed.
+        for (name, connection) in connections.iter_mut() {
+            if let Some(wanted) = config.mcp_servers.get(name) {
+                if wanted.same_connection(&connection.config) && *wanted != connection.config {
+                    for tool in &mut connection.tools {
+                        tool.auto_approved = wanted.is_auto_approved(&tool.name);
+                    }
+                    connection.config = wanted.clone();
+                }
+            }
+        }
+
         let stale: Vec<String> = connections
             .iter()
             .filter(|(name, connection)| {
                 config
                     .mcp_servers
                     .get(*name)
-                    .is_none_or(|wanted| wanted.disabled || *wanted != connection.config)
+                    .is_none_or(|wanted| wanted.disabled || !wanted.same_connection(&connection.config))
             })
             .map(|(name, _)| name.clone())
             .collect();
@@ -174,6 +186,20 @@ impl McpManager {
             }
         }
         self.publish(config, &connections, &failures, Vec::new());
+    }
+
+    /// Stops the named servers so the following [`sync`](Self::sync) starts them afresh (e.g. with a new key).
+    pub async fn restart(&self, names: &[String], config: &McpConfig) {
+        {
+            let mut connections = self.connections.lock().await;
+            for name in names {
+                if let Some(connection) = connections.remove(name) {
+                    log::info!("mcp {name}: restarting");
+                    let _ = connection.client.cancel().await;
+                }
+            }
+        }
+        self.sync(config).await;
     }
 
     /// Stops all servers (on exit).

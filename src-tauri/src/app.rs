@@ -186,6 +186,27 @@ pub async fn update_secret(app: &AppHandle, name: &str, value: Option<&str>) -> 
         log::error!("emit config change: {e}");
     }
 
+    // MCP servers read their keys only when they start.
+    let affected: Vec<String> = state
+        .config()
+        .mcp
+        .mcp_servers
+        .iter()
+        .filter(|(_, server)| server.secrets().iter().any(|secret| secret == name))
+        .map(|(server, _)| server.clone())
+        .collect();
+    if !affected.is_empty() {
+        let app = app.clone();
+        tauri::async_runtime::spawn(async move {
+            let state = app.state::<AppState>();
+            let config = state.config();
+            state.mcp.restart(&affected, &config.mcp).await;
+            if let Err(e) = app.emit(EVENT_CONFIG_CHANGED, snapshot(&app)) {
+                log::error!("emit config change: {e}");
+            }
+        });
+    }
+
     if name.starts_with("spotify_") {
         state.spotify.invalidate().await;
         state.spotify.warm_up(&state.http).await;

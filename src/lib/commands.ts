@@ -18,7 +18,9 @@ export interface SlashCommand {
     | "commands.translate"
     | "commands.model"
     | "commands.tools"
+    | "commands.settings"
     | "commands.keys"
+    | "commands.mcp"
     | "commands.pin"
     | "commands.config"
     | "commands.reload";
@@ -65,11 +67,13 @@ export const COMMANDS: SlashCommand[] = [
       const profile = ui.config?.profiles.find((p) => p.id === wanted || p.label.toLowerCase() === wanted);
       if (!profile) return;
       if (profile.available) ui.setProfile(profile.id);
-      else ui.setView("keys");
+      else ui.openSettings("keys");
     },
   },
   { name: "tools", description: "commands.tools", run: () => useUi.getState().setView("tools") },
-  { name: "keys", description: "commands.keys", run: () => useUi.getState().setView("keys") },
+  { name: "settings", description: "commands.settings", run: () => useUi.getState().openSettings("general") },
+  { name: "keys", description: "commands.keys", run: () => useUi.getState().openSettings("keys") },
+  { name: "mcp", description: "commands.mcp", run: () => useUi.getState().openSettings("mcp") },
   { name: "pin", description: "commands.pin", run: () => useUi.getState().togglePinned() },
   { name: "config", description: "commands.config", run: () => void api.configOpenFolder() },
   {

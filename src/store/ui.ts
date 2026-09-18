@@ -2,7 +2,8 @@ import { create } from "zustand";
 import { setLanguage } from "../i18n";
 import { api, type ConfigSnapshot, type WindowMode } from "../lib/ipc";
 
-export type PanelView = "chat" | "keys" | "tools" | "web" | "translate";
+export type PanelView = "chat" | "settings" | "tools" | "web" | "translate";
+export type SettingsTab = "general" | "keys" | "mcp";
 
 /** Short confirmation shown in the compact bar after a successful fast-path action. */
 export interface Flash {
@@ -28,12 +29,15 @@ interface UiState {
   webLarge: boolean;
   /** Text picked up from another app via the selection hotkey. */
   selection: string | null;
+  /** Section shown on the settings page. */
+  settingsTab: SettingsTab;
 
   /** Shows the panel for the current view (no-op if a panel is already shown). */
   expand: () => void;
   collapse: () => void;
   toggleMode: () => void;
   setView: (view: PanelView) => void;
+  openSettings: (tab: SettingsTab) => void;
   togglePinned: () => void;
   setProfile: (id: string) => void;
   applyConfig: (config: ConfigSnapshot) => void;
@@ -64,6 +68,7 @@ export const useUi = create<UiState>()((set, get) => {
     overlays: 0,
     webLarge: false,
     selection: null,
+    settingsTab: "general",
 
     expand: () => {
       if (get().mode === "compact") setMode(panelMode(get().view, get().webLarge));
@@ -76,6 +81,11 @@ export const useUi = create<UiState>()((set, get) => {
     setView: (view) => {
       set({ view });
       setMode(panelMode(view, get().webLarge));
+    },
+
+    openSettings: (settingsTab) => {
+      set({ settingsTab });
+      get().setView("settings");
     },
 
     togglePinned: () => {

@@ -22,6 +22,7 @@ export function ToolCard({ part }: { part: ToolPart }) {
   const { t } = useTranslation();
   const confirm = useChat((s) => s.confirm);
   const setView = useUi((s) => s.setView);
+  const openSettings = useUi((s) => s.openSettings);
   const [open, setOpen] = useState(false);
   const status = statusStyles[part.status];
   const StatusIcon = status.icon;
@@ -118,7 +119,7 @@ export function ToolCard({ part }: { part: ToolPart }) {
           {part.missingSecrets && part.missingSecrets.length > 0 && (
             <button
               type="button"
-              onClick={() => setView("keys")}
+              onClick={() => openSettings("keys")}
               className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 font-medium text-accent-fg hover:brightness-110"
             >
               <KeyRound size={14} /> {t("toolCard.enterKeys")}

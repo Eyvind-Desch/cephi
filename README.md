@@ -25,12 +25,12 @@ One hotkey, one input field: answer, search, or action ("öffne die Bluetooth-Ei
 | `Ctrl+E` | Compact bar ↔ large panel |
 | `Ctrl+N` | New chat (the previous one is archived) |
 | `Esc` | Hide |
-| `/` | Commands: `/clear`, `/web …`, `/translate …`, `/model …`, `/tools`, `/keys`, `/pin`, `/config`, `/reload` |
+| `/` | Commands: `/clear`, `/web …`, `/translate …`, `/model …`, `/tools`, `/settings`, `/keys`, `/mcp`, `/pin`, `/config`, `/reload` |
 
 Clicking outside hides Cephi, unless it's pinned (⋯ menu). Tray icon: open, configuration, quit.
 
 The chat is saved after every answer and is still there after a restart; *New chat* archives it (the last 50
-chats are kept in `%APPDATA%\io.github.eyvind-desch.cephi\chats\`). ⋯ → *Start with Windows* makes Cephi wait in the tray
+chats are kept in `%APPDATA%\io.github.eyvind-desch.cephi\chats\`). ⋯ → *Settings* → *Start with Windows* makes Cephi wait in the tray
 after login (installed version only).
 
 **Selected text:** mark text anywhere (browser, PDF, chat), press `Ctrl+Alt+T`, and it appears above the input
@@ -54,7 +54,7 @@ Cephi (address bar: search terms or an address) and can be enlarged; links from 
 | `yt search term` | YouTube in the browser |
 
 Everything else goes to the AI, which can call the same tools. Custom quick actions: `triggers` in the
-tool JSON files ([docs/TOOLS.md](docs/TOOLS.md)). API keys: ⋯ → *Keys & API Keys*.
+tool JSON files ([docs/TOOLS.md](docs/TOOLS.md)). Settings (⋯ → *Settings*, or `/settings`): general options, API keys and MCP servers, all without editing JSON.
 
 ## Configuration
 
@@ -75,12 +75,12 @@ the Windows display language). The UI and all messages are localized (English so
 
 ```powershell
 npm run app:build
-.\src-tauri\target\release\bundle\nsis\Cephi_0.1.0_x64-setup.exe
+.\src-tauri\target\release\bundle\nsis\Cephi_0.2.0_x64-setup.exe
 ```
 
 The installer needs no admin rights (installs for the current user, German or English). Settings, tools and
 keys are shared with the development build. Only one Cephi runs at a time, so close the dev version (`npm run app`)
-before starting the installed one. After installing: ⋯ → *Start with Windows*.
+before starting the installed one. After installing: ⋯ → *Settings* → *Start with Windows*.
 
 ## Development
 

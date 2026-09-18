@@ -4,8 +4,15 @@ MCP (Model Context Protocol) is an open standard for connecting AI apps to other
 tools, e.g. "search GitHub", "read a file", "create a calendar entry". Cephi starts the servers listed in
 **`%APPDATA%\Cephi\mcp.json`** and offers their tools to the AI next to its own.
 
-The file has the **same format as Claude Desktop**, so the setup snippets most servers publish can be pasted
-as they are. Changes apply as soon as the file is saved. `/tools` shows every server with its status and tools.
+**Without editing the file:** ⋯ → *Settings* → *MCP* (or `/mcp`). *Add server* takes a name and the command or URL;
+*Paste snippet* fills the form from the JSON a server's README shows (Claude Desktop, Cursor or VS Code format).
+Values marked with the lock (tokens, keys; names like `*_TOKEN` are marked automatically) go to the Windows
+Credential Manager and the file only gets `{{secret:…}}`. Each server can be switched off, edited or removed,
+and single tools can be allowed to run without asking. Changing a key restarts the servers that use it.
+
+The file has the **same format as Claude Desktop**, so the setup snippets most servers publish can also be pasted
+there directly. Changes apply as soon as the file is saved (only servers whose start settings changed restart).
+`/tools` shows every server with its status and tools.
 
 ## Examples
 

@@ -77,6 +77,12 @@ impl ServerConfig {
         names
     }
 
+    /// Whether both start the same server (permissions aside, which apply without a restart).
+    pub fn same_connection(&self, other: &ServerConfig) -> bool {
+        (&self.command, &self.args, &self.env, &self.cwd, &self.url, &self.headers)
+            == (&other.command, &other.args, &other.env, &other.cwd, &other.url, &other.headers)
+    }
+
     pub fn is_auto_approved(&self, tool: &str) -> bool {
         self.permission == Permission::Auto || self.auto_approve.iter().any(|t| t == tool)
     }
@@ -167,6 +173,24 @@ mod tests {
         assert_eq!(github.secrets(), vec!["github_token"]);
         assert!(github.is_auto_approved("search_code"));
         assert!(!github.is_auto_approved("create_issue"));
+    }
+
+    #[test]
+    fn permissions_do_not_count_as_a_different_connection() {
+        let server = ServerConfig {
+            command: Some("npx".into()),
+            ..Default::default()
+        };
+        let approved = ServerConfig {
+            auto_approve: vec!["search".into()],
+            ..server.clone()
+        };
+        assert!(server.same_connection(&approved));
+        let other_args = ServerConfig {
+            args: vec!["-y".into()],
+            ..server.clone()
+        };
+        assert!(!server.same_connection(&other_args));
     }
 
     #[test]

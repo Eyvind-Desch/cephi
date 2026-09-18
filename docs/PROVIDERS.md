@@ -13,7 +13,7 @@ Profiles pick a provider and a model; the model picker in the panel header lists
 
 ## Adding a key
 
-Panel → ⋯ → **Keys & API keys** → the provider's card → paste the key → *Save* → *Test connection*.
+Panel → ⋯ → **Settings** → **Keys** → the provider's card → paste the key → *Save* → *Test connection*.
 Keys are stored in the Windows Credential Manager as `Cephi/<providerId>_api_key`, never in files.
 
 | Provider | Where to get a key |
