@@ -118,7 +118,7 @@ request. Unambiguous commands ("open X") run through the quick action path witho
 4. ✅ **MCP** – `mcp.json` in Claude Desktop format (local + HTTP servers), tools offered as `<server>__<tool>`,
    confirmation unless approved, keys via `{{secret:…}}`, status in `/tools` → [docs/MCP.md](docs/MCP.md)
 5. **Polish** – ✅ save chat history (restored on start, archived on "new chat") · ✅ start with Windows · ✅ installer
-   (NSIS, per-user, own icon) · ✅ slash commands + tools overview · ✅ settings page (general, keys, MCP servers by form) · code highlighting
+   (NSIS, per-user, own icon) · ✅ slash commands + tools overview · ✅ settings page (general, keys, MCP servers by form) · ✅ code highlighting
 6. **Extras** – ✅ pick up selected text (`Ctrl+Alt+T`, clipboard is restored) · ask about a screenshot (vision model), voice
 
 ## Approach
@@ -129,7 +129,7 @@ next stage begins. Whatever isn't a nuisance goes into the backlog instead of th
 ### Backlog (polish)
 
 - [ ] When launched from the terminal, the window stays hidden (Windows foreground lock) → hotkey needed
-- [ ] Code highlighting in responses
+- [x] Code highlighting in responses (highlight.js core, ~20 languages, language label + copy)
 - [x] Browse archived chats: `/history`, ⋯ → *Earlier chats*, the two latest on the empty chat
 - [ ] Volume indicator (brief overlay) after "louder/quieter"
 - [ ] Check whether Spotify auto-plays albums/playlists

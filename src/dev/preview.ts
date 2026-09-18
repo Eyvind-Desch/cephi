@@ -2,7 +2,7 @@
  * Design preview: runs the UI in a normal browser with sample data (dev server only).
  *
  * Open http://localhost:1420/?mode=expanded&view=settings&tab=keys&lang=de
- *   mode: compact | expanded | large   view: chat | settings | tools | web | translate   tab: general | keys | mcp   chat: demo | results   lang: en | de   keys: some
+ *   mode: compact | expanded | large   view: chat | settings | tools | web | translate   tab: general | keys | mcp   chat: demo | results | code   lang: en | de   keys: some
  *   draft: text in the composer (e.g. "/" shows the commands)   web: page (web tab with a loaded page)   service: stopped (translator container down)   selection: 1 (text picked up from another app)
  *
  * Used to review UI changes (and take headless screenshots) without touching the running app.
@@ -196,6 +196,41 @@ const demoChat: Message[] = [
   },
 ];
 
+const FENCE = "```";
+const codeChat: Message[] = [
+  { id: "c1", role: "user", text: "Wie liste ich die größten Dateien auf?" },
+  {
+    id: "c2",
+    role: "assistant",
+    status: "done",
+    parts: [
+      {
+        kind: "text",
+        text: [
+          "Mit PowerShell:",
+          "",
+          `${FENCE}powershell`,
+          "# Die 10 größten Dateien im Profil",
+          "Get-ChildItem -Path $env:USERPROFILE -Recurse -File |",
+          "  Sort-Object Length -Descending |",
+          '  Select-Object -First 10 Name, @{ n = "MB"; e = { [math]::Round($_.Length / 1MB, 1) } }',
+          FENCE,
+          "",
+          "Oder in Python:",
+          "",
+          FENCE,
+          "import os",
+          "",
+          "def largest(path: str, count: int = 10):",
+          "    files = [(f, os.path.getsize(f)) for f in walk(path)]",
+          "    return sorted(files, key=lambda x: x[1], reverse=True)[:count]",
+          FENCE,
+        ].join("\n"),
+      },
+    ],
+  },
+];
+
 function webResult(title: string, url: string, snippet: string) {
   return { title, url, snippet, engines: ["google", "brave"] };
 }
@@ -258,6 +293,7 @@ export function installPreview() {
         : null,
   });
   if (params.get("chat") === "demo") useChat.setState({ messages: demoChat });
+  if (params.get("chat") === "code") useChat.setState({ messages: codeChat });
   if (params.get("draft")) useChat.setState({ draft: params.get("draft") ?? "" });
   if (params.get("view") === "translate") useTranslate.setState({ text: params.get("text") ?? "renovated" });
   // Search results without an AI answer (model unavailable).

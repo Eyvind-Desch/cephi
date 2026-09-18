@@ -1,44 +1,74 @@
 import { Check, Copy } from "lucide-react";
-import { memo, useRef, useState, type ReactNode } from "react";
+import { isValidElement, memo, useMemo, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { highlight } from "../../lib/highlight";
 import type { WebResult } from "../../lib/ipc";
 import { openLink } from "../../lib/links";
 
-function CodeBlock({ children }: { children?: ReactNode }) {
+/** A fenced code block: highlighted, with the language and a copy button in its header. */
+function CodeBlock({ code, fence }: { code: string; fence: string | null }) {
   const { t } = useTranslation();
-  const ref = useRef<HTMLPreElement>(null);
   const [copied, setCopied] = useState(false);
+  const text = code.replace(/\n$/, "");
+  const highlighted = useMemo(() => highlight(text, fence), [text, fence]);
+  const label = highlighted?.language ?? fence;
 
   const copy = async () => {
-    await navigator.clipboard.writeText(ref.current?.textContent ?? "");
+    await navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
 
   return (
-    <div className="group relative">
-      <pre
-        ref={ref}
-        className="overflow-x-auto rounded-xl border border-line bg-sunken px-3.5 py-3 font-mono text-[12.5px] leading-relaxed"
-      >
-        {children}
-      </pre>
-      <button
-        type="button"
-        onClick={copy}
-        title={t("common.copy")}
-        className="absolute top-2 right-2 grid size-7 place-items-center rounded-md bg-raised text-muted opacity-0 transition-opacity group-hover:opacity-100 hover:text-fg"
-      >
-        {copied ? <Check size={14} /> : <Copy size={14} />}
-      </button>
+    <div className="overflow-hidden rounded-xl border border-line bg-sunken">
+      <div className="flex h-7 items-center justify-between border-b border-line pr-1 pl-3">
+        <span className="text-[11px] text-subtle">{label}</span>
+        <button
+          type="button"
+          onClick={copy}
+          title={t("common.copy")}
+          className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] text-subtle transition-colors hover:bg-raised hover:text-fg"
+        >
+          {copied ? <Check size={12} /> : <Copy size={12} />}
+          {copied ? t("common.copied") : t("common.copy")}
+        </button>
+      </div>
+      {highlighted ? (
+        // highlight.js escapes the code; the markup only adds its own `hljs-*` spans.
+        <pre
+          className="hljs overflow-x-auto px-3.5 py-3 font-mono text-[12.5px] leading-relaxed"
+          dangerouslySetInnerHTML={{ __html: highlighted.html }}
+        />
+      ) : (
+        <pre className="overflow-x-auto px-3.5 py-3 font-mono text-[12.5px] leading-relaxed">{text}</pre>
+      )}
     </div>
   );
 }
 
+/** The text and the language after the fences (```ts → "ts") of the `<code>` inside a `<pre>`. */
+function codeOf(children: ReactNode): { code: string; fence: string | null } | null {
+  if (!isValidElement<{ className?: string; children?: ReactNode }>(children)) return null;
+  const { className, children: content } = children.props;
+  const code = Array.isArray(content) ? content.join("") : typeof content === "string" ? content : null;
+  if (code === null) return null;
+  const fence = /language-(\S+)/.exec(className ?? "")?.[1]?.toLowerCase() ?? null;
+  return { code, fence };
+}
+
 const components: Components = {
-  pre: ({ children }) => <CodeBlock>{children}</CodeBlock>,
+  pre: ({ children }) => {
+    const block = codeOf(children);
+    return block ? (
+      <CodeBlock code={block.code} fence={block.fence} />
+    ) : (
+      <pre className="overflow-x-auto rounded-xl border border-line bg-sunken px-3.5 py-3 font-mono text-[12.5px]">
+        {children}
+      </pre>
+    );
+  },
   // Links must never navigate the app's webview; they open in the web tab.
   a: ({ href, children }) => {
     const citation = typeof children === "string" && /^\d+$/.test(children);
