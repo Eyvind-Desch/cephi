@@ -67,6 +67,17 @@ Orbit/
 `settings.json` also has a `"language": "system" | "en" | "de"` field (default `system`, which follows
 the Windows display language). The UI and all messages are localized (English source, German translation).
 
+## Install
+
+```powershell
+npm run app:build
+.\src-tauri\target\release\bundle\nsis\Orbit_0.1.0_x64-setup.exe
+```
+
+The installer needs no admin rights (installs for the current user, German or English). Settings, tools and
+keys are shared with the development build. Only one Orbit runs at a time, so close the dev version (`npm run app`)
+before starting the installed one. After installing: ⋯ → *Start with Windows*.
+
 ## Development
 
 Requirements: Node 22+, Rust (MSVC), VS C++ Build Tools, Ollama.
