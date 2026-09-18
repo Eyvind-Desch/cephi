@@ -25,6 +25,7 @@ pub enum Builtin {
     MediaControl,
     Radio,
     WebSearch,
+    FetchPage,
     Translate,
 }
 
@@ -39,6 +40,7 @@ impl Builtin {
             Builtin::MediaControl => "media_control",
             Builtin::Radio => "radio",
             Builtin::WebSearch => "web_search",
+            Builtin::FetchPage => "fetch_page",
             Builtin::Translate => "translate",
         }
     }
@@ -52,6 +54,7 @@ impl Builtin {
             Builtin::MediaControl => &["action"],
             Builtin::Radio => &["device", "state"],
             Builtin::Translate => &["text"],
+            Builtin::FetchPage => &["url"],
             Builtin::Datetime | Builtin::ClipboardRead => &[],
         }
     }
@@ -100,6 +103,7 @@ impl Builtin {
     pub async fn run(self, ctx: &ExecContext<'_>, args: &Args) -> Result<Success, String> {
         let text = match self {
             Builtin::WebSearch => return web_search(ctx, str_arg(args, "query")).await,
+            Builtin::FetchPage => return fetch_page(str_arg(args, "url")).await,
             Builtin::Translate => {
                 let to = args.get("to").and_then(|v| v.as_str());
                 return translate(ctx, str_arg(args, "text"), to).await;
@@ -163,6 +167,18 @@ async fn web_search(ctx: &ExecContext<'_>, query: &str) -> Result<Success, Strin
             query: query.trim().to_string(),
             results: response.results,
         }),
+    })
+}
+
+async fn fetch_page(url: &str) -> Result<Success, String> {
+    let page = search::page::fetch(url).await?;
+    // Model-facing, so English.
+    let content = format!("Page \"{}\" ({}):
+
+{}", page.title, page.url, page.text);
+    Ok(Success {
+        content,
+        display: Some(ToolDisplay::WebPage { url: page.url }),
     })
 }
 

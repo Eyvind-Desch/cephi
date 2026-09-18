@@ -186,12 +186,20 @@
     "unknown_language": "Unknown language \"%{language}\".",
     "unreachable": "The translator is not running (LibreTranslate at %{url}).",
     "failed": "Translation failed: %{error}"
-  },  "search": {
+  },
+  "search": {
     "empty_query": "What should I search for?",
     "unreachable": "Web search is not running (SearXNG at %{url}).",
     "json_disabled": "SearXNG does not allow JSON results. Add \"json\" to search.formats in its settings.yml.",
     "failed": "Web search failed: %{error}",
     "no_results": "No web results for \"%{query}\"."
+  },
+  "page": {
+    "invalid_url": "\"%{url}\" is not a web address (http or https).",
+    "private": "%{url} is on this PC or in the local network; only public pages can be read.",
+    "failed": "Could not read the page: %{error}",
+    "not_text": "The address is not a web page (%{kind}).",
+    "empty": "The page has no readable text (maybe it needs JavaScript)."
   },
   "spotify": {
     "unknown_kind": "Unknown Spotify type \"%{kind}\".",

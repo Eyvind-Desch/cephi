@@ -215,6 +215,7 @@ is allowed. If the whole URL comes from the model (`{{url|raw}}`), only `http`/`
 | `radio` | `device` (`bluetooth`/`wlan`/`wifi`), `state` (`on`/`off`/`toggle`/`status`) | Turn Bluetooth/Wi-Fi on or off, toggle it, or check its status |
 | `translate` | `text`, optional `to` (language code or name) | Offline translation via local LibreTranslate, see [TRANSLATE.md](TRANSLATE.md) |
 | `web_search` | `query` | Web search via the local SearXNG (`settings.search`), result cards in the chat, excerpts for the AI, see [SEARCH.md](SEARCH.md) |
+| `fetch_page` | `url` | Reads a public web page as text (article or main part, max. 12,000 characters); local and private addresses are refused |
 
 Numeric parameters also understand `30%`, `30 %`, `30 Prozent` ("30 percent"), and `2,5` (comma as decimal separator).
 

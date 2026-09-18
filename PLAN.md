@@ -11,7 +11,7 @@ without opening an extra window. Runs locally with Ollama; cloud models (Claude,
 | Not: PowerToys extension (C#) | – | The Command Palette dictates a list UI: no free-form chat panel, no embedded Google, no custom design. Conceivable later as an *additional* entry point. |
 | UI | React + TypeScript + Tailwind + Framer Motion | Modern, fast iteration, smooth animations |
 | AI | Ollama (`localhost:11434`) | Models already available |
-| Web search | **SearXNG** (Docker in WSL), DuckDuckGo as fallback (backlog) | See below |
+| Web search | **SearXNG** (Docker in WSL), started from Cephi on demand | See below |
 | Tools/actions | Built-in tools + **MCP client** (Rust, `rmcp`) | Actions like "open Spotify" plus arbitrary MCP servers |
 
 ### SearXNG vs. DuckDuckGo
@@ -21,7 +21,8 @@ without opening an extra window. Runs locally with Ollama; cloud models (Claude,
 - **SearXNG** runs locally in Docker, queries Google, Bing, Brave, DuckDuckGo, Wikipedia, GitHub, etc.
   simultaneously, has a clean JSON API, no account, no key, no cost, no tracking.
   → **Clearly better.** Docker will also be useful for other projects later.
-- DuckDuckGo remains as a fallback if the SearXNG container isn't running.
+- A DuckDuckGo fallback was tried (2026-09-18) and dropped: after a few requests it only returns a bot challenge.
+  When SearXNG is down, Cephi offers a start button instead.
 
 ## UX
 
@@ -78,7 +79,7 @@ Shipped: `google_search`, `youtube_search`, `open_website`, `weather`, `datetime
 `clipboard_read`, `clipboard_write`, `open_explorer`, `open_settings`, `system_info`,
 `lock_pc` (confirm), `run_powershell` (confirm).
 
-Planned: `open_app` (launcher index), `web_search` + `fetch_page` (SearXNG), `find_files`.
+Built since: `open_app` (launcher index), `web_search` (SearXNG), `fetch_page`, `translate`. Planned: `find_files`.
 
 **Permission levels:** `auto` / `confirm` (default), per tool, later also for MCP tools.
 
@@ -133,8 +134,8 @@ next stage begins. Whatever isn't a nuisance goes into the backlog instead of th
 - [x] Browse archived chats: `/history`, ⋯ → *Earlier chats*, the two latest on the empty chat
 - [ ] Volume indicator (brief overlay) after "louder/quieter"
 - [ ] Check whether Spotify auto-plays albums/playlists
-- [ ] Search: DuckDuckGo fallback when SearXNG is not running
-- [ ] Search: `fetch_page` tool (read a result page when the excerpts are not enough)
+- [ ] ~~Search: DuckDuckGo fallback~~ tested 2026-09-18: DuckDuckGo answers with a bot challenge after ~4 requests, not reliable. Alternative if needed: Brave Search API (own key)
+- [x] Search: `fetch_page` tool (reads a public page as text; local/private addresses refused, also via redirect)
 - [ ] Web tab: Esc and Cephi shortcuts don't work while the page has focus (keys go to the page)
 - [ ] Web tab: ask the AI about the open page
 - [ ] MCP: servers that need a browser login (OAuth); resources and prompts

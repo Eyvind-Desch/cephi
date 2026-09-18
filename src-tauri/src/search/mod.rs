@@ -3,6 +3,7 @@
 //! SearXNG queries Google, Bing, Brave, DuckDuckGo, … at once and returns deduplicated results
 //! as JSON. Cephi shows them as cards and hands short excerpts to the model.
 
+pub mod page;
 mod searxng;
 
 use std::fmt::Write;

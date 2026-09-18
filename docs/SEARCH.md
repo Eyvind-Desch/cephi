@@ -25,6 +25,7 @@ restarts with Docker. Config: [`infra/searxng/settings.yml`](../infra/searxng/se
 | `? what's new in tauri 2` | Result cards immediately, then a short AI answer with sources `[1]` |
 | `suche im web nach …` / "search the web for …" | same |
 | Any question that needs current information | The AI can call `web_search` by itself |
+| "read the first result", a link in the chat | The AI can read a page with `fetch_page` (article text, public pages only) |
 | `g …` | Opens Google in Cephi's web tab (`google_search` tool) |
 
 The answer only uses the excerpts of the results (fast, also with small local models) and comes from the

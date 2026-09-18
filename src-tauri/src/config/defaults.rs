@@ -37,6 +37,7 @@ pub const TOOLS: &[(&str, &str)] = &[
         asset!("defaults/tools/web/youtube_search.json"),
     ),
     ("web/web_search.json", asset!("defaults/tools/web/web_search.json")),
+    ("web/fetch_page.json", asset!("defaults/tools/web/fetch_page.json")),
     ("web/translate.json", asset!("defaults/tools/web/translate.json")),
     ("web/open_website.json", asset!("defaults/tools/web/open_website.json")),
     ("web/weather.json", asset!("defaults/tools/web/weather.json")),
