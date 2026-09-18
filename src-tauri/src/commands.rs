@@ -13,6 +13,7 @@ use crate::desktop::web::{self, WebState};
 use crate::desktop::window::{self, WindowMode};
 use crate::error::{AppError, AppResult};
 use crate::secrets::SecretGroupInfo;
+use crate::services::{self, Service, ServiceStatus};
 use crate::state::AppState;
 use crate::translate::Translation;
 
@@ -145,6 +146,22 @@ pub fn web_command(app: AppHandle, command: web::WebCommand) -> AppResult<()> {
 pub async fn translate(state: State<'_, AppState>, text: String, to: Option<String>) -> AppResult<Translation> {
     let config = state.config();
     crate::translate::translate(&state.http, &config.settings.translate, &text, to.as_deref())
+        .await
+        .map_err(AppError::msg)
+}
+
+/// Are the local helper services (web search, translator) running?
+#[tauri::command]
+pub async fn services_status(state: State<'_, AppState>) -> AppResult<Vec<ServiceStatus>> {
+    let config = state.config();
+    Ok(services::status(&state.http, &config.settings).await)
+}
+
+/// Starts a helper service (Docker in WSL) and waits until it answers.
+#[tauri::command]
+pub async fn service_start(state: State<'_, AppState>, service: Service) -> AppResult<()> {
+    let config = state.config();
+    services::start(&state.http, &config.settings, service)
         .await
         .map_err(AppError::msg)
 }

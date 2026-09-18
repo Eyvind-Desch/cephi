@@ -131,7 +131,7 @@ next stage begins. Whatever isn't a nuisance goes into the backlog instead of th
 - [ ] Save chat history
 - [ ] Volume indicator (brief overlay) after "louder/quieter"
 - [ ] Check whether Spotify auto-plays albums/playlists
-- [ ] Search: DuckDuckGo fallback when SearXNG is not running; optionally start the container from Orbit
+- [ ] Search: DuckDuckGo fallback when SearXNG is not running
 - [ ] Search: `fetch_page` tool (read a result page when the excerpts are not enough)
 - [ ] Web tab: Esc and Orbit shortcuts don't work while the page has focus (keys go to the page)
 - [ ] Web tab: ask the AI about the open page

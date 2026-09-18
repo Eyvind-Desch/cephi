@@ -3,7 +3,7 @@
  *
  * Open http://localhost:1420/?mode=expanded&view=keys&lang=de
  *   mode: compact | expanded | large   view: chat | keys | web | translate   chat: demo | results   lang: en | de   keys: some
- *   web: page (web tab with a loaded page)   selection: 1 (text picked up from another app)
+ *   web: page (web tab with a loaded page)   service: stopped (translator container down)   selection: 1 (text picked up from another app)
  *
  * Used to review UI changes (and take headless screenshots) without touching the running app.
  */
@@ -11,6 +11,7 @@ import { mockIPC } from "@tauri-apps/api/mocks";
 import type { ConfigSnapshot, SecretGroup } from "../lib/ipc";
 import { useChat } from "../store/chat";
 import type { Message } from "../store/chatModel";
+import { useTranslate } from "../store/translate";
 import { useUi, type PanelView } from "../store/ui";
 
 const params = new URLSearchParams(location.search);
@@ -189,7 +190,13 @@ export function installPreview() {
         case "secrets_test":
           return lang === "de" ? "Verbindung funktioniert." : "Connection works.";
         case "translate":
+          if (params.get("service") === "stopped") throw new Error("Der Übersetzer läuft nicht (LibreTranslate unter http://127.0.0.1:8890).");
           return { source: "nevertheless", text: "dennoch", alternatives: ["trotzdem", "gleichwohl"], from: "en", to: "de" };
+        case "services_status":
+          return [
+            { id: "search", title: "Websuche", running: true },
+            { id: "translate", title: "Übersetzer", running: params.get("service") !== "stopped" },
+          ];
         case "web_state":
           return params.get("web") === "page"
             ? { url: "https://www.google.com/search?q=tauri+child+webview", title: "tauri child webview - Google Suche", loading: true }
@@ -212,6 +219,7 @@ export function installPreview() {
         : null,
   });
   if (params.get("chat") === "demo") useChat.setState({ messages: demoChat });
+  if (params.get("view") === "translate") useTranslate.setState({ text: params.get("text") ?? "renovated" });
   // Search results without an AI answer (model unavailable).
   if (params.get("chat") === "results") {
     const [question, answer] = demoChat.slice(-2);

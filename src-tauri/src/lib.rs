@@ -13,6 +13,7 @@ mod launcher;
 mod llm;
 mod search;
 mod secrets;
+mod services;
 mod state;
 mod tools;
 mod translate;
@@ -70,6 +71,8 @@ pub fn run() {
             commands::web_set_layout,
             commands::web_command,
             commands::translate,
+            commands::services_status,
+            commands::service_start,
             commands::secrets_list,
             commands::secrets_set,
             commands::secrets_delete,

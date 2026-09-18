@@ -1,6 +1,7 @@
 use serde::Serialize;
 use serde_json::Value;
 
+use crate::services::Service;
 use crate::tools::ToolDisplay;
 
 /// Streamed to the frontend over a Tauri channel while a request runs.
@@ -31,6 +32,8 @@ pub enum AgentEvent {
         duration_ms: u64,
         /// Secrets the tool needs but that are not stored yet (only reported on failure).
         missing_secrets: Vec<String>,
+        /// Local services the tool needs that are not running (only reported on failure).
+        stopped_services: Vec<Service>,
         /// Structured data for a richer view (e.g. search result cards).
         display: Option<ToolDisplay>,
     },

@@ -11,6 +11,7 @@ use crate::integrations::radio;
 use crate::integrations::spotify::{self, SearchKind};
 use crate::launcher::{FAST_PATH_MIN_SCORE, TOOL_MIN_SCORE};
 use crate::search;
+use crate::services::Service;
 use crate::state::AppState;
 
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq)]
@@ -52,6 +53,15 @@ impl Builtin {
             Builtin::Radio => &["device", "state"],
             Builtin::Translate => &["text"],
             Builtin::Datetime | Builtin::ClipboardRead => &[],
+        }
+    }
+
+    /// Local services this builtin needs; used to offer a start button when it fails.
+    pub fn required_services(self) -> &'static [Service] {
+        match self {
+            Builtin::WebSearch => &[Service::Search],
+            Builtin::Translate => &[Service::Translate],
+            _ => &[],
         }
     }
 

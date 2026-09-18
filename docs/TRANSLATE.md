@@ -4,7 +4,10 @@ Orbit translates offline with **LibreTranslate** (Argos Translate models), runni
 SearXNG. No AI model and no graphics card are needed: a translation takes about 0.05–0.5 s on the CPU.
 Only German and English are loaded (about 1.6 GB RAM in the container, no CPU load while idle).
 
-## Setup (once)
+## Setup
+
+Orbit starts the container itself: if the translator is not running, the error message comes with a
+**Start service** button (the first start pulls the image, which takes a few minutes). Manually:
 
 ```powershell
 .\infra\start.ps1           # starts SearXNG and LibreTranslate (first start downloads the models)

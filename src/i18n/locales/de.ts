@@ -62,7 +62,12 @@ export const de: Locale = {
     none: "Kein Text markiert",
     explainPrompt: "Erkläre das kurz:\n\n{{text}}",
     withContext: "{{question}}\n\nMarkierter Text:\n{{text}}",
-  },  tabs: {
+  },  services: {
+    start: "Dienst starten",
+    starting: "Wird gestartet…",
+    startingHint: "Beim ersten Start wird der Container geladen, das kann ein paar Minuten dauern.",
+  },
+  tabs: {
     chat: "Chat",
     web: "Web",
     translate: "Übersetzer",

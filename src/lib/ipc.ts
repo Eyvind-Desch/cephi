@@ -97,6 +97,15 @@ export interface WebResult {
   engines: string[];
 }
 
+/** `src-tauri/src/services/mod.rs`: Orbit's local containers (Docker in WSL). */
+export type ServiceId = "search" | "translate";
+
+export interface ServiceStatus {
+  id: ServiceId;
+  title: string;
+  running: boolean;
+}
+
 /** `src-tauri/src/translate/mod.rs` */
 export interface Translation {
   /** The text that was translated. */
@@ -127,6 +136,8 @@ export type AgentEvent =
       output: string;
       durationMs: number;
       missingSecrets: string[];
+      /** Local services the tool needs that are not running. */
+      stoppedServices: ServiceId[];
       display: ToolDisplay | null;
     }
   | { type: "notice"; message: string }
@@ -174,6 +185,10 @@ export const api = {
 
   /** `to`: language code; `null` = automatic direction. */
   translate: (text: string, to: string | null) => invoke<Translation>("translate", { text, to }),
+
+  servicesStatus: () => invoke<ServiceStatus[]>("services_status"),
+  /** Starts a local service; resolves once it answers (may take a while on first start). */
+  serviceStart: (service: ServiceId) => invoke<void>("service_start", { service }),
 
   secretsList: () => invoke<SecretGroup[]>("secrets_list"),
   /** Resolves with a success message, rejects with the reason. */

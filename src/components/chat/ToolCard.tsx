@@ -9,6 +9,7 @@ import { useChat } from "../../store/chat";
 import { useTranslate } from "../../store/translate";
 import type { ToolPart } from "../../store/chatModel";
 import { useUi } from "../../store/ui";
+import { ServiceStartButton } from "../ui/ServiceStartButton";
 
 const statusStyles = {
   running: { icon: Loader2, className: "text-accent", spin: true },
@@ -111,6 +112,9 @@ export function ToolCard({ part }: { part: ToolPart }) {
       {failed && part.output && (
         <div className="space-y-2 border-t border-line px-3 py-2.5">
           <p className="leading-relaxed text-danger select-text">{part.output}</p>
+          {part.stoppedServices?.map((service) => (
+            <ServiceStartButton key={service} service={service} />
+          ))}
           {part.missingSecrets && part.missingSecrets.length > 0 && (
             <button
               type="button"

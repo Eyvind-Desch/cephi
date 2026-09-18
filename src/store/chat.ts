@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { errorText } from "../lib/errors";
 import { api, type AgentEvent } from "../lib/ipc";
 import { applyAgentEvent, needsPanel, type AssistantMessage, type Message } from "./chatModel";
 import { isUntranslated } from "./translate";
@@ -36,7 +37,7 @@ export const useChat = create<ChatState>()((set, get) => {
         if (needsPanel(event)) useUi.getState().expand();
       });
     } catch (error) {
-      updateAssistant(assistantId, (message) => applyAgentEvent(message, { type: "error", message: String(error) }));
+      updateAssistant(assistantId, (message) => applyAgentEvent(message, { type: "error", message: errorText(error) }));
       useUi.getState().expand();
     } finally {
       set({ running: false });

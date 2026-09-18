@@ -10,11 +10,14 @@ interface TranslateState {
   result: Translation | null;
   error: string | null;
   loading: boolean;
+  /** Bumped to translate again, e.g. after the service was started. */
+  retryToken: number;
 
   setText: (text: string) => void;
   setDirection: (direction: Direction) => void;
   /** Shows a translation from elsewhere (e.g. a chat card) in the translator tab. */
   show: (translation: Translation) => void;
+  retry: () => void;
 }
 
 export const useTranslate = create<TranslateState>()((set) => ({
@@ -23,9 +26,11 @@ export const useTranslate = create<TranslateState>()((set) => ({
   result: null,
   error: null,
   loading: false,
+  retryToken: 0,
 
   setText: (text) => set({ text }),
   setDirection: (direction) => set({ direction }),
+  retry: () => set((s) => ({ result: null, error: null, retryToken: s.retryToken + 1 })),
   show: (translation) => set({ text: translation.source, result: translation, error: null, loading: false }),
 }));
 

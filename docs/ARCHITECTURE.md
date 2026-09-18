@@ -21,6 +21,7 @@
 │ launcher/ integrations/  app index, Spotify, media/volume, radios, selection     │
 │ search/       SearXNG client, excerpts for the model                            │
 │ translate/    LibreTranslate client, automatic direction                        │
+│ services/     starts the local containers (compose config is shipped in the app) │
 │ desktop/      window placement, web tab (child webview), tray, global hotkey     │
 └─────────────────────────────────────────────────────────────────────────────────┘
           │                       │                          │

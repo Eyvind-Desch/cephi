@@ -139,6 +139,13 @@
     "save_failed": "Could not save the key (error %{code}).",
     "delete_failed": "Could not delete the key (error %{code})."
   },
+  "services": {
+    "search": "Web search",
+    "translate": "Translator",
+    "wsl_missing": "Could not reach Docker in WSL: %{error}",
+    "start_failed": "Could not start the service: %{error}",
+    "timeout": "%{service} did not start in time. Check: wsl -- docker compose -f ~/.orbit/infra/compose.yaml logs"
+  },
   "settings": {
     "no_profiles": "At least one profile is required in \"profiles\".",
     "profile_incomplete": "profiles[%{index}]: \"id\" and \"model\" must not be empty.",
@@ -158,11 +165,11 @@
   "translate": {
     "empty": "What should I translate?",
     "unknown_language": "Unknown language \"%{language}\".",
-    "unreachable": "The translator is not running (LibreTranslate at %{url}). Start it with infra/start.ps1 in the Orbit folder.",
+    "unreachable": "The translator is not running (LibreTranslate at %{url}).",
     "failed": "Translation failed: %{error}"
   },  "search": {
     "empty_query": "What should I search for?",
-    "unreachable": "Web search is not running (SearXNG at %{url}). Start it with infra/start.ps1 in the Orbit folder.",
+    "unreachable": "Web search is not running (SearXNG at %{url}).",
     "json_disabled": "SearXNG does not allow JSON results. Add \"json\" to search.formats in its settings.yml.",
     "failed": "Web search failed: %{error}",
     "no_results": "No web results for \"%{query}\"."

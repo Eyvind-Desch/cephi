@@ -16,6 +16,7 @@ use rust_i18n::t;
 use crate::config::Config;
 use crate::error::{AppError, AppResult};
 use crate::llm::{ChatMessage, LlmClient, LlmError, LlmRequest, Role, ToolCall};
+use crate::services;
 use crate::state::AppState;
 use crate::tools::{self, ExecContext, Permission, ToolOutput};
 
@@ -307,14 +308,17 @@ impl Run<'_> {
         };
 
         let content = truncate(output.content, settings.max_tool_output_chars);
-        let missing_secrets = match tool {
-            Some(tool) if !output.ok => tool
-                .manifest
-                .secrets()
-                .into_iter()
-                .filter(|name| !crate::secrets::is_set(name))
-                .collect(),
-            _ => Vec::new(),
+        let (missing_secrets, stopped_services) = match tool {
+            // Only on failure: tell the UI what is missing, so it can offer keys or a start button.
+            Some(tool) if !output.ok => (
+                tool.manifest
+                    .secrets()
+                    .into_iter()
+                    .filter(|name| !crate::secrets::is_set(name))
+                    .collect(),
+                services::stopped(&self.state.http, &self.config.settings, tool.manifest.services()).await,
+            ),
+            _ => (Vec::new(), Vec::new()),
         };
         self.emit(AgentEvent::ToolResult {
             call_id,
@@ -322,6 +326,7 @@ impl Run<'_> {
             output: content.clone(),
             duration_ms: started.elapsed().as_millis() as u64,
             missing_secrets,
+            stopped_services,
             display: output.display,
         });
         ToolOutput {

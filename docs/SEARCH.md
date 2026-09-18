@@ -4,9 +4,10 @@ Orbit searches the web through **SearXNG**, a metasearch engine running locally 
 Google, Bing, Brave, DuckDuckGo, Wikipedia, … at once and returns a clean JSON list: no account, no key,
 no tracking. A search takes about one second.
 
-## Setup (once)
+## Setup
 
-Docker must be available in WSL (the default distro). Then:
+Docker must be available in WSL (the default distro). Orbit then starts the container itself: a failed
+search offers a **Start service** button. Manually:
 
 ```powershell
 .\infra\start.ps1           # copies the config to ~/.orbit/infra in WSL and starts the containers
@@ -52,6 +53,6 @@ asks the model later, e.g. after switching to another model.
 
 ## Troubleshooting
 
-- *"Web search is not running"*: start the container with `start.ps1`, check `wsl -- docker ps`.
+- *"Web search is not running"*: use the **Start service** button, or `.\infra\start.ps1`; check `wsl -- docker ps`.
 - *"SearXNG does not allow JSON results"*: `json` is missing under `search.formats` in `settings.yml`.
 - Logs: `wsl -- docker logs orbit-searxng`.

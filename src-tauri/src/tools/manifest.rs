@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use super::builtin::Builtin;
+use crate::services::Service;
 use super::localized::LocalizedText;
 use super::template::{self, Context};
 use super::trigger::{Trigger, TriggerSpec};
@@ -199,6 +200,14 @@ impl ToolManifest {
             .iter()
             .map(|spec| spec.compile(&self.parameters.properties))
             .collect()
+    }
+
+    /// Local services this tool needs (builtins only).
+    pub fn services(&self) -> &'static [Service] {
+        match &self.action {
+            Action::Builtin { id } => id.required_services(),
+            _ => &[],
+        }
     }
 
     /// Names of all secrets this tool needs (template references and builtin requirements).

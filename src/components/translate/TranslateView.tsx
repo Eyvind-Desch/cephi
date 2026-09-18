@@ -2,9 +2,11 @@ import clsx from "clsx";
 import { Loader2, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { errorText } from "../../lib/errors";
 import { api, onWindowShown } from "../../lib/ipc";
 import { useTranslate, type Direction } from "../../store/translate";
 import { languageName } from "./languages";
+import { ServiceHint } from "../ui/ServiceHint";
 import { TranslationView } from "./TranslationView";
 
 /** Pause after typing before translating. LibreTranslate answers in well under a second. */
@@ -13,7 +15,7 @@ const DEBOUNCE_MS = 300;
 /** Translator tab: type or paste, the translation follows while typing. */
 export function TranslateView() {
   const { t } = useTranslation();
-  const { text, direction, result, error, loading } = useTranslate();
+  const { text, direction, result, error, loading, retryToken } = useTranslate();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const request = useRef(0);
 
@@ -45,13 +47,13 @@ export function TranslateView() {
         const translation = await api.translate(input, direction === "auto" ? null : direction);
         if (id === request.current) useTranslate.setState({ result: translation, error: null });
       } catch (e) {
-        if (id === request.current) useTranslate.setState({ error: String(e) });
+        if (id === request.current) useTranslate.setState({ error: errorText(e) });
       } finally {
         if (id === request.current) useTranslate.setState({ loading: false });
       }
     }, DEBOUNCE_MS);
     return () => window.clearTimeout(timer);
-  }, [text, direction]);
+  }, [text, direction, retryToken]);
 
   const directions: { id: Direction; label: string }[] = [
     { id: "auto", label: t("translate.auto") },
@@ -112,7 +114,10 @@ export function TranslateView() {
         <div className="selectable relative rounded-2xl border border-line bg-sunken px-3.5 py-3">
           {loading && <Loader2 size={12} className="absolute top-3.5 right-3.5 animate-spin text-subtle" />}
           {error ? (
-            <p className="text-[13px] leading-relaxed text-danger">{error}</p>
+            <div className="space-y-2">
+              <p className="text-[13px] leading-relaxed text-danger">{error}</p>
+              <ServiceHint service="translate" onStarted={() => useTranslate.getState().retry()} />
+            </div>
           ) : (
             result && <TranslationView translation={result} dimmed={loading} />
           )}

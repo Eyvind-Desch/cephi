@@ -64,7 +64,12 @@ export const en = {
     none: "No text selected",
     explainPrompt: "Explain this briefly:\n\n{{text}}",
     withContext: "{{question}}\n\nSelected text:\n{{text}}",
-  },  tabs: {
+  },  services: {
+    start: "Start service",
+    starting: "Starting…",
+    startingHint: "The first start downloads the container, this can take a few minutes.",
+  },
+  tabs: {
     chat: "Chat",
     web: "Web",
     translate: "Translator",

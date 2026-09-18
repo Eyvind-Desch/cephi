@@ -139,6 +139,13 @@
     "save_failed": "Schlüssel konnte nicht gespeichert werden (Fehler %{code}).",
     "delete_failed": "Schlüssel konnte nicht gelöscht werden (Fehler %{code})."
   },
+  "services": {
+    "search": "Websuche",
+    "translate": "Übersetzer",
+    "wsl_missing": "Docker in WSL nicht erreichbar: %{error}",
+    "start_failed": "Dienst konnte nicht gestartet werden: %{error}",
+    "timeout": "%{service} ist nicht rechtzeitig gestartet. Prüfen: wsl -- docker compose -f ~/.orbit/infra/compose.yaml logs"
+  },
   "settings": {
     "no_profiles": "Mindestens ein Profil in \"profiles\" ist nötig.",
     "profile_incomplete": "profiles[%{index}]: \"id\" und \"model\" dürfen nicht leer sein.",
@@ -158,11 +165,11 @@
   "translate": {
     "empty": "Was soll ich übersetzen?",
     "unknown_language": "Unbekannte Sprache „%{language}“.",
-    "unreachable": "Der Übersetzer läuft nicht (LibreTranslate unter %{url}). Starte ihn mit infra/start.ps1 im Orbit-Ordner.",
+    "unreachable": "Der Übersetzer läuft nicht (LibreTranslate unter %{url}).",
     "failed": "Übersetzung fehlgeschlagen: %{error}"
   },  "search": {
     "empty_query": "Wonach soll ich suchen?",
-    "unreachable": "Die Websuche läuft nicht (SearXNG unter %{url}). Starte sie mit infra/start.ps1 im Orbit-Ordner.",
+    "unreachable": "Die Websuche läuft nicht (SearXNG unter %{url}).",
     "json_disabled": "SearXNG erlaubt keine JSON-Ergebnisse. Ergänze \"json\" unter search.formats in der settings.yml.",
     "failed": "Websuche fehlgeschlagen: %{error}",
     "no_results": "Keine Webergebnisse für \"%{query}\"."

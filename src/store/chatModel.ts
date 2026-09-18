@@ -1,5 +1,5 @@
 import i18n from "../i18n";
-import type { AgentEvent, ToolDisplay, WebResult } from "../lib/ipc";
+import type { AgentEvent, ServiceId, ToolDisplay, WebResult } from "../lib/ipc";
 
 export type ToolStatus = "running" | "awaiting" | "ok" | "error";
 
@@ -21,6 +21,7 @@ export interface ToolPart {
   output?: string;
   durationMs?: number;
   missingSecrets?: string[];
+  stoppedServices?: ServiceId[];
   display?: ToolDisplay;
 }
 
@@ -81,6 +82,7 @@ export function applyAgentEvent(message: AssistantMessage, event: AgentEvent): A
         output: event.output,
         durationMs: event.durationMs,
         missingSecrets: event.missingSecrets,
+        stoppedServices: event.stoppedServices,
         display: event.display ?? undefined,
       });
     case "notice":
