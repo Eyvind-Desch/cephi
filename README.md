@@ -26,7 +26,7 @@ One hotkey, one input field: answer, search, or action ("öffne die Bluetooth-Ei
 Clicking outside hides Orbit, unless it's pinned (⋯ menu). Tray icon: open, configuration, quit.
 
 The chat is saved after every answer and is still there after a restart; *New chat* archives it (the last 50
-chats are kept in `%APPDATA%io.github.eyvind-desch.orbitats`). ⋯ → *Start with Windows* makes Orbit wait in the tray
+chats are kept in `%APPDATA%\io.github.eyvind-desch.orbit\chats\`). ⋯ → *Start with Windows* makes Orbit wait in the tray
 after login (installed version only).
 
 **Selected text:** mark text anywhere (browser, PDF, chat), press `Ctrl+Alt+T`, and it appears above the input
