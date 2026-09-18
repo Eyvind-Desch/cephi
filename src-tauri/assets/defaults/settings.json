@@ -2,6 +2,7 @@
   "$schema": "./schemas/settings.schema.json",
   "language": "system",
   "hotkey": "Ctrl+Alt+Space",
+  "selectionHotkey": "Ctrl+Alt+T",
   "defaultProfile": "fast",
   "profiles": [
     { "id": "fast", "label": { "en": "Fast", "de": "Schnell" }, "model": "assistant-fast:latest" },

@@ -187,6 +187,10 @@ export const onWindowShown = (handler: () => void): Promise<UnlistenFn> => liste
 export const onWebState = (handler: (state: WebState) => void): Promise<UnlistenFn> =>
   listen<WebState>("orbit://web-state", (event) => handler(event.payload));
 
+/** Text picked up by the selection hotkey; `null` = nothing was selected. */
+export const onSelection = (handler: (text: string | null) => void): Promise<UnlistenFn> =>
+  listen<string | null>("orbit://selection", (event) => handler(event.payload));
+
 /** A tool opened a page in the web tab. */
 export const onWebOpen = (handler: () => void): Promise<UnlistenFn> => listen("orbit://web-open", handler);
 

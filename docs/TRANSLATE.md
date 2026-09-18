@@ -20,6 +20,7 @@ The container `orbit-libretranslate` listens on `http://127.0.0.1:8890` (only re
 | `tr nevertheless` | Translation right in the compact bar, with a copy button |
 | `übersetze Kannst du mir helfen?` / "translate …" | same |
 | `übersetze guten Morgen ins Englische` / "translate … into German" | fixed target language |
+| Select text anywhere + `Ctrl+Alt+T` | The text appears above the input; *Translate* opens it in the translator |
 | Translator tab (文A icon) | type or paste, the translation follows while typing; alternatives as chips (click = copy) |
 
 **Direction:** German text is translated into English, everything else into German. In the tab you can

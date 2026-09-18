@@ -17,6 +17,11 @@
       "type": "string",
       "default": "Ctrl+Alt+Space"
     },
+    "selectionHotkey": {
+      "description": "Picks up the text selected in another app and shows it in Orbit. Copies the selection (Ctrl+C) and restores the clipboard afterwards. null or \"\" disables it.",
+      "type": ["string", "null"],
+      "default": "Ctrl+Alt+T"
+    },
     "defaultProfile": {
       "description": "id of the profile selected at startup.",
       "type": "string",

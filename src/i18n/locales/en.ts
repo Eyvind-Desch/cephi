@@ -57,7 +57,14 @@ export const en = {
     durationMs: "{{value}} ms",
     durationS: "{{value}} s",
   },
-  tabs: {
+  selection: {
+    dismiss: "Discard",
+    translate: "Translate",
+    explain: "Explain",
+    none: "No text selected",
+    explainPrompt: "Explain this briefly:\n\n{{text}}",
+    withContext: "{{question}}\n\nSelected text:\n{{text}}",
+  },  tabs: {
     chat: "Chat",
     web: "Web",
     translate: "Translator",

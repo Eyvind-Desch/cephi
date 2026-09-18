@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { onWindowShown } from "../../lib/ipc";
 import { useChat } from "../../store/chat";
+import { useUi } from "../../store/ui";
 import { IconButton } from "../ui/IconButton";
 
 interface ComposerProps {
@@ -38,7 +39,11 @@ export function Composer({ compact = false }: ComposerProps) {
 
   const submit = () => {
     if (running || !text.trim()) return;
-    void send(text);
+    // Picked-up text travels with the question as context.
+    const { selection, setSelection } = useUi.getState();
+    const message = selection ? t("selection.withContext", { question: text.trim(), text: selection }) : text;
+    setSelection(null);
+    void send(message);
     setText("");
   };
 

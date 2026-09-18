@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { CompactBar } from "./components/shell/CompactBar";
 import { Panel } from "./components/shell/Panel";
-import { useConfigSync, useKeyboardShortcuts, useNativeContextMenu, useWebSync } from "./hooks/useAppLifecycle";
+import { useConfigSync, useKeyboardShortcuts, useNativeContextMenu, useSelectionSync, useWebSync } from "./hooks/useAppLifecycle";
 import { useUi } from "./store/ui";
 
 export function App() {
@@ -9,6 +9,7 @@ export function App() {
 
   useConfigSync();
   useWebSync();
+  useSelectionSync();
   useKeyboardShortcuts();
   useNativeContextMenu();
 

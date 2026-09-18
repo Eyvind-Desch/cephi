@@ -15,6 +15,9 @@ pub struct Settings {
     pub schema: Option<String>,
     pub language: LanguageSetting,
     pub hotkey: String,
+    /// Picks up the text selected in the foreground app (copies it, then restores the clipboard).
+    /// Empty disables it.
+    pub selection_hotkey: Option<String>,
     pub default_profile: String,
     pub profiles: Vec<Profile>,
     /// The local provider (id `ollama`), always available.
@@ -307,6 +310,7 @@ impl Default for Settings {
             language: LanguageSetting::System,
             // Not Ctrl+Space: that is IntelliSense in VS Code and many IDEs.
             hotkey: "Ctrl+Alt+Space".into(),
+            selection_hotkey: Some("Ctrl+Alt+T".into()),
             default_profile: "fast".into(),
             profiles: vec![
                 Profile {

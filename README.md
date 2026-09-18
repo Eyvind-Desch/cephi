@@ -17,12 +17,17 @@ One hotkey, one input field: answer, search, or action ("öffne die Bluetooth-Ei
 | Key | Action |
 |---|---|
 | `Ctrl+Alt+Space` | Show/hide Orbit (configurable in `settings.json`) |
+| `Ctrl+Alt+T` | Pick up the text selected in any app (translate, explain, ask about it) |
 | `Enter` / `Shift+Enter` | Send / new line |
 | `Ctrl+E` | Compact bar ↔ large panel |
 | `Ctrl+N` | New chat |
 | `Esc` | Hide |
 
 Clicking outside hides Orbit, unless it's pinned (⋯ menu). Tray icon: open, configuration, quit.
+
+**Selected text:** mark text anywhere (browser, PDF, chat), press `Ctrl+Alt+T`, and it appears above the input
+with *Translate* and *Explain*; typing your own question sends the text along as context. Orbit copies the
+selection for that moment and **restores your clipboard afterwards**. The normal hotkey never touches the clipboard.
 
 The panel has three tabs (icons top right): **Chat**, **Web** and **Translator**. The web tab shows Google and other pages inside
 Orbit (address bar: search terms or an address) and can be enlarged; links from the chat and search results open there too.

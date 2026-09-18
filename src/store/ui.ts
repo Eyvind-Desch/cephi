@@ -26,6 +26,8 @@ interface UiState {
   overlays: number;
   /** The web tab is enlarged (window mode `large`). */
   webLarge: boolean;
+  /** Text picked up from another app via the selection hotkey. */
+  selection: string | null;
 
   /** Shows the panel for the current view (no-op if a panel is already shown). */
   expand: () => void;
@@ -37,6 +39,7 @@ interface UiState {
   applyConfig: (config: ConfigSnapshot) => void;
   showFlash: (flash: Flash | null) => void;
   setOverlay: (open: boolean) => void;
+  setSelection: (text: string | null) => void;
   toggleWebLarge: () => void;
 }
 
@@ -60,6 +63,7 @@ export const useUi = create<UiState>()((set, get) => {
     flash: null,
     overlays: 0,
     webLarge: false,
+    selection: null,
 
     expand: () => {
       if (get().mode === "compact") setMode(panelMode(get().view, get().webLarge));
@@ -95,6 +99,8 @@ export const useUi = create<UiState>()((set, get) => {
     },
 
     showFlash: (flash) => set({ flash }),
+
+    setSelection: (selection) => set({ selection }),
 
     setOverlay: (open) => set((s) => ({ overlays: Math.max(0, s.overlays + (open ? 1 : -1)) })),
 

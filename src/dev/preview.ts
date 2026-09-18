@@ -3,7 +3,7 @@
  *
  * Open http://localhost:1420/?mode=expanded&view=keys&lang=de
  *   mode: compact | expanded | large   view: chat | keys | web | translate   chat: demo | results   lang: en | de   keys: some
- *   web: page (web tab with a loaded page)
+ *   web: page (web tab with a loaded page)   selection: 1 (text picked up from another app)
  *
  * Used to review UI changes (and take headless screenshots) without touching the running app.
  */
@@ -206,6 +206,10 @@ export function installPreview() {
     mode: params.get("mode") === "compact" ? "compact" : params.get("mode") === "large" ? "large" : "expanded",
     webLarge: params.get("mode") === "large",
     view: (params.get("view") as PanelView | null) ?? "chat",
+    selection:
+      params.get("selection") === "1"
+        ? "Nevertheless, the committee agreed that the proposal was somewhat awkward to implement."
+        : null,
   });
   if (params.get("chat") === "demo") useChat.setState({ messages: demoChat });
   // Search results without an AI answer (model unavailable).

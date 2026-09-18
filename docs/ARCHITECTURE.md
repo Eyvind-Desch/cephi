@@ -18,7 +18,7 @@
 │ agent/        loop: model → tools → model, confirmations, cancellation          │
 │ llm/          providers: Ollama, Anthropic, OpenAI-compatible (streaming, tools)│
 │ secrets/      Windows Credential Manager + key catalog for the keys view        │
-│ launcher/ integrations/  app index, Spotify, media/volume, radios                │
+│ launcher/ integrations/  app index, Spotify, media/volume, radios, selection     │
 │ search/       SearXNG client, excerpts for the model                            │
 │ translate/    LibreTranslate client, automatic direction                        │
 │ desktop/      window placement, web tab (child webview), tray, global hotkey     │

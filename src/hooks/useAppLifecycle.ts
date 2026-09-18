@@ -1,8 +1,9 @@
 import { useEffect } from "react";
-import { api, onConfigChanged, onWebOpen, onWebState } from "../lib/ipc";
+import { api, onConfigChanged, onSelection, onWebOpen, onWebState } from "../lib/ipc";
 import { useChat } from "../store/chat";
 import { useUi } from "../store/ui";
 import { useWeb } from "../store/web";
+import i18n from "../i18n";
 
 /** Loads the configuration and keeps it in sync with hot reloads. */
 export function useConfigSync() {
@@ -24,6 +25,23 @@ export function useWebSync() {
       void unlistenState.then((fn) => fn());
       void unlistenOpen.then((fn) => fn());
     };
+  }, []);
+}
+
+/** Shows text picked up from another app (selection hotkey) above the composer. */
+export function useSelectionSync() {
+  useEffect(() => {
+    const unlisten = onSelection((text) => {
+      const ui = useUi.getState();
+      if (!text) {
+        ui.showFlash({ ok: false, text: i18n.t("selection.none") });
+        return;
+      }
+      ui.setSelection(text);
+      ui.setView("chat");
+      ui.expand();
+    });
+    return () => void unlisten.then((fn) => fn());
   }, []);
 }
 

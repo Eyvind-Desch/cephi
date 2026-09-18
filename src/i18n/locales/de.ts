@@ -55,7 +55,14 @@ export const de: Locale = {
     durationMs: "{{value}} ms",
     durationS: "{{value}} s",
   },
-  tabs: {
+  selection: {
+    dismiss: "Verwerfen",
+    translate: "Übersetzen",
+    explain: "Erklären",
+    none: "Kein Text markiert",
+    explainPrompt: "Erkläre das kurz:\n\n{{text}}",
+    withContext: "{{question}}\n\nMarkierter Text:\n{{text}}",
+  },  tabs: {
     chat: "Chat",
     web: "Web",
     translate: "Übersetzer",
