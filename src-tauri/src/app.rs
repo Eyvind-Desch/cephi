@@ -7,8 +7,9 @@ use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_opener::OpenerExt;
 
 use crate::config::{self, ConfigPaths, ConfigSnapshot, Diagnostic};
-use crate::desktop::{hotkey, tray, window};
+use crate::desktop::{autostart, hotkey, tray, window};
 use crate::error::{AppError, AppResult};
+use crate::history::ChatStore;
 use crate::launcher::AppIndex;
 use crate::llm::{LlmClient, OllamaClient, LOCAL_PROVIDER_ID};
 use crate::secrets::{self, SecretGroupInfo};
@@ -22,7 +23,9 @@ pub fn setup(app: &AppHandle) -> AppResult<()> {
     log::info!("config folder: {}", paths.root.display());
 
     let config = config::load(&paths, None);
-    let show_on_startup = config.settings.window.show_on_startup;
+    // Started with Windows: wait in the tray until the hotkey is pressed.
+    let autostarted = std::env::args().any(|arg| arg == autostart::AUTOSTART_ARG);
+    let show_on_startup = config.settings.window.show_on_startup && !autostarted;
 
     let http = reqwest::Client::builder()
         .user_agent(concat!("Orbit/", env!("CARGO_PKG_VERSION")))
@@ -36,7 +39,18 @@ pub fn setup(app: &AppHandle) -> AppResult<()> {
         .map_err(|e| AppError::msg(format!("cache directory not found: {e}")))?;
     let launcher = AppIndex::load(cache_dir.join("app-index.json"));
 
-    app.manage(AppState::new(paths, config, http, launcher));
+    let data_dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|e| AppError::msg(format!("data directory not found: {e}")))?;
+    let chats = ChatStore::new(data_dir.join("chats"));
+    let saved_history = chats.load().map(|chat| chat.history);
+
+    app.manage(AppState::new(paths, config, http, launcher, chats));
+    if let Some(history) = saved_history {
+        log::info!("chat restored: {} messages", history.len());
+        app.state::<AppState>().agent.restore(history);
+    }
 
     register_hotkey(app);
     tray::create(app)?;
@@ -176,4 +190,21 @@ fn register_hotkey(app: &AppHandle) {
         log::error!("{message}");
     }
     state.set_hotkey_error(result.err());
+}
+
+/// The saved chat as the frontend renders it (`None` = start empty).
+pub fn load_chat(state: &AppState) -> Option<serde_json::Value> {
+    state.chats.load().map(|chat| chat.ui)
+}
+
+/// Saves the conversation: the frontend's messages together with the model history.
+pub async fn save_chat(state: &AppState, ui: serde_json::Value) -> AppResult<()> {
+    let history = state.agent.history().await;
+    state.chats.save(ui, &history).map_err(AppError::from)
+}
+
+/// "New chat": archives the current one and clears the model history.
+pub async fn new_chat(state: &AppState) -> AppResult<()> {
+    state.agent.reset().await;
+    state.chats.archive().map_err(AppError::from)
 }

@@ -1,13 +1,21 @@
 import { AnimatePresence, motion } from "motion/react";
 import { CompactBar } from "./components/shell/CompactBar";
 import { Panel } from "./components/shell/Panel";
-import { useConfigSync, useKeyboardShortcuts, useNativeContextMenu, useSelectionSync, useWebSync } from "./hooks/useAppLifecycle";
+import {
+  useChatRestore,
+  useConfigSync,
+  useKeyboardShortcuts,
+  useNativeContextMenu,
+  useSelectionSync,
+  useWebSync,
+} from "./hooks/useAppLifecycle";
 import { useUi } from "./store/ui";
 
 export function App() {
   const mode = useUi((s) => s.mode);
 
   useConfigSync();
+  useChatRestore();
   useWebSync();
   useSelectionSync();
   useKeyboardShortcuts();

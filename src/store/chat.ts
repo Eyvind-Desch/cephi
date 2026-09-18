@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { errorText } from "../lib/errors";
 import { api, type AgentEvent } from "../lib/ipc";
-import { applyAgentEvent, needsPanel, type AssistantMessage, type Message } from "./chatModel";
+import { applyAgentEvent, needsPanel, restoreMessages, type AssistantMessage, type Message } from "./chatModel";
 import { isUntranslated } from "./translate";
 import { useUi } from "./ui";
 
@@ -18,6 +18,8 @@ interface ChatState {
   cancel: () => void;
   confirm: (callId: string, approved: boolean) => void;
   reset: () => Promise<void>;
+  /** Shows the chat saved in the last session (at startup). */
+  restore: () => Promise<void>;
 }
 
 export const useChat = create<ChatState>()((set, get) => {
@@ -41,6 +43,8 @@ export const useChat = create<ChatState>()((set, get) => {
       useUi.getState().expand();
     } finally {
       set({ running: false });
+      // Every finished request is saved, so the chat survives a restart.
+      void api.chatSave(get().messages).catch((e) => console.warn("chat not saved", e));
     }
   };
 
@@ -123,6 +127,12 @@ export const useChat = create<ChatState>()((set, get) => {
     reset: async () => {
       await api.agentReset();
       set({ messages: [] });
+    },
+
+    restore: async () => {
+      const saved = await api.chatLoad();
+      // Only if nothing was typed in the meantime.
+      if (get().messages.length === 0) set({ messages: restoreMessages(saved) });
     },
   };
 });

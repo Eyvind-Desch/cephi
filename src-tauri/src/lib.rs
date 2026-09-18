@@ -7,6 +7,7 @@ mod commands;
 mod config;
 mod desktop;
 mod error;
+mod history;
 mod i18n;
 mod integrations;
 mod launcher;
@@ -61,9 +62,13 @@ pub fn run() {
             commands::agent_cancel,
             commands::agent_confirm,
             commands::agent_reset,
+            commands::chat_load,
+            commands::chat_save,
             commands::window_set_mode,
             commands::window_hide,
             commands::window_set_pinned,
+            commands::autostart_state,
+            commands::autostart_set,
             commands::open_external,
             commands::web_state,
             commands::web_navigate,

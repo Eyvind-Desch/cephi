@@ -9,6 +9,7 @@ use tauri_plugin_opener::OpenerExt;
 
 use crate::agent::{self, AgentEvent, Input};
 use crate::config::ConfigSnapshot;
+use crate::desktop::autostart::{self, AutostartState};
 use crate::desktop::web::{self, WebState};
 use crate::desktop::window::{self, WindowMode};
 use crate::error::{AppError, AppResult};
@@ -91,10 +92,21 @@ pub fn agent_confirm(state: State<'_, AppState>, call_id: String, approved: bool
     state.agent.confirm(&call_id, approved)
 }
 
+/// New chat: archives the current conversation.
 #[tauri::command]
 pub async fn agent_reset(state: State<'_, AppState>) -> AppResult<()> {
-    state.agent.reset().await;
-    Ok(())
+    crate::app::new_chat(&state).await
+}
+
+#[tauri::command]
+pub fn chat_load(state: State<'_, AppState>) -> Option<serde_json::Value> {
+    crate::app::load_chat(&state)
+}
+
+/// Saves the UI messages (after a request finished) together with the model history.
+#[tauri::command]
+pub async fn chat_save(state: State<'_, AppState>, ui: serde_json::Value) -> AppResult<()> {
+    crate::app::save_chat(&state, ui).await
 }
 
 #[tauri::command]
@@ -110,6 +122,16 @@ pub fn window_hide(app: AppHandle) -> AppResult<()> {
 #[tauri::command]
 pub fn window_set_pinned(state: State<'_, AppState>, pinned: bool) {
     state.window.set_pinned(pinned);
+}
+
+#[tauri::command]
+pub fn autostart_state() -> AutostartState {
+    autostart::state()
+}
+
+#[tauri::command]
+pub fn autostart_set(enabled: bool) -> AppResult<AutostartState> {
+    autostart::set(enabled).map_err(AppError::msg)
 }
 
 #[tauri::command]

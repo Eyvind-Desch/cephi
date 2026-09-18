@@ -1,7 +1,8 @@
 import clsx from "clsx";
-import { FolderCog, KeyRound, Minimize2, MoreHorizontal, Pin, RefreshCw, SquarePen } from "lucide-react";
+import { FolderCog, KeyRound, Minimize2, MoreHorizontal, Pin, Power, RefreshCw, SquarePen } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { api } from "../../lib/ipc";
+import { api, type AutostartState } from "../../lib/ipc";
 import { useChat } from "../../store/chat";
 import { useUi } from "../../store/ui";
 import { IconButton } from "../ui/IconButton";
@@ -21,6 +22,12 @@ export function Header() {
   const collapse = useUi((s) => s.collapse);
   const applyConfig = useUi((s) => s.applyConfig);
 
+  // The registry is the source of truth; read it once when the header appears.
+  const [autostart, setAutostart] = useState<AutostartState | null>(null);
+  useEffect(() => {
+    void api.autostartState().then(setAutostart);
+  }, []);
+
   const entries: MenuEntry[] = [
     {
       label: t("menu.newChat"),
@@ -32,6 +39,14 @@ export function Header() {
       },
     },
     { label: t("menu.pin"), icon: Pin, checked: pinned, onSelect: togglePinned },
+    {
+      label: t("menu.autostart"),
+      icon: Power,
+      checked: autostart?.enabled ?? false,
+      disabled: !autostart?.available,
+      description: autostart && !autostart.available ? t("menu.autostartUnavailable") : undefined,
+      onSelect: () => void api.autostartSet(!autostart?.enabled).then(setAutostart),
+    },
     { kind: "separator" },
     {
       label: t("menu.keys"),

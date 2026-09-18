@@ -57,6 +57,19 @@ impl AgentController {
         self.history.lock().await.clear();
     }
 
+    /// Continues a saved conversation (at startup, before any run).
+    pub fn restore(&self, history: Vec<ChatMessage>) {
+        match self.history.try_lock() {
+            Ok(mut current) => *current = history,
+            Err(_) => log::warn!("chat not restored: a request is already running"),
+        }
+    }
+
+    /// The conversation as the model sees it. Waits for a running request to finish.
+    pub async fn history(&self) -> Vec<ChatMessage> {
+        self.history.lock().await.clone()
+    }
+
     fn begin_run(&self) -> AppResult<CancellationToken> {
         let mut active = self.active_run.lock().expect("run lock poisoned");
         if active.is_some() {

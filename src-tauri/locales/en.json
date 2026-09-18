@@ -28,6 +28,10 @@
     "state": "Volume %{percent} %",
     "state_muted": "Volume %{percent} % (muted)"
   },
+  "autostart": {
+    "dev_build": "Start with Windows only works in the installed version (the development build needs the dev server).",
+    "failed": "Could not change the Windows autostart entry (error %{code})."
+  },
   "clipboard": {
     "unavailable": "Clipboard is not available: %{error}",
     "no_text": "The clipboard contains no text: %{error}",

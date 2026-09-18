@@ -23,6 +23,13 @@ export interface WebBounds {
   height: number;
 }
 
+/** `src-tauri/src/desktop/autostart.rs` */
+export interface AutostartState {
+  enabled: boolean;
+  /** False in development builds, which need the dev server. */
+  available: boolean;
+}
+
 export type WebCommand = "back" | "forward" | "reload" | "stop" | "openExternal";
 
 export type Permission = "auto" | "confirm";
@@ -165,11 +172,18 @@ export const api = {
   agentPreload: (profileId: string) => invoke<void>("agent_preload", { profileId }),
   agentCancel: () => invoke<void>("agent_cancel"),
   agentConfirm: (callId: string, approved: boolean) => invoke<boolean>("agent_confirm", { callId, approved }),
+  /** New chat: the backend archives the current one. */
   agentReset: () => invoke<void>("agent_reset"),
+  /** The saved chat (UI messages) from the last session, or `null`. */
+  chatLoad: () => invoke<unknown>("chat_load"),
+  chatSave: (ui: unknown) => invoke<void>("chat_save", { ui }),
 
   windowSetMode: (mode: WindowMode) => invoke<void>("window_set_mode", { mode }),
   windowHide: () => invoke<void>("window_hide"),
   windowSetPinned: (pinned: boolean) => invoke<void>("window_set_pinned", { pinned }),
+
+  autostartState: () => invoke<AutostartState>("autostart_state"),
+  autostartSet: (enabled: boolean) => invoke<AutostartState>("autostart_set", { enabled }),
 
   openExternal: (url: string) => invoke<void>("open_external", { url }),
 

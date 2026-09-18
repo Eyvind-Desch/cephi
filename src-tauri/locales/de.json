@@ -28,6 +28,10 @@
     "state": "Lautstärke %{percent} %",
     "state_muted": "Lautstärke %{percent} % (stumm)"
   },
+  "autostart": {
+    "dev_build": "Mit Windows starten geht nur in der installierten Version (der Entwicklungs-Build braucht den Dev-Server).",
+    "failed": "Der Windows-Autostart-Eintrag konnte nicht geändert werden (Fehler %{code})."
+  },
   "clipboard": {
     "unavailable": "Zwischenablage nicht verfügbar: %{error}",
     "no_text": "Zwischenablage enthält keinen Text: %{error}",

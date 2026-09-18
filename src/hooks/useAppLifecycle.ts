@@ -5,6 +5,13 @@ import { useUi } from "../store/ui";
 import { useWeb } from "../store/web";
 import i18n from "../i18n";
 
+/** Shows the chat from the last session. */
+export function useChatRestore() {
+  useEffect(() => {
+    void useChat.getState().restore();
+  }, []);
+}
+
 /** Loads the configuration and keeps it in sync with hot reloads. */
 export function useConfigSync() {
   useEffect(() => {

@@ -197,6 +197,10 @@ export function installPreview() {
             { id: "search", title: "Websuche", running: true },
             { id: "translate", title: "Übersetzer", running: params.get("service") !== "stopped" },
           ];
+        case "autostart_state":
+          return { enabled: false, available: true };
+        case "chat_load":
+          return null;
         case "web_state":
           return params.get("web") === "page"
             ? { url: "https://www.google.com/search?q=tauri+child+webview", title: "tauri child webview - Google Suche", loading: true }

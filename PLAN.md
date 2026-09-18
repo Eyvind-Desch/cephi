@@ -116,7 +116,8 @@ request. Unambiguous commands ("open X") run through the quick action path witho
    → [docs/TRANSLATE.md](docs/TRANSLATE.md). Local LLMs were tested first: ~2.5 s per request, 2–3 GB VRAM,
    unreliable for single words.
 4. **MCP** – `mcp.json`, tools from MCP servers
-5. **Polish** – settings UI, save history, code highlighting, autostart, installer
+5. **Polish** – ✅ save chat history (restored on start, archived on "new chat") · ✅ start with Windows · settings UI,
+   code highlighting, installer
 6. **Extras** – ✅ pick up selected text (`Ctrl+Alt+T`, clipboard is restored) · ask about a screenshot (vision model), voice
 
 ## Approach
@@ -128,7 +129,7 @@ next stage begins. Whatever isn't a nuisance goes into the backlog instead of th
 
 - [ ] When launched from the terminal, the window stays hidden (Windows foreground lock) → hotkey needed
 - [ ] Code highlighting in responses
-- [ ] Save chat history
+- [ ] Browse archived chats (they are saved, but there is no list in the UI yet)
 - [ ] Volume indicator (brief overlay) after "louder/quieter"
 - [ ] Check whether Spotify auto-plays albums/playlists
 - [ ] Search: DuckDuckGo fallback when SearXNG is not running

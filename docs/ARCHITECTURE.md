@@ -22,6 +22,7 @@
 │ search/       SearXNG client, excerpts for the model                            │
 │ translate/    LibreTranslate client, automatic direction                        │
 │ services/     starts the local containers (compose config is shipped in the app) │
+│ history.rs    current chat on disk (UI messages + model history), archive       │
 │ desktop/      window placement, web tab (child webview), tray, global hotkey     │
 └─────────────────────────────────────────────────────────────────────────────────┘
           │                       │                          │

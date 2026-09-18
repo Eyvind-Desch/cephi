@@ -62,7 +62,8 @@ export const de: Locale = {
     none: "Kein Text markiert",
     explainPrompt: "Erkläre das kurz:\n\n{{text}}",
     withContext: "{{question}}\n\nMarkierter Text:\n{{text}}",
-  },  services: {
+  },
+  services: {
     start: "Dienst starten",
     starting: "Wird gestartet…",
     startingHint: "Beim ersten Start wird der Container geladen, das kann ein paar Minuten dauern.",
@@ -110,6 +111,8 @@ export const de: Locale = {
     newChat: "Neuer Chat",
     newChatShortcut: "Strg+N",
     pin: "Anpinnen",
+    autostart: "Mit Windows starten",
+    autostartUnavailable: "Nur in der installierten Version",
     keys: "Schlüssel & API-Keys",
     configFolder: "Konfigurationsordner",
     reloadConfig: "Konfiguration neu laden",

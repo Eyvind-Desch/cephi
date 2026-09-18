@@ -64,7 +64,8 @@ export const en = {
     none: "No text selected",
     explainPrompt: "Explain this briefly:\n\n{{text}}",
     withContext: "{{question}}\n\nSelected text:\n{{text}}",
-  },  services: {
+  },
+  services: {
     start: "Start service",
     starting: "Starting…",
     startingHint: "The first start downloads the container, this can take a few minutes.",
@@ -112,6 +113,8 @@ export const en = {
     newChat: "New chat",
     newChatShortcut: "Ctrl+N",
     pin: "Pin",
+    autostart: "Start with Windows",
+    autostartUnavailable: "Only in the installed version",
     keys: "Keys & API keys",
     configFolder: "Config folder",
     reloadConfig: "Reload configuration",

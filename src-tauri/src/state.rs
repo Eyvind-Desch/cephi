@@ -3,6 +3,7 @@ use std::sync::{Arc, Mutex, RwLock};
 use crate::agent::AgentController;
 use crate::config::{Config, ConfigPaths};
 use crate::desktop::web::WebController;
+use crate::history::ChatStore;
 use crate::desktop::window::WindowController;
 use crate::integrations::spotify::SpotifyClient;
 use crate::launcher::AppIndex;
@@ -18,13 +19,15 @@ pub struct AppState {
     pub window: WindowController,
     pub web: WebController,
     pub launcher: AppIndex,
+    /// The current conversation on disk.
+    pub chats: ChatStore,
     pub spotify: SpotifyClient,
     config: RwLock<Arc<Config>>,
     hotkey_error: Mutex<Option<String>>,
 }
 
 impl AppState {
-    pub fn new(paths: ConfigPaths, config: Config, http: reqwest::Client, launcher: AppIndex) -> Self {
+    pub fn new(paths: ConfigPaths, config: Config, http: reqwest::Client, launcher: AppIndex, chats: ChatStore) -> Self {
         Self {
             paths,
             http,
@@ -32,6 +35,7 @@ impl AppState {
             window: WindowController::default(),
             web: WebController::default(),
             launcher,
+            chats,
             spotify: SpotifyClient::default(),
             config: RwLock::new(Arc::new(config)),
             hotkey_error: Mutex::new(None),

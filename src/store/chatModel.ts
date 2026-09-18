@@ -143,6 +143,19 @@ function updateTool(message: AssistantMessage, callId: string, patch: Partial<To
   };
 }
 
+/**
+ * Messages saved in an earlier session. Anything that was still in progress when Orbit closed
+ * counts as cancelled; a file that isn't a message list yields an empty chat.
+ */
+export function restoreMessages(saved: unknown): Message[] {
+  if (!Array.isArray(saved)) return [];
+  return (saved as Message[]).map((message) =>
+    message.role === "assistant" && message.status === "streaming"
+      ? { ...message, status: "cancelled", parts: settleTools(message.parts) }
+      : message,
+  );
+}
+
 /** Tools still running/awaiting when a run ends will never finish. */
 function settleTools(parts: Part[]): Part[] {
   return parts.map((part) =>

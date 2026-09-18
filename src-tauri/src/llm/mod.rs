@@ -37,30 +37,36 @@ pub enum Role {
     Tool,
 }
 
-/// Provider-neutral chat message.
-#[derive(Clone, Debug)]
+/// Provider-neutral chat message. Serializable so conversations survive a restart (`history.rs`).
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ChatMessage {
     pub role: Role,
     pub content: String,
     /// Assistant only.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub tool_calls: Vec<ToolCall>,
     /// Tool results only.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tool_call_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tool_name: Option<String>,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub tool_error: bool,
     /// The assistant turn exactly as the provider returned it (e.g. Claude thinking blocks with
     /// signatures). Replayed verbatim when talking to the same provider and model again.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub native: Option<NativeTurn>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct NativeTurn {
     pub provider: String,
     pub model: String,
     pub content: Value,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct ToolCall {
     pub id: String,
     pub name: String,
