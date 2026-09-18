@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { api, type AgentEvent } from "../lib/ipc";
 import { applyAgentEvent, needsPanel, type AssistantMessage, type Message } from "./chatModel";
+import { isUntranslated } from "./translate";
 import { useUi } from "./ui";
 
 /** How long a successful fast-path confirmation stays visible before Orbit hides itself. */
@@ -76,8 +77,10 @@ export const useChat = create<ChatState>()((set, get) => {
           return;
         }
         // Something to read and copy, not just a confirmation: keep it until the next interaction.
+        // Without a translation the panel opens instead, where the AI can take over.
         if (tool.display?.kind === "translation") {
-          showFlash({ ok: true, text: tool.display.text, sticky: true });
+          if (isUntranslated(tool.display)) expand();
+          else showFlash({ ok: true, text: tool.display.text, sticky: true });
           return;
         }
         const text = tool.output ?? tool.title;

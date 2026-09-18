@@ -146,7 +146,28 @@ const demoChat: Message[] = [
         fast: true,
         output: "dennoch (trotzdem, gleichwohl)",
         durationMs: 41,
-        display: { kind: "translation", text: "dennoch", alternatives: ["trotzdem", "gleichwohl"], from: "en", to: "de" },
+        display: { kind: "translation", source: "nevertheless", text: "dennoch", alternatives: ["trotzdem", "gleichwohl"], from: "en", to: "de" },
+      },
+    ],
+  },
+  { id: "9", role: "user", text: "tr awkard" },
+  {
+    id: "10",
+    role: "assistant",
+    status: "done",
+    parts: [
+      {
+        kind: "tool",
+        callId: "c5",
+        name: "translate",
+        title: "Übersetzen",
+        args: { text: "awkard" },
+        status: "ok",
+        fast: true,
+        output: "awkard",
+        durationMs: 114,
+        // A typo: LibreTranslate returns unknown words unchanged.
+        display: { kind: "translation", source: "awkard", text: "awkard", alternatives: [], from: "en", to: "de" },
       },
     ],
   },
@@ -168,7 +189,7 @@ export function installPreview() {
         case "secrets_test":
           return lang === "de" ? "Verbindung funktioniert." : "Connection works.";
         case "translate":
-          return { text: "dennoch", alternatives: ["trotzdem", "gleichwohl"], from: "en", to: "de" };
+          return { source: "nevertheless", text: "dennoch", alternatives: ["trotzdem", "gleichwohl"], from: "en", to: "de" };
         case "web_state":
           return params.get("web") === "page"
             ? { url: "https://www.google.com/search?q=tauri+child+webview", title: "tauri child webview - Google Suche", loading: true }

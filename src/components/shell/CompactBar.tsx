@@ -9,7 +9,7 @@ import { useUi, type Flash } from "../../store/ui";
 import { Composer } from "../chat/Composer";
 import { IconButton } from "../ui/IconButton";
 import { OrbitMark } from "../ui/OrbitMark";
-import { CopyButton } from "../translate/TranslateView";
+import { CopyButton } from "../translate/TranslationView";
 
 /** Compact mode: a single input line, Spotlight-style. */
 export function CompactBar() {

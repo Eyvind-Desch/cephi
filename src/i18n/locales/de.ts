@@ -45,6 +45,7 @@ export const de: Locale = {
     run: "Ausführen",
     enterKeys: "Schlüssel eintragen",
     showPage: "Im Web-Tab anzeigen",
+    showTranslation: "Im Übersetzer öffnen",
     details: {
       tool: "Tool",
       arguments: "Argumente",
@@ -65,6 +66,9 @@ export const de: Locale = {
     placeholder: "Text eingeben oder einfügen…",
     clear: "Leeren",
     alternatives: "Auch:",
+    notFound: "Keine Übersetzung für „{{text}}“ gefunden.",
+    askAi: "Mit KI übersetzen",
+    aiPrompt: "Wie übersetzt man „{{text}}“ ins {{language}}? Korrigiere vorher Tippfehler.",
   },
   web: {
     back: "Zurück",

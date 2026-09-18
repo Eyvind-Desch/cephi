@@ -47,6 +47,7 @@ export const en = {
     run: "Run",
     enterKeys: "Enter keys",
     showPage: "Show in the web tab",
+    showTranslation: "Open in the translator",
     details: {
       tool: "Tool",
       arguments: "Arguments",
@@ -67,6 +68,9 @@ export const en = {
     placeholder: "Type or paste text…",
     clear: "Clear",
     alternatives: "Also:",
+    notFound: "No translation found for “{{text}}”.",
+    askAi: "Translate with AI",
+    aiPrompt: "How do you translate “{{text}}” into {{language}}? Fix typos first.",
   },
   web: {
     back: "Back",

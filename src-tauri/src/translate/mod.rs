@@ -14,6 +14,8 @@ use crate::config::TranslateSettings;
 #[derive(Clone, Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Translation {
+    /// The text that was translated, so the UI can show and reuse it.
+    pub source: String,
     pub text: String,
     /// Other common translations (mostly for single words and short phrases).
     pub alternatives: Vec<String>,
@@ -95,6 +97,7 @@ mod tests {
     #[test]
     fn duplicate_alternatives_are_dropped() {
         let translation = clean(Translation {
+            source: "Kannst du mir helfen?".into(),
             text: "Can you help me?".into(),
             alternatives: vec!["can you help me?".into(), "Could you help me?".into(), "Could you help me?".into()],
             from: "de".into(),

@@ -93,6 +93,7 @@ impl<'a> Client<'a> {
             (source, _) => source.to_string(),
         };
         Ok(Translation {
+            source: text.to_string(),
             text: body.translated_text.trim().to_string(),
             alternatives: body.alternatives.into_iter().map(|a| a.trim().to_string()).collect(),
             from,

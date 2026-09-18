@@ -1,11 +1,12 @@
 import clsx from "clsx";
-import { Check, ChevronRight, Globe, KeyRound, Loader2, ShieldQuestion, Wrench, X, Zap } from "lucide-react";
+import { Check, ChevronRight, Globe, KeyRound, Languages, Loader2, ShieldQuestion, Wrench, X, Zap } from "lucide-react";
 import { motion } from "motion/react";
 import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { formatDuration } from "../../i18n";
 import { openLink } from "../../lib/links";
 import { useChat } from "../../store/chat";
+import { useTranslate } from "../../store/translate";
 import type { ToolPart } from "../../store/chatModel";
 import { useUi } from "../../store/ui";
 
@@ -27,6 +28,16 @@ export function ToolCard({ part }: { part: ToolPart }) {
   const failed = part.status === "error";
   const hasArgs = part.args != null && Object.keys(part.args as object).length > 0;
   const pageUrl = part.display?.kind === "webPage" ? part.display.url : null;
+  const translation = part.display?.kind === "translation" ? part.display : null;
+  // Tools with their own view: the card leads there instead of toggling the details.
+  const openView = pageUrl
+    ? () => void openLink(pageUrl)
+    : translation
+      ? () => {
+          useTranslate.getState().show(translation);
+          setView("translate");
+        }
+      : null;
 
   return (
     <motion.div
@@ -41,8 +52,8 @@ export function ToolCard({ part }: { part: ToolPart }) {
         <button
           type="button"
           // Opened a page: the card leads back to it. Otherwise it toggles the details.
-          onClick={() => (pageUrl ? void openLink(pageUrl) : setOpen((v) => !v))}
-          title={pageUrl ? t("toolCard.showPage") : undefined}
+          onClick={() => (openView ? openView() : setOpen((v) => !v))}
+          title={openView ? t(pageUrl ? "toolCard.showPage" : "toolCard.showTranslation") : undefined}
           className="flex min-w-0 flex-1 items-center gap-2.5 py-2 pl-3 text-left"
         >
           {part.fast ? (
@@ -54,6 +65,7 @@ export function ToolCard({ part }: { part: ToolPart }) {
           )}
           <span className="min-w-0 flex-1 truncate text-muted">{part.title}</span>
           {pageUrl && <Globe size={13} className="shrink-0 text-subtle" />}
+          {translation && <Languages size={13} className="shrink-0 text-subtle" />}
           {part.durationMs != null && (
             <span className="shrink-0 text-[11.5px] text-subtle">{formatDuration(part.durationMs)}</span>
           )}

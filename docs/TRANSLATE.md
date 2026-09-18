@@ -26,6 +26,11 @@ The container `orbit-libretranslate` listens on `http://127.0.0.1:8890` (only re
 also force "→ English" or "→ German". For single words LibreTranslate also returns alternatives
 ("dennoch · trotzdem · gleichwohl").
 
+**Unknown words:** LibreTranslate returns words it does not know (typos, rare terms) unchanged. Orbit detects
+that, says so, and offers **Translate with AI**, which also fixes typos ("awkard" → "awkward" → "unbeholfen").
+
+A click on the translation card in the chat opens it in the translator tab.
+
 The AI can call the `translate` tool too. For things a dictionary can't do ("say this more politely",
 "what's the difference between awkward and embarrassing") just ask in the chat.
 

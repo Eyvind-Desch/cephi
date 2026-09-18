@@ -99,6 +99,8 @@ export interface WebResult {
 
 /** `src-tauri/src/translate/mod.rs` */
 export interface Translation {
+  /** The text that was translated. */
+  source: string;
   text: string;
   alternatives: string[];
   /** Language codes, e.g. `en` → `de`. */
