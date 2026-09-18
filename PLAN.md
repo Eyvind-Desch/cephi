@@ -136,7 +136,7 @@ next stage begins. Whatever isn't a nuisance goes into the backlog instead of th
 - [ ] Search: `fetch_page` tool (read a result page when the excerpts are not enough)
 - [ ] Web tab: Esc and Orbit shortcuts don't work while the page has focus (keys go to the page)
 - [ ] Web tab: ask the AI about the open page
-- [ ] Slash commands in the input (like Claude Code): `/clear` new chat, `/tools` list, `/keys`, `/web`, …
+- [x] Slash commands in the input (like Claude Code): `/clear`, `/web`, `/translate`, `/model`, `/tools`, `/keys`, …
 
 ## Setup
 

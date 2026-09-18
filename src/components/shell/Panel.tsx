@@ -3,6 +3,7 @@ import { Composer } from "../chat/Composer";
 import { MessageList } from "../chat/MessageList";
 import { SelectionChip } from "../chat/SelectionChip";
 import { KeysView } from "../keys/KeysView";
+import { ToolsView } from "../tools/ToolsView";
 import { TranslateView } from "../translate/TranslateView";
 import { WebView } from "../web/WebView";
 import { DiagnosticsBanner } from "./DiagnosticsBanner";
@@ -17,6 +18,7 @@ export function Panel() {
       <Header />
       <DiagnosticsBanner />
       {view === "keys" && <KeysView />}
+      {view === "tools" && <ToolsView />}
       {view === "web" && <WebView />}
       {view === "translate" && <TranslateView />}
       {view === "chat" && (

@@ -11,6 +11,10 @@ const AUTO_HIDE_MS = 1400;
 interface ChatState {
   messages: Message[];
   running: boolean;
+  /** Text in the composer; kept in the store so it survives switching between bar and panel. */
+  draft: string;
+
+  setDraft: (draft: string) => void;
 
   send: (text: string) => Promise<void>;
   /** Asks the model to answer from the search results at the end of the last message. */
@@ -51,6 +55,9 @@ export const useChat = create<ChatState>()((set, get) => {
   return {
     messages: [],
     running: false,
+    draft: "",
+
+    setDraft: (draft) => set({ draft }),
 
     send: async (raw) => {
       const text = raw.trim();

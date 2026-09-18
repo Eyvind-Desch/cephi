@@ -43,6 +43,12 @@ pub struct Trigger {
 }
 
 impl TriggerSpec {
+    pub fn pattern(&self) -> &str {
+        match self {
+            TriggerSpec::Pattern(pattern) | TriggerSpec::WithArgs { pattern, .. } => pattern,
+        }
+    }
+
     pub fn compile(&self, params: &BTreeMap<String, ParamSpec>) -> Result<Trigger, String> {
         let (pattern, fixed_args) = match self {
             TriggerSpec::Pattern(pattern) => (pattern.as_str(), Map::new()),

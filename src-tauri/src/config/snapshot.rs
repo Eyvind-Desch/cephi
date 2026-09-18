@@ -45,6 +45,8 @@ pub struct ToolInfo {
     pub permission: Permission,
     pub kind: &'static str,
     pub source: String,
+    /// Fast-path phrases, as written in the manifest.
+    pub triggers: Vec<String>,
 }
 
 impl ConfigSnapshot {
@@ -83,6 +85,7 @@ impl ConfigSnapshot {
                     description: t.manifest.description.clone(),
                     permission: t.manifest.permission,
                     kind: t.manifest.action.kind(),
+                    triggers: t.manifest.triggers.iter().map(|spec| spec.pattern().to_string()).collect(),
                     source: t.source.clone(),
                 })
                 .collect(),

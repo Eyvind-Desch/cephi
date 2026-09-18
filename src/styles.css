@@ -9,7 +9,8 @@
   --surface: rgb(250 250 252 / 0.78);
   --surface-raised: rgb(255 255 255 / 0.72);
   --surface-sunken: rgb(0 0 0 / 0.04);
-  --popover: rgb(252 252 254 / 0.97);
+  /* Menus sit on top of content and must not let it show through. */
+  --popover: rgb(252 252 254);
   --line: rgb(0 0 0 / 0.08);
   --fg: #18181c;
   --fg-muted: #62626e;
@@ -29,7 +30,7 @@
     --surface: rgb(22 22 27 / 0.72);
     --surface-raised: rgb(255 255 255 / 0.06);
     --surface-sunken: rgb(0 0 0 / 0.22);
-    --popover: rgb(34 34 40 / 0.98);
+    --popover: rgb(34 34 40);
     --line: rgb(255 255 255 / 0.09);
     --fg: #ececf1;
     --fg-muted: #a4a4b0;

@@ -3,7 +3,7 @@
  *
  * Open http://localhost:1420/?mode=expanded&view=keys&lang=de
  *   mode: compact | expanded | large   view: chat | keys | web | translate   chat: demo | results   lang: en | de   keys: some
- *   web: page (web tab with a loaded page)   service: stopped (translator container down)   selection: 1 (text picked up from another app)
+ *   draft: text in the composer (e.g. "/" shows the commands)   web: page (web tab with a loaded page)   service: stopped (translator container down)   selection: 1 (text picked up from another app)
  *
  * Used to review UI changes (and take headless screenshots) without touching the running app.
  */
@@ -30,7 +30,11 @@ const config: ConfigSnapshot = {
     profile("claude", "Claude", "claude-opus-5", "anthropic", "Anthropic", false, someKeys),
     profile("gemini", "Gemini", "gemini-3.8-flash", "gemini", "Google Gemini", false, false),
   ],
-  tools: [],
+  tools: [
+    { name: "spotify_play", title: "Spotify", description: "Plays music on Spotify: a song, an album, an artist or a playlist.", permission: "auto", kind: "builtin", source: "tools/media/spotify_play.json", triggers: ["(spiele|play) {query} (auf|on) spotify"] },
+    { name: "web_search", title: "Websuche", description: "Searches the web and returns the top results with short excerpts.", permission: "auto", kind: "builtin", source: "tools/web/web_search.json", triggers: ["?{query}", "search the web for {query}"] },
+    { name: "run_powershell", title: "PowerShell", description: "Runs a PowerShell command.", permission: "confirm", kind: "powershell", source: "tools/system/run_powershell.json", triggers: [] },
+  ],
   diagnostics: [],
 };
 
@@ -223,6 +227,7 @@ export function installPreview() {
         : null,
   });
   if (params.get("chat") === "demo") useChat.setState({ messages: demoChat });
+  if (params.get("draft")) useChat.setState({ draft: params.get("draft") ?? "" });
   if (params.get("view") === "translate") useTranslate.setState({ text: params.get("text") ?? "renovated" });
   // Search results without an AI answer (model unavailable).
   if (params.get("chat") === "results") {

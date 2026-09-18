@@ -56,6 +56,8 @@ export interface ToolInfo {
   permission: Permission;
   kind: string;
   source: string;
+  /** Fast-path phrases as written in the manifest. */
+  triggers: string[];
 }
 
 export interface Diagnostic {
