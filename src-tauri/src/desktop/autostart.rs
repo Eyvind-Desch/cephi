@@ -83,7 +83,9 @@ pub fn remove_legacy_entry() {
 
 /// The command line Windows should run: this executable, quoted, plus the autostart flag.
 fn own_command() -> String {
-    let exe = std::env::current_exe().map(|p| p.display().to_string()).unwrap_or_default();
+    let exe = std::env::current_exe()
+        .map(|p| p.display().to_string())
+        .unwrap_or_default();
     format!("\"{exe}\" {AUTOSTART_ARG}")
 }
 
@@ -112,7 +114,10 @@ fn registered_command() -> Option<String> {
 }
 
 fn wide(text: &str) -> Vec<u16> {
-    std::ffi::OsStr::new(text).encode_wide().chain(std::iter::once(0)).collect()
+    std::ffi::OsStr::new(text)
+        .encode_wide()
+        .chain(std::iter::once(0))
+        .collect()
 }
 
 #[cfg(test)]

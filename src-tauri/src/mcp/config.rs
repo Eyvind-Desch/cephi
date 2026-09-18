@@ -11,18 +11,18 @@ use std::path::Path;
 
 use regex::Regex;
 use rust_i18n::t;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::tools::Permission;
 
-#[derive(Clone, Debug, Default, Deserialize)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct McpConfig {
     #[serde(default)]
     pub mcp_servers: BTreeMap<String, ServerConfig>,
 }
 
-#[derive(Clone, Debug, Default, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct ServerConfig {
     /// Local server: program to start (e.g. `npx`, `uvx`, `docker`, a path).
@@ -55,7 +55,9 @@ impl ServerConfig {
     pub fn transport(&self) -> Result<Transport<'_>, String> {
         match (self.command.as_deref(), self.url.as_deref()) {
             (Some(command), None) if !command.trim().is_empty() => Ok(Transport::Process { command }),
-            (None, Some(url)) if url.starts_with("http://") || url.starts_with("https://") => Ok(Transport::Http { url }),
+            (None, Some(url)) if url.starts_with("http://") || url.starts_with("https://") => {
+                Ok(Transport::Http { url })
+            }
             (Some(_), Some(_)) => Err(t!("mcp.command_and_url").into()),
             (None, Some(url)) => Err(t!("mcp.invalid_url", url = url).into()),
             _ => Err(t!("mcp.no_command").into()),
@@ -89,13 +91,19 @@ pub fn load(path: &Path) -> Result<McpConfig, String> {
     };
     let config: McpConfig =
         serde_json::from_str(&text).map_err(|e| t!("config.invalid_json", error = e).to_string())?;
+    validate(&config)?;
+    Ok(config)
+}
+
+/// Checks names and that every server has exactly one way to reach it.
+pub fn validate(config: &McpConfig) -> Result<(), String> {
     for (name, server) in &config.mcp_servers {
         if !is_valid_server_name(name) {
             return Err(t!("mcp.invalid_name", name = name).into());
         }
         server.transport().map_err(|e| format!("{name}: {e}"))?;
     }
-    Ok(config)
+    Ok(())
 }
 
 /// Replaces `{{secret:name}}` with the stored key. Fails with the name of a missing key.

@@ -3,11 +3,11 @@ use std::sync::{Arc, Mutex, RwLock};
 use crate::agent::AgentController;
 use crate::config::{Config, ConfigPaths};
 use crate::desktop::web::WebController;
-use crate::history::ChatStore;
-use crate::mcp::McpManager;
 use crate::desktop::window::WindowController;
+use crate::history::ChatStore;
 use crate::integrations::spotify::SpotifyClient;
 use crate::launcher::AppIndex;
+use crate::mcp::McpManager;
 
 /// Global application state, managed by Tauri.
 ///
@@ -30,7 +30,13 @@ pub struct AppState {
 }
 
 impl AppState {
-    pub fn new(paths: ConfigPaths, config: Config, http: reqwest::Client, launcher: AppIndex, chats: ChatStore) -> Self {
+    pub fn new(
+        paths: ConfigPaths,
+        config: Config,
+        http: reqwest::Client,
+        launcher: AppIndex,
+        chats: ChatStore,
+    ) -> Self {
         Self {
             paths,
             http,

@@ -11,8 +11,8 @@ use crate::desktop::{autostart, hotkey, tray, window};
 use crate::error::{AppError, AppResult};
 use crate::history::ChatStore;
 use crate::launcher::AppIndex;
-use crate::migrate;
 use crate::llm::{LlmClient, OllamaClient, LOCAL_PROVIDER_ID};
+use crate::migrate;
 use crate::secrets::{self, SecretGroupInfo};
 use crate::state::AppState;
 
@@ -151,7 +151,12 @@ pub fn snapshot(app: &AppHandle) -> ConfigSnapshot {
     let hotkey_problem = state
         .hotkey_error()
         .map(|message| Diagnostic::new("settings.json", message));
-    ConfigSnapshot::build(&state.config(), &state.mcp, state.paths.root.display().to_string(), hotkey_problem)
+    ConfigSnapshot::build(
+        &state.config(),
+        &state.mcp,
+        state.paths.root.display().to_string(),
+        hotkey_problem,
+    )
 }
 
 pub fn secret_overview(state: &AppState) -> Vec<SecretGroupInfo> {
@@ -236,4 +241,29 @@ pub async fn save_chat(state: &AppState, ui: serde_json::Value) -> AppResult<()>
 pub async fn new_chat(state: &AppState) -> AppResult<()> {
     state.agent.reset().await;
     state.chats.archive().map_err(AppError::from)
+}
+
+/// Settings page: merges `patch` into settings.json and applies it right away.
+pub fn update_settings(app: &AppHandle, patch: &serde_json::Value) -> AppResult<ConfigSnapshot> {
+    let state = app.state::<AppState>();
+    config::edit::update_settings(&state.paths.settings, patch).map_err(AppError::msg)?;
+    Ok(reload_config(app))
+}
+
+/// Settings page: adds or changes an MCP server in mcp.json.
+pub fn save_mcp_server(
+    app: &AppHandle,
+    name: &str,
+    previous: Option<&str>,
+    server: &serde_json::Value,
+) -> AppResult<ConfigSnapshot> {
+    let state = app.state::<AppState>();
+    config::edit::save_mcp_server(&state.paths.mcp, name, previous, server).map_err(AppError::msg)?;
+    Ok(reload_config(app))
+}
+
+pub fn remove_mcp_server(app: &AppHandle, name: &str) -> AppResult<ConfigSnapshot> {
+    let state = app.state::<AppState>();
+    config::edit::remove_mcp_server(&state.paths.mcp, name).map_err(AppError::msg)?;
+    Ok(reload_config(app))
 }

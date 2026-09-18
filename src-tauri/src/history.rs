@@ -50,7 +50,10 @@ impl ChatStore {
         match serde_json::from_slice::<SavedChat>(&bytes) {
             Ok(chat) if chat.version == VERSION => Some(chat),
             Ok(chat) => {
-                log::warn!("chat file has version {}, expected {VERSION}; starting fresh", chat.version);
+                log::warn!(
+                    "chat file has version {}, expected {VERSION}; starting fresh",
+                    chat.version
+                );
                 set_aside(&path);
                 None
             }

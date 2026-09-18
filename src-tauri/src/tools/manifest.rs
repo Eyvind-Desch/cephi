@@ -5,10 +5,10 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use super::builtin::Builtin;
-use crate::services::Service;
 use super::localized::LocalizedText;
 use super::template::{self, Context};
 use super::trigger::{Trigger, TriggerSpec};
+use crate::services::Service;
 
 /// One tool, as written in `tools/**/*.json`. See `assets/schemas/tool.schema.json`.
 #[derive(Clone, Debug, Deserialize)]

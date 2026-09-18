@@ -28,6 +28,27 @@ pub fn config_reload(app: AppHandle) -> ConfigSnapshot {
     crate::app::reload_config(&app)
 }
 
+/// Settings page: changes keys in settings.json (objects merge, `null` removes).
+#[tauri::command]
+pub fn settings_update(app: AppHandle, patch: serde_json::Value) -> AppResult<ConfigSnapshot> {
+    crate::app::update_settings(&app, &patch)
+}
+
+#[tauri::command]
+pub fn mcp_save_server(
+    app: AppHandle,
+    name: String,
+    previous_name: Option<String>,
+    server: serde_json::Value,
+) -> AppResult<ConfigSnapshot> {
+    crate::app::save_mcp_server(&app, &name, previous_name.as_deref(), &server)
+}
+
+#[tauri::command]
+pub fn mcp_remove_server(app: AppHandle, name: String) -> AppResult<ConfigSnapshot> {
+    crate::app::remove_mcp_server(&app, &name)
+}
+
 #[tauri::command]
 pub fn config_open_folder(app: AppHandle) -> AppResult<()> {
     crate::app::open_config_folder(&app)

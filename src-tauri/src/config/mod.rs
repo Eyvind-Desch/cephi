@@ -5,6 +5,7 @@
 //! `settings.json` falls back to the last good settings.
 
 pub(crate) mod defaults;
+pub mod edit;
 mod paths;
 mod settings;
 mod snapshot;
@@ -19,7 +20,8 @@ use crate::tools::ToolRegistry;
 
 pub use paths::ConfigPaths;
 pub use settings::{
-    Anchor, OllamaSettings, Profile, ProviderKind, ProviderSettings, SearchSettings, Settings, TranslateSettings, WindowSettings,
+    Anchor, OllamaSettings, Profile, ProviderKind, ProviderSettings, SearchSettings, Settings, TranslateSettings,
+    WindowSettings,
 };
 pub use snapshot::ConfigSnapshot;
 

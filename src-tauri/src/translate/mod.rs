@@ -49,7 +49,10 @@ pub async fn translate(
     let native = settings.native_language.as_str();
     let first = client.translate(text, "auto", native).await?;
     if first.from == native {
-        return client.translate(text, native, &settings.foreign_language).await.map(clean);
+        return client
+            .translate(text, native, &settings.foreign_language)
+            .await
+            .map(clean);
     }
     Ok(clean(first))
 }
@@ -99,7 +102,11 @@ mod tests {
         let translation = clean(Translation {
             source: "Kannst du mir helfen?".into(),
             text: "Can you help me?".into(),
-            alternatives: vec!["can you help me?".into(), "Could you help me?".into(), "Could you help me?".into()],
+            alternatives: vec![
+                "can you help me?".into(),
+                "Could you help me?".into(),
+                "Could you help me?".into(),
+            ],
             from: "de".into(),
             to: "en".into(),
         });
@@ -114,7 +121,9 @@ mod tests {
         let settings = TranslateSettings::default();
         let to_german = translate(&http, &settings, "nevertheless", None).await.unwrap();
         assert_eq!((to_german.from.as_str(), to_german.to.as_str()), ("en", "de"));
-        let to_english = translate(&http, &settings, "Kannst du mir helfen?", None).await.unwrap();
+        let to_english = translate(&http, &settings, "Kannst du mir helfen?", None)
+            .await
+            .unwrap();
         assert_eq!(to_english.to, "en");
     }
 }

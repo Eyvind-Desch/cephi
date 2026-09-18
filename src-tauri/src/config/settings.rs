@@ -197,7 +197,7 @@ impl Settings {
         self.providers.iter().find(|p| p.id == id)
     }
 
-    fn validate(&self) -> Result<(), String> {
+    pub(crate) fn validate(&self) -> Result<(), String> {
         for (index, provider) in self.providers.iter().enumerate() {
             if provider.id == crate::llm::LOCAL_PROVIDER_ID || !crate::secrets::is_valid_name(&provider.id) {
                 return Err(t!("settings.invalid_provider_id", id = provider.id).into());
@@ -244,7 +244,11 @@ impl Settings {
             return Err(t!("settings.invalid_searxng_url", url = self.search.searxng_url).into());
         }
         if url::Url::parse(&self.translate.libretranslate_url).is_err() {
-            return Err(t!("settings.invalid_libretranslate_url", url = self.translate.libretranslate_url).into());
+            return Err(t!(
+                "settings.invalid_libretranslate_url",
+                url = self.translate.libretranslate_url
+            )
+            .into());
         }
         if !(1..=20).contains(&self.search.max_results) {
             return Err(t!("settings.max_results").into());

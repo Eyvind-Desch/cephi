@@ -174,7 +174,10 @@ pub(crate) mod tests {
             Type: CRED_TYPE_GENERIC,
             TargetName: target.as_mut_ptr(),
             Comment: ptr::null_mut(),
-            LastWritten: FILETIME { dwLowDateTime: 0, dwHighDateTime: 0 },
+            LastWritten: FILETIME {
+                dwLowDateTime: 0,
+                dwHighDateTime: 0,
+            },
             CredentialBlobSize: blob.len() as u32,
             CredentialBlob: blob.as_mut_ptr(),
             Persist: CRED_PERSIST_LOCAL_MACHINE,

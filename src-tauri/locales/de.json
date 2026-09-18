@@ -41,6 +41,7 @@
     "copied": "Text in die Zwischenablage kopiert."
   },
   "config": {
+    "write_failed": "Konnte nicht gespeichert werden: %{error}",
     "file_unreadable": "Datei nicht lesbar: %{error}",
     "folder_unreadable": "Ordner nicht lesbar: %{error}",
     "invalid_json": "Ungültiges JSON: %{error}",

@@ -1,6 +1,10 @@
+use std::collections::BTreeMap;
+
 use serde::Serialize;
 
 use super::{Config, Diagnostic};
+use crate::i18n::LanguageSetting;
+use crate::mcp::config::ServerConfig;
 use crate::mcp::{McpManager, ServerState, ServerStatus};
 use crate::tools::Permission;
 
@@ -18,6 +22,10 @@ pub struct ConfigSnapshot {
     pub tools: Vec<ToolInfo>,
     /// Servers from `mcp.json` and how they are doing.
     pub mcp_servers: Vec<ServerStatus>,
+    /// `mcp.json` as configured, for the settings page.
+    pub mcp_config: BTreeMap<String, ServerConfig>,
+    /// Values shown on the settings page.
+    pub general: GeneralSettings,
     pub diagnostics: Vec<Diagnostic>,
 }
 
@@ -95,21 +103,53 @@ impl ConfigSnapshot {
                     description: t.manifest.description.clone(),
                     permission: t.manifest.permission,
                     kind: t.manifest.action.kind(),
-                    triggers: t.manifest.triggers.iter().map(|spec| spec.pattern().to_string()).collect(),
+                    triggers: t
+                        .manifest
+                        .triggers
+                        .iter()
+                        .map(|spec| spec.pattern().to_string())
+                        .collect(),
                     source: t.source.clone(),
                 })
                 .chain(mcp.tools().into_iter().map(|t| ToolInfo {
                     name: t.exposed,
                     title: t.title,
                     description: t.description,
-                    permission: if t.auto_approved { Permission::Auto } else { Permission::Confirm },
+                    permission: if t.auto_approved {
+                        Permission::Auto
+                    } else {
+                        Permission::Confirm
+                    },
                     kind: "mcp",
                     triggers: Vec::new(),
                     source: format!("mcp.json › {}", t.server),
                 }))
                 .collect(),
             mcp_servers,
-            diagnostics: config.diagnostics.iter().cloned().chain(mcp_problems).chain(extra).collect(),
+            mcp_config: config.mcp.mcp_servers.clone(),
+            general: GeneralSettings {
+                language: settings.language,
+                selection_hotkey: settings.selection_hotkey.clone(),
+                hide_on_blur: settings.window.hide_on_blur,
+                summarize_search: settings.search.summarize,
+            },
+            diagnostics: config
+                .diagnostics
+                .iter()
+                .cloned()
+                .chain(mcp_problems)
+                .chain(extra)
+                .collect(),
         }
     }
+}
+
+/// Settings the settings page edits (besides hotkey and default profile, which are top-level).
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GeneralSettings {
+    pub language: LanguageSetting,
+    pub selection_hotkey: Option<String>,
+    pub hide_on_blur: bool,
+    pub summarize_search: bool,
 }

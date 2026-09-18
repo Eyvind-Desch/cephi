@@ -147,7 +147,12 @@ impl McpManager {
 
         let mut failures: HashMap<String, String> = HashMap::new();
         if !to_start.is_empty() {
-            self.publish(config, &connections, &failures, to_start.iter().map(|(n, _)| n.as_str()).collect());
+            self.publish(
+                config,
+                &connections,
+                &failures,
+                to_start.iter().map(|(n, _)| n.as_str()).collect(),
+            );
             let started = futures_util::future::join_all(to_start.into_iter().map(|(name, server)| async move {
                 let result = tokio::time::timeout(CONNECT_TIMEOUT, connect(&name, &server))
                     .await
@@ -262,12 +267,16 @@ async fn connect(name: &str, server: &ServerConfig) -> Result<Connection, String
                     }
                 });
             }
-            ().serve(transport).await.map_err(|e| t!("mcp.start_failed", error = e).to_string())?
+            ().serve(transport)
+                .await
+                .map_err(|e| t!("mcp.start_failed", error = e).to_string())?
         }
         Transport::Http { url } => {
             let mut headers = HashMap::new();
             for (key, value) in &server.headers {
-                let name = key.parse().map_err(|_| t!("mcp.invalid_header", header = key).to_string())?;
+                let name = key
+                    .parse()
+                    .map_err(|_| t!("mcp.invalid_header", header = key).to_string())?;
                 let value = resolve_secrets(value)?
                     .parse()
                     .map_err(|_| t!("mcp.invalid_header", header = key).to_string())?;
@@ -276,7 +285,9 @@ async fn connect(name: &str, server: &ServerConfig) -> Result<Connection, String
             let mut config = StreamableHttpClientTransportConfig::with_uri(url);
             config.custom_headers = headers;
             let transport = StreamableHttpClientTransport::from_config(config);
-            ().serve(transport).await.map_err(|e| t!("mcp.start_failed", error = e).to_string())?
+            ().serve(transport)
+                .await
+                .map_err(|e| t!("mcp.start_failed", error = e).to_string())?
         }
     };
 
@@ -318,7 +329,13 @@ async fn connect(name: &str, server: &ServerConfig) -> Result<Connection, String
 fn exposed_name(server: &str, tool: &str) -> String {
     let clean = |s: &str| -> String {
         s.chars()
-            .map(|c| if c.is_ascii_alphanumeric() || c == '_' || c == '-' { c } else { '_' })
+            .map(|c| {
+                if c.is_ascii_alphanumeric() || c == '_' || c == '-' {
+                    c
+                } else {
+                    '_'
+                }
+            })
             .collect()
     };
     let mut name = format!("{}{SEPARATOR}{}", clean(server), clean(tool));
@@ -363,7 +380,10 @@ mod tests {
             return;
         }
         // Most servers start with npx, which is npx.cmd on Windows.
-        assert!(rmcp::transport::which_command("npx").is_ok(), "npx is found next to node");
+        assert!(
+            rmcp::transport::which_command("npx").is_ok(),
+            "npx is found next to node"
+        );
         let script = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/echo-mcp-server.js");
         let config: McpConfig = serde_json::from_value(serde_json::json!({
             "mcpServers": { "echo": { "command": "node", "args": [script], "autoApprove": ["echo"] } }

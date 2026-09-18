@@ -41,6 +41,7 @@
     "copied": "Copied text to the clipboard."
   },
   "config": {
+    "write_failed": "Could not save: %{error}",
     "file_unreadable": "File not readable: %{error}",
     "folder_unreadable": "Folder not readable: %{error}",
     "invalid_json": "Invalid JSON: %{error}",

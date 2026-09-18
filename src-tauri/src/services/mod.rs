@@ -63,7 +63,10 @@ impl Service {
     fn health_url(self, settings: &Settings) -> String {
         match self {
             Service::Search => format!("{}/healthz", settings.search.searxng_url.trim_end_matches('/')),
-            Service::Translate => format!("{}/languages", settings.translate.libretranslate_url.trim_end_matches('/')),
+            Service::Translate => format!(
+                "{}/languages",
+                settings.translate.libretranslate_url.trim_end_matches('/')
+            ),
         }
     }
 
@@ -132,7 +135,11 @@ async fn write_config() -> Result<(), String> {
     wsl(&format!("cat > {TARGET_DIR}/compose.yaml"), Some(COMPOSE)).await?;
 
     // Keep an existing SearXNG config (it holds a generated secret).
-    let exists = wsl(&format!("test -f {TARGET_DIR}/searxng/settings.yml && echo yes || true"), None).await?;
+    let exists = wsl(
+        &format!("test -f {TARGET_DIR}/searxng/settings.yml && echo yes || true"),
+        None,
+    )
+    .await?;
     if !exists.trim().eq_ignore_ascii_case("yes") {
         let settings = SEARXNG_SETTINGS.replace("__SECRET__", &random_secret());
         wsl(&format!("cat > {TARGET_DIR}/searxng/settings.yml"), Some(&settings)).await?;
@@ -152,7 +159,10 @@ async fn wsl(command: &str, stdin: Option<&str>) -> Result<String, String> {
         .map_err(|e| t!("services.wsl_missing", error = e).to_string())?;
 
     if let Some(stdin) = stdin {
-        let mut pipe = child.stdin.take().ok_or_else(|| t!("services.wsl_missing", error = "stdin").to_string())?;
+        let mut pipe = child
+            .stdin
+            .take()
+            .ok_or_else(|| t!("services.wsl_missing", error = "stdin").to_string())?;
         pipe.write_all(stdin.as_bytes())
             .await
             .map_err(|e| t!("services.start_failed", error = e).to_string())?;
@@ -188,7 +198,10 @@ mod tests {
     #[test]
     fn shipped_config_matches_the_repository() {
         assert!(COMPOSE.contains("cephi-searxng") && COMPOSE.contains("cephi-libretranslate"));
-        assert!(SEARXNG_SETTINGS.contains("__SECRET__"), "the secret placeholder is filled in on start");
+        assert!(
+            SEARXNG_SETTINGS.contains("__SECRET__"),
+            "the secret placeholder is filled in on start"
+        );
     }
 
     /// Needs Docker in WSL. Starts the translator (fine if it is already running).

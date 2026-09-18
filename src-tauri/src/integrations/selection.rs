@@ -20,7 +20,10 @@ const RESTORE_DELAY: Duration = Duration::from_millis(120);
 
 /// Returns the selected text, or `None` if nothing was selected.
 pub async fn capture() -> Option<String> {
-    tauri::async_runtime::spawn_blocking(copy_selection).await.ok().flatten()
+    tauri::async_runtime::spawn_blocking(copy_selection)
+        .await
+        .ok()
+        .flatten()
 }
 
 fn copy_selection() -> Option<String> {

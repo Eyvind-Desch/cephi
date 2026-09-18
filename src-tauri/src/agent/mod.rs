@@ -297,7 +297,11 @@ impl Run<'_> {
         let call_id = uuid::Uuid::new_v4().to_string();
         let name = &call.name;
         let tool = self.config.tools.get(name);
-        let mcp_tool = if tool.is_none() { self.state.mcp.find(name) } else { None };
+        let mcp_tool = if tool.is_none() {
+            self.state.mcp.find(name)
+        } else {
+            None
+        };
 
         self.emit(AgentEvent::ToolCall {
             call_id: call_id.clone(),

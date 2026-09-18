@@ -44,7 +44,10 @@ pub fn register(app: &AppHandle, hotkey: &str, selection_hotkey: Option<&str>) -
 fn pick_up_selection(app: AppHandle) {
     tauri::async_runtime::spawn(async move {
         let text = selection::capture().await;
-        log::info!("selection hotkey: {} characters", text.as_ref().map_or(0, |t| t.chars().count()));
+        log::info!(
+            "selection hotkey: {} characters",
+            text.as_ref().map_or(0, |t| t.chars().count())
+        );
         if let Err(e) = window::show(&app) {
             log::error!("show window: {e}");
         }

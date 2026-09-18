@@ -95,7 +95,9 @@ mod tests {
         rename_in_prompt(&new.join("settings.json"));
 
         assert!(new.join("tools/web/x.json").exists());
-        assert!(fs::read_to_string(new.join("settings.json")).unwrap().contains("You are Cephi"));
+        assert!(fs::read_to_string(new.join("settings.json"))
+            .unwrap()
+            .contains("You are Cephi"));
         assert!(old.join("settings.json").exists(), "the old folder is kept");
         let _ = fs::remove_dir_all(root);
     }
