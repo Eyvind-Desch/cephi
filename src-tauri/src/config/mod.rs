@@ -1,4 +1,4 @@
-//! User configuration: `settings.json` and tool manifests in `tools/`.
+//! User configuration: `settings.json`, tool manifests in `tools/` and MCP servers in `mcp.json`.
 //!
 //! Everything lives in a single user-editable folder (see [`ConfigPaths`]). Loading never
 //! fails hard: problems are collected as [`Diagnostic`]s and shown in the UI, and a broken
@@ -14,6 +14,7 @@ use std::path::Path;
 
 use serde::Serialize;
 
+use crate::mcp::config::{self as mcp_config, McpConfig};
 use crate::tools::ToolRegistry;
 
 pub use paths::ConfigPaths;
@@ -47,6 +48,7 @@ impl Diagnostic {
 pub struct Config {
     pub settings: Settings,
     pub tools: ToolRegistry,
+    pub mcp: McpConfig,
     pub diagnostics: Vec<Diagnostic>,
 }
 
@@ -71,6 +73,11 @@ pub fn load(paths: &ConfigPaths, previous: Option<&Settings>) -> Config {
     let (tools, tool_diagnostics) = ToolRegistry::load_dir(&paths.root, &paths.tools);
     diagnostics.extend(tool_diagnostics);
 
+    let mcp = mcp_config::load(&paths.mcp).unwrap_or_else(|message| {
+        diagnostics.push(Diagnostic::for_path(&paths.root, &paths.mcp, message));
+        McpConfig::default()
+    });
+
     for diagnostic in &diagnostics {
         log::warn!("config: {}: {}", diagnostic.source, diagnostic.message);
     }
@@ -83,6 +90,7 @@ pub fn load(paths: &ConfigPaths, previous: Option<&Settings>) -> Config {
     Config {
         settings,
         tools,
+        mcp,
         diagnostics,
     }
 }

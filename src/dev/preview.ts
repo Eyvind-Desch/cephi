@@ -34,6 +34,11 @@ const config: ConfigSnapshot = {
     { name: "spotify_play", title: "Spotify", description: "Plays music on Spotify: a song, an album, an artist or a playlist.", permission: "auto", kind: "builtin", source: "tools/media/spotify_play.json", triggers: ["(spiele|play) {query} (auf|on) spotify"] },
     { name: "web_search", title: "Websuche", description: "Searches the web and returns the top results with short excerpts.", permission: "auto", kind: "builtin", source: "tools/web/web_search.json", triggers: ["?{query}", "search the web for {query}"] },
     { name: "run_powershell", title: "PowerShell", description: "Runs a PowerShell command.", permission: "confirm", kind: "powershell", source: "tools/system/run_powershell.json", triggers: [] },
+    { name: "github__search_code", title: "Search code · github", description: "[github] Search code across GitHub repositories.", permission: "auto", kind: "mcp", source: "mcp.json › github", triggers: [] },
+  ],
+  mcpServers: [
+    { name: "github", state: "running", error: null, tools: 1 },
+    { name: "notion", state: "failed", error: "\"npx\" wurde nicht gefunden. Ist es installiert (z. B. Node.js für npx, uv für uvx)?", tools: 0 },
   ],
   diagnostics: [],
 };

@@ -2,6 +2,7 @@
   "_version": 1,
   "agent": {
     "busy": "A request is already running.",
+    "mcp_preview": "MCP server \"%{server}\" → %{tool}\n%{arguments}",
     "nothing_to_continue": "There are no results to answer from.",
     "answer_unavailable": "No AI answer: %{reason}",
     "too_many_rounds": "Stopped after %{rounds} tool rounds without a final answer.",
@@ -89,6 +90,19 @@
     "refused": "The model declined this request.",
     "cancelled": "Cancelled",
     "connection_ok": "Connection to %{provider} works."
+  },
+  "mcp": {
+    "no_command": "Needs \"command\" (local server) or \"url\" (remote server).",
+    "command_and_url": "Use either \"command\" or \"url\", not both.",
+    "invalid_url": "\"%{url}\" is not an http(s) address.",
+    "invalid_name": "Server name \"%{name}\" may only contain letters, digits, - and _ (at most 40).",
+    "invalid_header": "Invalid header \"%{header}\".",
+    "command_not_found": "\"%{command}\" was not found. Is it installed (e.g. Node.js for npx, uv for uvx)?",
+    "start_failed": "The server did not start: %{error}",
+    "list_failed": "The server did not list its tools: %{error}",
+    "timeout": "The server did not answer in time.",
+    "not_running": "The MCP server \"%{server}\" is not running.",
+    "call_failed": "The MCP call failed: %{error}"
   },
   "media": {
     "unknown_action": "Unknown media action \"%{action}\".",

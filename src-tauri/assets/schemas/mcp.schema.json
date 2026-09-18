@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "cephi://schemas/mcp.schema.json",
+  "title": "Cephi MCP servers",
+  "description": "%APPDATA%\Cephi\mcp.json – MCP servers whose tools Cephi can use. Same format as Claude Desktop, so existing snippets can be pasted. Changes apply immediately.",
+  "type": "object",
+  "properties": {
+    "$schema": { "type": "string" },
+    "mcpServers": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[A-Za-z0-9_-]{1,40}$" },
+      "additionalProperties": { "$ref": "#/definitions/server" }
+    }
+  },
+  "definitions": {
+    "server": {
+      "type": "object",
+      "description": "Either a local server (command) or a remote one (url).",
+      "properties": {
+        "command": { "type": "string", "description": "Program that starts the server, e.g. \"npx\", \"uvx\", \"docker\" or a path." },
+        "args": { "type": "array", "items": { "type": "string" } },
+        "env": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Environment variables. API keys: \"{{secret:name}}\" (stored under Keys, never in this file)."
+        },
+        "cwd": { "type": "string", "description": "Working directory." },
+        "url": { "type": "string", "pattern": "^https?://", "description": "Remote server (streamable HTTP)." },
+        "headers": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "HTTP headers, e.g. { \"Authorization\": \"Bearer {{secret:github_token}}\" }."
+        },
+        "disabled": { "type": "boolean", "default": false },
+        "permission": {
+          "enum": ["confirm", "auto"],
+          "default": "confirm",
+          "description": "confirm = every call asks first. auto = calls run without asking."
+        },
+        "autoApprove": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tools that run without asking even with permission \"confirm\" (e.g. read-only ones)."
+        }
+      },
+      "oneOf": [{ "required": ["command"] }, { "required": ["url"] }]
+    }
+  }
+}

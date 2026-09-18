@@ -115,7 +115,8 @@ request. Unambiguous commands ("open X") run through the quick action path witho
 3c. ✅ **Translator** – offline via LibreTranslate (Docker, CPU): `tr …` fast path, translator tab, chat card
    → [docs/TRANSLATE.md](docs/TRANSLATE.md). Local LLMs were tested first: ~2.5 s per request, 2–3 GB VRAM,
    unreliable for single words.
-4. **MCP** – `mcp.json`, tools from MCP servers
+4. ✅ **MCP** – `mcp.json` in Claude Desktop format (local + HTTP servers), tools offered as `<server>__<tool>`,
+   confirmation unless approved, keys via `{{secret:…}}`, status in `/tools` → [docs/MCP.md](docs/MCP.md)
 5. **Polish** – ✅ save chat history (restored on start, archived on "new chat") · ✅ start with Windows · ✅ installer
    (NSIS, per-user, own icon) · ✅ slash commands + tools overview · settings UI, code highlighting
 6. **Extras** – ✅ pick up selected text (`Ctrl+Alt+T`, clipboard is restored) · ask about a screenshot (vision model), voice
@@ -136,6 +137,8 @@ next stage begins. Whatever isn't a nuisance goes into the backlog instead of th
 - [ ] Search: `fetch_page` tool (read a result page when the excerpts are not enough)
 - [ ] Web tab: Esc and Cephi shortcuts don't work while the page has focus (keys go to the page)
 - [ ] Web tab: ask the AI about the open page
+- [ ] MCP: servers that need a browser login (OAuth); resources and prompts
+- [ ] MCP: send only the tools that fit the request (many servers = many tools, small models get confused)
 - [x] Slash commands in the input (like Claude Code): `/clear`, `/web`, `/translate`, `/model`, `/tools`, `/keys`, …
 
 ## Setup

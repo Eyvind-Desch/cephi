@@ -1,14 +1,19 @@
 import clsx from "clsx";
-import { ArrowLeft, FolderCog, ShieldCheck, Zap } from "lucide-react";
+import { ArrowLeft, FolderCog, Plug, ShieldCheck, Zap } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { api, type ToolInfo } from "../../lib/ipc";
+import { api, type McpServerStatus, type ToolInfo } from "../../lib/ipc";
 import { useUi } from "../../store/ui";
 
-/** All loaded tools with their quick phrases (`/tools`). */
+const EMPTY_TOOLS: ToolInfo[] = [];
+const EMPTY_SERVERS: McpServerStatus[] = [];
+
+/** All tools (`/tools`): Cephi's own with their quick phrases, then each MCP server with its tools. */
 export function ToolsView() {
   const { t } = useTranslation();
-  const tools = useUi((s) => s.config?.tools);
+  const tools = useUi((s) => s.config?.tools ?? EMPTY_TOOLS);
+  const servers = useUi((s) => s.config?.mcpServers ?? EMPTY_SERVERS);
   const setView = useUi((s) => s.setView);
+  const own = tools.filter((tool) => tool.kind !== "mcp");
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -30,15 +35,70 @@ export function ToolsView() {
         </button>
       </div>
 
-      <div className="selectable flex-1 space-y-3 overflow-y-auto px-4 pt-3 pb-5">
-        <div className="space-y-0.5 px-1">
-          <h2 className="text-[15px] font-medium text-fg">{t("tools.title", { count: tools?.length ?? 0 })}</h2>
-          <p className="text-[12px] text-subtle">{t("tools.hint")}</p>
-        </div>
-        <ul className="space-y-1.5">
-          {tools?.map((tool) => <ToolRow key={tool.name} tool={tool} />)}
-        </ul>
+      <div className="selectable flex-1 space-y-5 overflow-y-auto px-4 pt-3 pb-5">
+        <section className="space-y-2">
+          <div className="space-y-0.5 px-1">
+            <h2 className="text-[15px] font-medium text-fg">{t("tools.title", { count: own.length })}</h2>
+            <p className="text-[12px] text-subtle">{t("tools.hint")}</p>
+          </div>
+          <ul className="space-y-1.5">
+            {own.map((tool) => (
+              <ToolRow key={tool.name} tool={tool} />
+            ))}
+          </ul>
+        </section>
+
+        <section className="space-y-2">
+          <div className="space-y-0.5 px-1">
+            <h2 className="flex items-center gap-1.5 text-[15px] font-medium text-fg">
+              <Plug size={15} /> {t("tools.mcpTitle")}
+            </h2>
+            <p className="text-[12px] text-subtle">{t("tools.mcpHint")}</p>
+          </div>
+          {servers.length === 0 ? (
+            <p className="rounded-xl border border-dashed border-line px-3 py-3 text-[12.5px] text-muted">
+              {t("tools.mcpEmpty")}
+            </p>
+          ) : (
+            servers.map((server) => (
+              <ServerBlock
+                key={server.name}
+                server={server}
+                tools={tools.filter((tool) => tool.source === `mcp.json › ${server.name}`)}
+              />
+            ))
+          )}
+        </section>
       </div>
+    </div>
+  );
+}
+
+const STATE_STYLE = {
+  running: "bg-success",
+  starting: "bg-warning animate-pulse",
+  failed: "bg-danger",
+  disabled: "bg-subtle",
+} as const;
+
+function ServerBlock({ server, tools }: { server: McpServerStatus; tools: ToolInfo[] }) {
+  const { t } = useTranslation();
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center gap-2 px-1 text-[13px]">
+        <span className={clsx("size-2 shrink-0 rounded-full", STATE_STYLE[server.state])} />
+        <span className="font-medium text-fg">{server.name}</span>
+        <span className="text-[12px] text-subtle">
+          {t(`tools.serverState.${server.state}`)}
+          {server.state === "running" && ` · ${t("tools.title", { count: server.tools })}`}
+        </span>
+      </div>
+      {server.error && <p className="px-1 text-[12px] leading-snug text-danger">{server.error}</p>}
+      <ul className="space-y-1.5">
+        {tools.map((tool) => (
+          <ToolRow key={tool.name} tool={tool} />
+        ))}
+      </ul>
     </div>
   );
 }
@@ -72,7 +132,7 @@ function ToolRow({ tool }: { tool: ToolInfo }) {
           ))}
         </div>
       )}
-      <p className="mt-1 truncate text-[11px] text-subtle">{tool.source}</p>
+      {tool.kind !== "mcp" && <p className="mt-1 truncate text-[11px] text-subtle">{tool.source}</p>}
     </li>
   );
 }

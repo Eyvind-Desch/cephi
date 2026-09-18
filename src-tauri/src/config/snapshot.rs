@@ -1,6 +1,7 @@
 use serde::Serialize;
 
 use super::{Config, Diagnostic};
+use crate::mcp::{McpManager, ServerState, ServerStatus};
 use crate::tools::Permission;
 
 /// Read-only view of the configuration sent to the frontend. Texts are already resolved for the
@@ -15,6 +16,8 @@ pub struct ConfigSnapshot {
     pub default_profile: String,
     pub profiles: Vec<ProfileInfo>,
     pub tools: Vec<ToolInfo>,
+    /// Servers from `mcp.json` and how they are doing.
+    pub mcp_servers: Vec<ServerStatus>,
     pub diagnostics: Vec<Diagnostic>,
 }
 
@@ -50,8 +53,15 @@ pub struct ToolInfo {
 }
 
 impl ConfigSnapshot {
-    pub fn build(config: &Config, config_dir: String, extra: Option<Diagnostic>) -> Self {
+    pub fn build(config: &Config, mcp: &McpManager, config_dir: String, extra: Option<Diagnostic>) -> Self {
         let settings = &config.settings;
+        let mcp_servers = mcp.servers();
+        // A server that failed to start is a configuration problem like a broken tool file.
+        let mcp_problems: Vec<Diagnostic> = mcp_servers
+            .iter()
+            .filter(|s| s.state == ServerState::Failed)
+            .map(|s| Diagnostic::new(format!("mcp.json › {}", s.name), s.error.clone().unwrap_or_default()))
+            .collect();
         let locale = rust_i18n::locale();
         Self {
             language: locale.to_string(),
@@ -88,8 +98,18 @@ impl ConfigSnapshot {
                     triggers: t.manifest.triggers.iter().map(|spec| spec.pattern().to_string()).collect(),
                     source: t.source.clone(),
                 })
+                .chain(mcp.tools().into_iter().map(|t| ToolInfo {
+                    name: t.exposed,
+                    title: t.title,
+                    description: t.description,
+                    permission: if t.auto_approved { Permission::Auto } else { Permission::Confirm },
+                    kind: "mcp",
+                    triggers: Vec::new(),
+                    source: format!("mcp.json › {}", t.server),
+                }))
                 .collect(),
-            diagnostics: config.diagnostics.iter().cloned().chain(extra).collect(),
+            mcp_servers,
+            diagnostics: config.diagnostics.iter().cloned().chain(mcp_problems).chain(extra).collect(),
         }
     }
 }

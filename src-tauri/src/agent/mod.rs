@@ -16,6 +16,7 @@ use rust_i18n::t;
 use crate::config::Config;
 use crate::error::{AppError, AppResult};
 use crate::llm::{ChatMessage, LlmClient, LlmError, LlmRequest, Role, ToolCall};
+use crate::mcp::McpTool;
 use crate::services;
 use crate::state::AppState;
 use crate::tools::{self, ExecContext, Permission, ToolOutput};
@@ -200,7 +201,9 @@ impl Run<'_> {
             Err(error) => return Err(error.to_string()),
         };
         let tool_definitions = if profile.tools {
-            self.config.tools.definitions()
+            let mut definitions = self.config.tools.definitions();
+            definitions.extend(self.state.mcp.definitions());
+            definitions
         } else {
             Vec::new()
         };
@@ -294,18 +297,26 @@ impl Run<'_> {
         let call_id = uuid::Uuid::new_v4().to_string();
         let name = &call.name;
         let tool = self.config.tools.get(name);
+        let mcp_tool = if tool.is_none() { self.state.mcp.find(name) } else { None };
 
         self.emit(AgentEvent::ToolCall {
             call_id: call_id.clone(),
             name: name.clone(),
-            title: tool.map_or_else(|| name.clone(), |t| t.title()),
+            title: match (tool, &mcp_tool) {
+                (Some(tool), _) => tool.title(),
+                (None, Some(mcp)) => format!("{} · {}", mcp.title, mcp.server),
+                (None, None) => name.clone(),
+            },
             args: call.arguments.clone(),
             fast,
         });
 
         let started = Instant::now();
         let output = match tool {
-            None => ToolOutput::error(t!("agent.unknown_tool", name = name)),
+            None => match &mcp_tool {
+                Some(mcp) => self.run_mcp_tool(&call_id, mcp, &call.arguments).await,
+                None => ToolOutput::error(t!("agent.unknown_tool", name = name)),
+            },
             Some(tool) => match tool.normalize_args(&call.arguments) {
                 Err(message) => ToolOutput::error(message),
                 Ok(args) => {
@@ -346,6 +357,29 @@ impl Run<'_> {
             ok: output.ok,
             content,
             display: None,
+        }
+    }
+
+    /// A tool from an MCP server: asks first unless approved in `mcp.json`, then forwards the call.
+    async fn run_mcp_tool(&self, call_id: &str, tool: &McpTool, arguments: &serde_json::Value) -> ToolOutput {
+        if !tool.auto_approved {
+            let preview = t!(
+                "agent.mcp_preview",
+                server = tool.server,
+                tool = tool.name,
+                arguments = serde_json::to_string_pretty(arguments).unwrap_or_default()
+            );
+            if !self.await_confirmation(call_id, preview.into()).await {
+                return ToolOutput::error(t!("agent.denied"));
+            }
+        }
+        match self.state.mcp.call(tool, arguments.clone()).await {
+            Ok(content) => ToolOutput {
+                ok: true,
+                content,
+                display: None,
+            },
+            Err(message) => ToolOutput::error(message),
         }
     }
 

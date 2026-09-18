@@ -60,6 +60,14 @@ export interface ToolInfo {
   triggers: string[];
 }
 
+/** `src-tauri/src/mcp/mod.rs` */
+export interface McpServerStatus {
+  name: string;
+  state: "starting" | "running" | "failed" | "disabled";
+  error: string | null;
+  tools: number;
+}
+
 export interface Diagnostic {
   source: string;
   message: string;
@@ -73,6 +81,8 @@ export interface ConfigSnapshot {
   defaultProfile: string;
   profiles: ProfileInfo[];
   tools: ToolInfo[];
+  /** Servers from `mcp.json`. */
+  mcpServers: McpServerStatus[];
   diagnostics: Diagnostic[];
 }
 

@@ -48,6 +48,8 @@ uuid = { version = "1.26.1", features = ["v4"] }
 windows-sys = { version = "0.60", features = ["Win32_Foundation", "Win32_Globalization", "Win32_Security_Credentials", "Win32_System_DataExchange", "Win32_System_Registry", "Win32_UI_Input_KeyboardAndMouse", "Win32_UI_WindowsAndMessaging"] }
 windows = { version = "0.61", features = ["Devices_Radios", "Foundation_Collections", "Win32_Media_Audio", "Win32_Media_Audio_Endpoints", "Win32_System_Com", "std"] }
 rust-i18n = "4.2.2"
+# MCP client: tools from external servers (local processes or HTTP).
+rmcp = { version = "3.4", default-features = false, features = ["client", "transport-child-process", "transport-streamable-http-client-reqwest", "reqwest-native-tls", "which-command"] }
 
 # https://tauri.app/concept/size/#cargo-configuration
 [profile.release]

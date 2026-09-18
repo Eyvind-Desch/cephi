@@ -64,6 +64,7 @@ Everything lives in **`%APPDATA%\Cephi\`** and is reloaded immediately on change
 Cephi/
 ├── settings.json   language, hotkey, model profiles, AI providers, window, agent
 ├── tools/          custom tools as JSON → docs/TOOLS.md
+├── mcp.json        MCP servers (tools from other apps) → docs/MCP.md
 └── schemas/        for editor autocompletion (generated automatically)
 ```
 
@@ -103,4 +104,5 @@ Logs: `%LOCALAPPDATA%\io.github.eyvind-desch.cephi\logs\`.
 - [docs/SPOTIFY.md](docs/SPOTIFY.md): Spotify setup
 - [docs/SEARCH.md](docs/SEARCH.md): web search (local SearXNG)
 - [docs/TRANSLATE.md](docs/TRANSLATE.md): offline translator (local LibreTranslate)
+- [docs/MCP.md](docs/MCP.md): MCP servers (tools from other apps, Claude Desktop format)
 - [docs/PROVIDERS.md](docs/PROVIDERS.md): cloud AI providers (Claude, Gemini, OpenAI-compatible)

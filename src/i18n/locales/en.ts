@@ -90,6 +90,15 @@ export const en = {
     confirm: "Asks before running",
     auto: "Runs without asking",
     openFolder: "Config folder",
+    mcpTitle: "MCP servers",
+    mcpHint: "Tools from other apps, configured in mcp.json (same format as Claude Desktop).",
+    mcpEmpty: "No MCP servers yet. Add them to mcp.json in the config folder, see docs/MCP.md.",
+    serverState: {
+      running: "running",
+      starting: "starting…",
+      failed: "failed",
+      disabled: "disabled",
+    },
   },
   services: {
     start: "Start service",

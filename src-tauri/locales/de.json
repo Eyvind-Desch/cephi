@@ -2,6 +2,7 @@
   "_version": 1,
   "agent": {
     "busy": "Es läuft bereits eine Anfrage.",
+    "mcp_preview": "MCP-Server \"%{server}\" → %{tool}\n%{arguments}",
     "nothing_to_continue": "Es gibt keine Ergebnisse, aus denen ich antworten kann.",
     "answer_unavailable": "Keine KI-Antwort: %{reason}",
     "too_many_rounds": "Abbruch nach %{rounds} Tool-Runden ohne abschließende Antwort.",
@@ -89,6 +90,19 @@
     "refused": "Das Modell hat die Anfrage abgelehnt.",
     "cancelled": "Abgebrochen",
     "connection_ok": "Verbindung zu %{provider} funktioniert."
+  },
+  "mcp": {
+    "no_command": "Braucht \"command\" (lokaler Server) oder \"url\" (entfernter Server).",
+    "command_and_url": "Entweder \"command\" oder \"url\", nicht beides.",
+    "invalid_url": "\"%{url}\" ist keine http(s)-Adresse.",
+    "invalid_name": "Servername \"%{name}\" darf nur Buchstaben, Ziffern, - und _ enthalten (höchstens 40).",
+    "invalid_header": "Ungültiger Header \"%{header}\".",
+    "command_not_found": "\"%{command}\" wurde nicht gefunden. Ist es installiert (z. B. Node.js für npx, uv für uvx)?",
+    "start_failed": "Der Server ist nicht gestartet: %{error}",
+    "list_failed": "Der Server hat seine Tools nicht geliefert: %{error}",
+    "timeout": "Der Server hat nicht rechtzeitig geantwortet.",
+    "not_running": "Der MCP-Server \"%{server}\" läuft nicht.",
+    "call_failed": "Der MCP-Aufruf ist fehlgeschlagen: %{error}"
   },
   "media": {
     "unknown_action": "Unbekannte Medienaktion \"%{action}\".",

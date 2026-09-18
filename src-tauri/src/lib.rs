@@ -12,6 +12,7 @@ mod i18n;
 mod integrations;
 mod launcher;
 mod llm;
+mod mcp;
 mod migrate;
 mod search;
 mod secrets;
@@ -20,7 +21,7 @@ mod state;
 mod tools;
 mod translate;
 
-use tauri::{Manager, WindowEvent};
+use tauri::{Manager, RunEvent, WindowEvent};
 use tauri_plugin_log::{Target, TargetKind};
 
 use desktop::window;
@@ -84,6 +85,14 @@ pub fn run() {
             commands::secrets_delete,
             commands::secrets_test,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running Cephi");
+        .build(tauri::generate_context!())
+        .expect("error while building Cephi")
+        .run(|app, event| {
+            // MCP servers are child processes: end them together with Cephi.
+            if let RunEvent::Exit = event {
+                if let Some(state) = app.try_state::<state::AppState>() {
+                    tauri::async_runtime::block_on(state.mcp.shutdown());
+                }
+            }
+        });
 }

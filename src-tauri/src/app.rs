@@ -83,6 +83,21 @@ fn warm_up(app: &AppHandle) {
             state.spotify.warm_up(&state.http),
         );
     });
+    sync_mcp(app);
+}
+
+/// Connects to the MCP servers from `mcp.json` in the background and tells the UI when their tools
+/// are ready (starting a server can take a while, e.g. a first `npx` download).
+pub fn sync_mcp(app: &AppHandle) {
+    let app = app.clone();
+    tauri::async_runtime::spawn(async move {
+        let state = app.state::<AppState>();
+        let config = state.config();
+        state.mcp.sync(&config.mcp).await;
+        if let Err(e) = app.emit(EVENT_CONFIG_CHANGED, snapshot(&app)) {
+            log::error!("emit config change: {e}");
+        }
+    });
 }
 
 /// Loads a local profile's model into memory so the first answer starts without delay.
@@ -121,6 +136,9 @@ pub fn reload_config(app: &AppHandle) -> ConfigSnapshot {
         }
     }
 
+    // Unchanged servers keep running; see `McpManager::sync`.
+    sync_mcp(app);
+
     let snapshot = snapshot(app);
     if let Err(e) = app.emit(EVENT_CONFIG_CHANGED, &snapshot) {
         log::error!("emit config change: {e}");
@@ -133,12 +151,19 @@ pub fn snapshot(app: &AppHandle) -> ConfigSnapshot {
     let hotkey_problem = state
         .hotkey_error()
         .map(|message| Diagnostic::new("settings.json", message));
-    ConfigSnapshot::build(&state.config(), state.paths.root.display().to_string(), hotkey_problem)
+    ConfigSnapshot::build(&state.config(), &state.mcp, state.paths.root.display().to_string(), hotkey_problem)
 }
 
 pub fn secret_overview(state: &AppState) -> Vec<SecretGroupInfo> {
     let config = state.config();
-    secrets::overview(&config.tools.secret_usage(), &config.settings)
+    let mut usage = config.tools.secret_usage();
+    // Keys referenced as {{secret:…}} in mcp.json show up next to the ones tools use.
+    for (name, server) in &config.mcp.mcp_servers {
+        for secret in server.secrets() {
+            usage.entry(secret).or_default().push(format!("MCP · {name}"));
+        }
+    }
+    secrets::overview(&usage, &config.settings)
 }
 
 /// Stores (`Some`) or deletes (`None`) a secret and refreshes dependent integrations.

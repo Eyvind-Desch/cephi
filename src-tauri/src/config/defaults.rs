@@ -9,10 +9,12 @@ macro_rules! asset {
 }
 
 pub const SETTINGS: &str = asset!("defaults/settings.json");
+pub const MCP: &str = asset!("defaults/mcp.json");
 
 pub const SCHEMAS: &[(&str, &str)] = &[
     ("settings.schema.json", asset!("schemas/settings.schema.json")),
     ("tool.schema.json", asset!("schemas/tool.schema.json")),
+    ("mcp.schema.json", asset!("schemas/mcp.schema.json")),
 ];
 
 /// `(path relative to tools/, content)`

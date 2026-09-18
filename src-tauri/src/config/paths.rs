@@ -29,6 +29,8 @@ pub struct ConfigPaths {
     pub settings: PathBuf,
     pub tools: PathBuf,
     pub schemas: PathBuf,
+    /// MCP servers, same format as Claude Desktop.
+    pub mcp: PathBuf,
 }
 
 impl ConfigPaths {
@@ -54,6 +56,7 @@ impl ConfigPaths {
             settings: root.join("settings.json"),
             tools: root.join("tools"),
             schemas: root.join("schemas"),
+            mcp: root.join("mcp.json"),
             root,
         }
     }
@@ -72,6 +75,9 @@ impl ConfigPaths {
         if !self.settings.exists() {
             fs::write(&self.settings, defaults::SETTINGS)?;
             log::info!("seeded {}", self.settings.display());
+        }
+        if !self.mcp.exists() {
+            fs::write(&self.mcp, defaults::MCP)?;
         }
 
         sync_default_tools(&self.root.join(SEEDED_TOOLS_FILE), &self.tools, defaults::TOOLS)

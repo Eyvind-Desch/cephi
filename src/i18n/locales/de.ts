@@ -88,6 +88,15 @@ export const de: Locale = {
     confirm: "Fragt vor dem Ausführen",
     auto: "Läuft ohne Rückfrage",
     openFolder: "Konfigurationsordner",
+    mcpTitle: "MCP-Server",
+    mcpHint: "Tools aus anderen Apps, eingerichtet in mcp.json (gleiches Format wie Claude Desktop).",
+    mcpEmpty: "Noch keine MCP-Server. Trage sie in mcp.json im Konfigurationsordner ein, siehe docs/MCP.md.",
+    serverState: {
+      running: "läuft",
+      starting: "startet…",
+      failed: "Fehler",
+      disabled: "deaktiviert",
+    },
   },
   services: {
     start: "Dienst starten",

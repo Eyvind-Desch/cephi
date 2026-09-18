@@ -4,6 +4,7 @@ use crate::agent::AgentController;
 use crate::config::{Config, ConfigPaths};
 use crate::desktop::web::WebController;
 use crate::history::ChatStore;
+use crate::mcp::McpManager;
 use crate::desktop::window::WindowController;
 use crate::integrations::spotify::SpotifyClient;
 use crate::launcher::AppIndex;
@@ -18,6 +19,8 @@ pub struct AppState {
     pub agent: AgentController,
     pub window: WindowController,
     pub web: WebController,
+    /// Connections to the MCP servers from `mcp.json`.
+    pub mcp: McpManager,
     pub launcher: AppIndex,
     /// The current conversation on disk.
     pub chats: ChatStore,
@@ -34,6 +37,7 @@ impl AppState {
             agent: AgentController::default(),
             window: WindowController::default(),
             web: WebController::default(),
+            mcp: McpManager::default(),
             launcher,
             chats,
             spotify: SpotifyClient::default(),
