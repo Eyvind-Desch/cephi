@@ -19,12 +19,13 @@ One hotkey, one input field: answer, search, or action ("öffne die Bluetooth-Ei
 
 | Key | Action |
 |---|---|
-| `Ctrl+Alt+Space` | Show/hide Cephi (configurable in `settings.json`) |
+| `Ctrl+Alt+Space` | Show/hide Cephi (configurable under ⋯ → *Settings*) |
 | `Ctrl+Alt+T` | Pick up the text selected in any app (translate, explain, ask about it) |
 | `Enter` / `Shift+Enter` | Send / new line |
 | `Ctrl+E` | Compact bar ↔ large panel |
 | `Ctrl+N` | New chat (the previous one is archived) |
-| `Esc` | Hide |
+| `Esc` | Back to the chat, in the chat: hide (also works inside a web page that doesn't use Esc itself) |
+| `Ctrl+L` | Web tab: address bar |
 | `/` | Commands: `/clear`, `/web …`, `/translate …`, `/model …`, `/history`, `/tools`, `/settings`, `/keys`, `/mcp`, `/pin`, `/config`, `/reload` |
 
 Clicking outside hides Cephi, unless it's pinned (⋯ menu). Tray icon: open, configuration, quit.

@@ -91,6 +91,14 @@ function AddressBar() {
     return () => void unlisten.then((fn) => fn());
   }, []);
 
+  // Ctrl+L inside the page.
+  const addressFocus = useWeb((s) => s.addressFocus);
+  useEffect(() => {
+    if (addressFocus === 0) return;
+    inputRef.current?.focus();
+    inputRef.current?.select();
+  }, [addressFocus]);
+
   // A page loaded (from the address bar, a tool or a link): show its address.
   useEffect(() => {
     if (!url) return;

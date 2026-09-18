@@ -275,6 +275,12 @@ export const onWebState = (handler: (state: WebState) => void): Promise<Unlisten
 export const onSelection = (handler: (text: string | null) => void): Promise<UnlistenFn> =>
   listen<string | null>("cephi://selection", (event) => handler(event.payload));
 
+/** `src-tauri/src/desktop/web.rs` (`SHORTCUT_ACTIONS`): a Cephi shortcut pressed inside the web page. */
+export type WebShortcut = "escape" | "new-chat" | "toggle-mode" | "address";
+
+export const onWebShortcut = (handler: (action: WebShortcut) => void): Promise<UnlistenFn> =>
+  listen<WebShortcut>("cephi://web-shortcut", (event) => handler(event.payload));
+
 /** A tool opened a page in the web tab. */
 export const onWebOpen = (handler: () => void): Promise<UnlistenFn> => listen("cephi://web-open", handler);
 

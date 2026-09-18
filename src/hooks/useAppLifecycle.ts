@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { api, onConfigChanged, onSelection, onWebOpen, onWebState } from "../lib/ipc";
+import { api, onConfigChanged, onSelection, onWebOpen, onWebShortcut, onWebState } from "../lib/ipc";
 import { useChat } from "../store/chat";
 import { useUi } from "../store/ui";
 import { useWeb } from "../store/web";
@@ -52,7 +52,19 @@ export function useSelectionSync() {
   }, []);
 }
 
-/** Window-level keyboard shortcuts. */
+/** Sub-views go back first; only the chat hides the window. */
+function goBackOrHide() {
+  const ui = useUi.getState();
+  if (ui.mode !== "compact" && ui.view !== "chat") ui.setView("chat");
+  else void api.windowHide();
+}
+
+function newChat() {
+  useUi.getState().setView("chat");
+  void useChat.getState().reset();
+}
+
+/** Window-level keyboard shortcuts, also while the web tab's page has the keyboard. */
 export function useKeyboardShortcuts() {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -61,23 +73,38 @@ export function useKeyboardShortcuts() {
 
       if (e.key === "Escape") {
         e.preventDefault();
-        // Sub-views go back first; only the chat hides the window.
-        const ui = useUi.getState();
-        if (ui.mode !== "compact" && ui.view !== "chat") ui.setView("chat");
-        else void api.windowHide();
+        goBackOrHide();
       } else if (ctrl && key === "c") {
         copySelectionOutsideFocus();
       } else if (ctrl && key === "n") {
         e.preventDefault();
-        useUi.getState().setView("chat");
-        void useChat.getState().reset();
+        newChat();
       } else if (ctrl && key === "e") {
         e.preventDefault();
         useUi.getState().toggleMode();
       }
     };
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    const unlisten = onWebShortcut((action) => {
+      switch (action) {
+        case "escape":
+          goBackOrHide();
+          break;
+        case "new-chat":
+          newChat();
+          break;
+        case "toggle-mode":
+          useUi.getState().toggleMode();
+          break;
+        case "address":
+          useWeb.setState((s) => ({ addressFocus: s.addressFocus + 1 }));
+          break;
+      }
+    });
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      void unlisten.then((fn) => fn());
+    };
   }, []);
 }
 

@@ -24,7 +24,16 @@ pub const EVENT_WEB_STATE: &str = "cephi://web-state";
 /// A tool opened a page: the frontend switches to the web tab.
 pub const EVENT_WEB_OPEN: &str = "cephi://web-open";
 
+/// A Cephi shortcut was pressed inside the page (payload: the action).
+pub const EVENT_WEB_SHORTCUT: &str = "cephi://web-shortcut";
+
 const SEARCH_URL: &str = "https://www.google.com/search";
+
+/// Injected into every page: reports Cephi's shortcuts as `cephi-key://<action>` navigations.
+const SHORTCUT_SCRIPT: &str = include_str!("../../assets/web-shortcuts.js");
+const SHORTCUT_SCHEME: &str = "cephi-key";
+/// Mirrored in `src/lib/ipc.ts` (`WebShortcut`).
+const SHORTCUT_ACTIONS: [&str; 4] = ["escape", "new-chat", "toggle-mode", "address"];
 
 /// Mirrored in `src/lib/ipc.ts` (`WebState`).
 #[derive(Clone, Debug, Default, Serialize)]
@@ -123,12 +132,18 @@ async fn create(app: &AppHandle, url: Url) -> AppResult<()> {
         _ => tauri::window::Color(24, 24, 28, 255),
     };
 
+    let key_app = app.clone();
     let popup_app = app.clone();
     let load_app = app.clone();
     let title_app = app.clone();
     let builder = WebviewBuilder::new(WEB_LABEL, WebviewUrl::External(url))
         .background_color(background)
+        .initialization_script(SHORTCUT_SCRIPT)
         .on_navigation(move |url| {
+            if url.scheme() == SHORTCUT_SCHEME {
+                report_shortcut(&key_app, url);
+                return false;
+            }
             let allowed = is_web_url(url) || url.scheme() == "about";
             if !allowed {
                 log::info!("web tab: blocked navigation to a {} link", url.scheme());
@@ -250,6 +265,23 @@ fn logical(bounds: Bounds) -> (LogicalPosition<f64>, LogicalSize<f64>) {
         LogicalPosition::new(bounds.x, bounds.y),
         LogicalSize::new(bounds.width.max(0.0), bounds.height.max(0.0)),
     )
+}
+
+/// A Cephi shortcut pressed while the page had focus: the keyboard goes back to Cephi's UI, which
+/// then handles it like its own key press.
+fn report_shortcut(app: &AppHandle, url: &Url) {
+    let action = url.host_str().unwrap_or_default();
+    if !SHORTCUT_ACTIONS.contains(&action) {
+        return;
+    }
+    if let Some(main) = app.get_webview(MAIN_LABEL) {
+        if let Err(e) = main.set_focus() {
+            log::warn!("focus main webview: {e}");
+        }
+    }
+    if let Err(e) = app.emit_to(MAIN_LABEL, EVENT_WEB_SHORTCUT, action) {
+        log::error!("emit web shortcut: {e}");
+    }
 }
 
 fn is_web_url(url: &Url) -> bool {
