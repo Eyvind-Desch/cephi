@@ -127,16 +127,24 @@ export function toSaveRequest(form: ServerForm): SaveRequest {
     form.kind === "local"
       ? {
           command: form.command.trim(),
-          args: form.args
-            .split("\n")
-            .map((a) => a.trim())
-            .filter(Boolean),
+          args: splitArgs(form.args),
           cwd: form.cwd.trim() || null,
           env: resolveRows(name, form.env, secrets),
           ...common,
         }
       : { url: form.url.trim(), headers: resolveRows(name, form.headers, secrets), ...common };
   return { server, secrets };
+}
+
+/**
+ * One argument per line. Setup instructions are usually copied from a web page, and a paste from
+ * one can carry `<br>` where the line breaks were — an argument with a `<br>` in it never works.
+ */
+function splitArgs(text: string): string[] {
+  return text
+    .split(/\n|<br\s*\/?>/i)
+    .map((argument) => argument.trim())
+    .filter(Boolean);
 }
 
 /** Secret rows that have neither a stored nor a new value. */
