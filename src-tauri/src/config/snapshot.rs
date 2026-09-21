@@ -93,7 +93,7 @@ impl ConfigSnapshot {
                         provider_icon: provider.map_or("ollama", |pr| pr.brand().0).to_string(),
                         local: provider.is_none(),
                         available: provider.is_none_or(|pr| crate::secrets::is_set(&pr.api_key_secret())),
-                        vision: p.vision,
+                        vision: p.sees_images(),
                     }
                 })
                 .collect(),

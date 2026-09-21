@@ -367,7 +367,7 @@ mod tests {
             provider: "anthropic".into(),
             model: model.into(),
             tools: true,
-            vision: true,
+            vision: Some(true),
             think: None,
             temperature: None,
             effort: None,

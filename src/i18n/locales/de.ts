@@ -74,7 +74,8 @@ export const de: Locale = {
     ready: "Screenshot angehängt – frag etwas dazu.",
     describe: "Was ist darauf?",
     describePrompt: "Was siehst du auf diesem Screenshot?",
-    noVision: "{{model}} kann keine Bilder ansehen. Wähle oben ein Modell mit Bildverständnis.",
+    noVision: "{{model}} kann keine Bilder ansehen.",
+    switchModel: "Stattdessen {{model}} nehmen",
   },
   pageChip: {
     summarize: "Zusammenfassen",

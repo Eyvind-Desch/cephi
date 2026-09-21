@@ -168,7 +168,7 @@ impl Run<'_> {
         match input {
             Input::Message { text, images } if !images.is_empty() => {
                 // A question about a picture: no fast path, and the model has to be able to see.
-                if !profile.vision {
+                if !profile.sees_images() {
                     return Err(t!("capture.no_vision", model = profile.model).into());
                 }
                 history.push(ChatMessage::user_with_images(text, images));

@@ -43,10 +43,10 @@ pub struct Profile {
     /// Whether the model may call tools.
     #[serde(default = "default_true")]
     pub tools: bool,
-    /// Whether the model can look at pictures (screenshots). Cloud models usually can; a local
-    /// model needs to be a vision model (e.g. `qwen2.5vl`, `gemma3`, `llava`).
+    /// Whether the model can look at pictures (screenshots). Left out, Cephi decides by provider and
+    /// model name ([`Profile::sees_images`]); set it explicitly when that guess is wrong.
     #[serde(default)]
-    pub vision: bool,
+    pub vision: Option<bool>,
     /// Ollama: enable/disable the model's reasoning mode. `None` = model default.
     #[serde(default)]
     pub think: Option<bool>,
@@ -201,6 +201,35 @@ pub struct Size {
     pub height: u32,
 }
 
+/// Parts of a local model's name that mean it can look at pictures.
+const VISION_MODEL_HINTS: [&str; 9] = [
+    "llava",
+    "vision",
+    "-vl",
+    "vl:",
+    "gemma3",
+    "gemma4",
+    "minicpm-v",
+    "moondream",
+    "pixtral",
+];
+
+impl Profile {
+    /// Whether a screenshot may go to this model. Without `vision` in `settings.json`: cloud models
+    /// can (all current ones read pictures), a local one only when its name says so — otherwise
+    /// every profile of an older settings file would look blind.
+    pub fn sees_images(&self) -> bool {
+        if let Some(vision) = self.vision {
+            return vision;
+        }
+        if self.provider != crate::llm::LOCAL_PROVIDER_ID {
+            return true;
+        }
+        let model = self.model.to_lowercase();
+        VISION_MODEL_HINTS.iter().any(|hint| model.contains(hint))
+    }
+}
+
 impl Settings {
     /// Returns the requested profile, falling back to the default and then the first profile.
     pub fn profile(&self, id: Option<&str>) -> &Profile {
@@ -317,7 +346,7 @@ fn local_profile(id: &str, label: LocalizedText, model: &str) -> Profile {
         provider: default_provider(),
         model: model.into(),
         tools: true,
-        vision: false,
+        vision: None,
         think: None,
         temperature: None,
         effort: None,
@@ -354,12 +383,10 @@ impl Default for Settings {
                 Profile {
                     provider: "anthropic".into(),
                     effort: Some("low".into()),
-                    vision: true,
                     ..local_profile("claude", LocalizedText::plain("Claude"), "claude-opus-5")
                 },
                 Profile {
                     provider: "gemini".into(),
-                    vision: true,
                     ..local_profile("gemini", LocalizedText::plain("Gemini"), "gemini-3.8-flash")
                 },
             ],
@@ -479,6 +506,34 @@ impl Default for WindowSettings {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn profile(provider: &str, model: &str, vision: Option<bool>) -> Profile {
+        Profile {
+            id: "x".into(),
+            label: LocalizedText::plain("X"),
+            provider: provider.into(),
+            model: model.into(),
+            tools: true,
+            vision,
+            think: None,
+            temperature: None,
+            effort: None,
+        }
+    }
+
+    /// An older settings.json has no "vision" anywhere; without a guess every model would look blind.
+    #[test]
+    fn models_that_can_see_are_recognised_without_a_setting() {
+        assert!(profile("anthropic", "claude-opus-5", None).sees_images(), "cloud models read pictures");
+        assert!(profile("gemini", "gemini-3.8-flash", None).sees_images());
+        assert!(!profile("ollama", "assistant-fast:latest", None).sees_images(), "a plain local model does not");
+        assert!(profile("ollama", "qwen2.5vl:7b", None).sees_images(), "local vision models do");
+        assert!(profile("ollama", "llava:13b", None).sees_images());
+        assert!(profile("ollama", "gemma3:12b", None).sees_images());
+        // The setting always wins over the guess.
+        assert!(!profile("anthropic", "claude-opus-5", Some(false)).sees_images());
+        assert!(profile("ollama", "my-own-model", Some(true)).sees_images());
+    }
 
     #[test]
     fn default_settings_file_is_valid() {

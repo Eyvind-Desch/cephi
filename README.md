@@ -44,8 +44,8 @@ selection for that moment and **restores your clipboard afterwards**. The normal
 **Screenshot:** ⋯ → *Screenshot* (or `/screenshot`) takes a picture of the monitor the mouse is on —
 Cephi hides itself for the shot — and puts it above the input: *What is on it?* or your own question about it.
 You can also paste a picture from the clipboard (Snipping Tool, a copied image) into the input. This all
-needs a model that can look at pictures; cloud models can, a local one needs a vision model (`"vision": true` in the
-profile, see [docs/PROVIDERS.md](docs/PROVIDERS.md)). Pictures stay in the session: a saved chat never keeps a screenshot.
+needs a model that can read pictures — Cephi knows which ones (cloud models, and local vision models
+like `llava` or `…vl`), and the attached screenshot offers to switch to one. Pictures stay in the session: a saved chat never keeps a screenshot.
 
 The panel has three tabs (icons top right): **Chat**, **Web** and **Translator**. The web tab shows Google and other pages inside
 Cephi (address bar: search terms or an address) and can be enlarged; links from the chat and search results open there too.

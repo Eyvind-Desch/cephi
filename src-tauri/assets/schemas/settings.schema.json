@@ -55,7 +55,7 @@
           },
           "model": { "type": "string", "description": "Ollama model name, e.g. \"assistant-fast:latest\" (see `ollama list`)." },
           "tools": { "type": "boolean", "default": true, "description": "May the model call tools?" },
-          "vision": { "type": "boolean", "default": false, "description": "Can the model look at pictures (screenshots)? Cloud models usually can; local models need a vision model." },
+          "vision": { "type": "boolean", "description": "Can the model look at pictures (screenshots)? Left out, Cephi decides: cloud models yes, local models only when the name says so (llava, …vl, gemma3, moondream, pixtral)." },
           "think": { "type": "boolean", "description": "Ollama only: reasoning mode on/off (models with 'thinking'). Omit = model default." },
           "temperature": { "type": "number", "minimum": 0, "maximum": 2, "description": "Ollama and OpenAI-compatible only: creativity. Omit = model default." }
         }

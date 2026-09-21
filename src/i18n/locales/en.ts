@@ -76,7 +76,8 @@ export const en = {
     ready: "Screenshot attached – ask about it.",
     describe: "What is on it?",
     describePrompt: "What can you see on this screenshot?",
-    noVision: "{{model}} cannot look at pictures. Pick a model with vision in the header.",
+    noVision: "{{model}} cannot look at pictures.",
+    switchModel: "Use {{model}} instead",
   },
   pageChip: {
     summarize: "Summarize",
