@@ -45,6 +45,8 @@ pub struct ProfileInfo {
     pub local: bool,
     /// False when the provider's API key is missing.
     pub available: bool,
+    /// Whether a screenshot can be sent to this model.
+    pub vision: bool,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -91,6 +93,7 @@ impl ConfigSnapshot {
                         provider_icon: provider.map_or("ollama", |pr| pr.brand().0).to_string(),
                         local: provider.is_none(),
                         available: provider.is_none_or(|pr| crate::secrets::is_set(&pr.api_key_secret())),
+                        vision: p.vision,
                     }
                 })
                 .collect(),

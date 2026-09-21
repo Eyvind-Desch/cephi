@@ -31,6 +31,8 @@ export interface UserMessage {
   id: string;
   role: "user";
   text: string;
+  /** Screenshot the question is about (base64 PNG), shown above the text. */
+  image?: string;
 }
 
 export interface AssistantMessage {

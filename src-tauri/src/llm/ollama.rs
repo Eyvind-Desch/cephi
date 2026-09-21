@@ -197,6 +197,10 @@ fn wire_messages(request: &LlmRequest<'_>) -> Vec<Value> {
     let mut messages = vec![json!({ "role": "system", "content": request.system })];
     for message in request.messages {
         messages.push(match message.role {
+            // Ollama takes pictures as plain base64 next to the text.
+            Role::User if !message.images.is_empty() => {
+                json!({ "role": "user", "content": message.content, "images": message.images })
+            }
             Role::User => json!({ "role": "user", "content": message.content }),
             Role::Assistant => {
                 let mut wire = json!({ "role": "assistant", "content": message.content });
@@ -277,5 +281,21 @@ mod tests {
         assert_eq!(call.function.name, "weather");
         assert_eq!(call.function.arguments["location"], "Berlin");
         assert!(call.id.is_none());
+    }
+
+    #[test]
+    fn a_screenshot_travels_next_to_the_question() {
+        let settings = crate::config::Settings::default();
+        let profile = settings.profile(Some("fast")).clone();
+        let messages = [ChatMessage::user_with_images("What is on the screen?", vec!["QUJD".into()])];
+        let tools: Vec<ToolDef> = Vec::new();
+        let wire = wire_messages(&LlmRequest {
+            system: "",
+            messages: &messages,
+            tools: &tools,
+            profile: &profile,
+        });
+        assert_eq!(wire[1]["content"], "What is on the screen?");
+        assert_eq!(wire[1]["images"][0], "QUJD");
     }
 }

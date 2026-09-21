@@ -26,7 +26,7 @@ One hotkey, one input field: answer, search, or action ("öffne die Bluetooth-Ei
 | `Ctrl+N` | New chat (the previous one is archived) |
 | `Esc` | Back to the chat, in the chat: hide (also works inside a web page that doesn't use Esc itself) |
 | `Ctrl+L` | Web tab: address bar |
-| `/` | Commands: `/clear`, `/web …`, `/translate …`, `/model …`, `/history`, `/tools`, `/settings`, `/keys`, `/mcp`, `/pin`, `/config`, `/reload` |
+| `/` | Commands: `/clear`, `/web …`, `/translate …`, `/model …`, `/history`, `/screenshot`, `/tools`, `/settings`, `/keys`, `/mcp`, `/pin`, `/config`, `/reload` |
 
 Clicking outside hides Cephi, unless it's pinned (⋯ menu). Tray icon: open, configuration, quit.
 
@@ -37,6 +37,11 @@ after login (installed version only).
 **Selected text:** mark text anywhere (browser, PDF, chat), press `Ctrl+Alt+T`, and it appears above the input
 with *Translate* and *Explain*; typing your own question sends the text along as context. Cephi copies the
 selection for that moment and **restores your clipboard afterwards**. The normal hotkey never touches the clipboard.
+
+**Screenshot:** the camera button next to the input (or `/screenshot`) takes a picture of the monitor the mouse is on —
+Cephi hides itself for the shot — and puts it above the input: *What is on it?* or your own question about it. This
+needs a model that can look at pictures; cloud models can, a local one needs a vision model (`"vision": true` in the
+profile, see [docs/PROVIDERS.md](docs/PROVIDERS.md)).
 
 The panel has three tabs (icons top right): **Chat**, **Web** and **Translator**. The web tab shows Google and other pages inside
 Cephi (address bar: search terms or an address) and can be enlarged; links from the chat and search results open there too.

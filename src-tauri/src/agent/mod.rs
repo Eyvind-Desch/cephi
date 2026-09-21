@@ -92,8 +92,8 @@ impl AgentController {
 
 /// What starts a run.
 pub enum Input {
-    /// A new user message.
-    Message(String),
+    /// A new user message, optionally about pictures (PNG, base64), e.g. a screenshot.
+    Message { text: String, images: Vec<String> },
     /// Let the model answer from the tool results at the end of the history
     /// (e.g. "summarize" on search results that were only shown).
     Continue,
@@ -166,7 +166,14 @@ impl Run<'_> {
         let mut answer_is_optional = false;
 
         match input {
-            Input::Message(text) => {
+            Input::Message { text, images } if !images.is_empty() => {
+                // A question about a picture: no fast path, and the model has to be able to see.
+                if !profile.vision {
+                    return Err(t!("capture.no_vision", model = profile.model).into());
+                }
+                history.push(ChatMessage::user_with_images(text, images));
+            }
+            Input::Message { text, .. } => {
                 // Fast path: a trigger phrase runs its tool directly, without waiting for the model.
                 // Afterwards the model only gets involved if the tool asks for an answer from its result.
                 if let Some(call) = self.fast_path_call(&text) {

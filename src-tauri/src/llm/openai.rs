@@ -8,8 +8,8 @@ use tokio_util::sync::CancellationToken;
 
 use super::sse::{self, Flow, ReadOutcome};
 use super::{
-    new_call_id, parse_arguments, status_error, transport_error, ChatMessage, LlmError, LlmRequest, NativeTurn, Role,
-    ToolCall, ToolDef,
+    data_url, new_call_id, parse_arguments, status_error, transport_error, ChatMessage, LlmError, LlmRequest,
+    NativeTurn, Role, ToolCall, ToolDef,
 };
 use crate::config::ProviderSettings;
 
@@ -188,6 +188,16 @@ impl OpenAiClient {
         let mut wire = vec![json!({ "role": "system", "content": request.system })];
         for message in request.messages {
             match message.role {
+                // With pictures the content becomes a list of parts (data URLs).
+                Role::User if !message.images.is_empty() => {
+                    let mut parts: Vec<Value> = message
+                        .images
+                        .iter()
+                        .map(|image| json!({ "type": "image_url", "image_url": { "url": data_url(image) } }))
+                        .collect();
+                    parts.push(json!({ "type": "text", "text": message.content }));
+                    wire.push(json!({ "role": "user", "content": parts }));
+                }
                 Role::User => wire.push(json!({ "role": "user", "content": message.content })),
                 Role::Assistant => {
                     if message.content.trim().is_empty() && message.tool_calls.is_empty() {
@@ -318,5 +328,32 @@ mod tests {
         assert!(q["default"].is_null());
         assert_eq!(q["enum"][0], "y");
         assert!(wire[0]["function"]["parameters"]["required"].is_null());
+    }
+
+    #[test]
+    fn a_screenshot_becomes_a_data_url_part() {
+        let settings = crate::config::Settings::default();
+        let profile = settings.profile(Some("gemini")).clone();
+        let provider = ProviderSettings {
+            id: "gemini".into(),
+            kind: crate::config::ProviderKind::Openai,
+            label: None,
+            base_url: Some("https://example.invalid/v1".into()),
+            api_key_secret: None,
+            max_tokens: None,
+            fallbacks: false,
+        };
+        let client = OpenAiClient::new(reqwest::Client::new(), &provider, "key".into());
+        let messages = [ChatMessage::user_with_images("What is on the screen?", vec!["QUJD".into()])];
+        let tools: Vec<ToolDef> = Vec::new();
+        let wire = client.wire_messages(&LlmRequest {
+            system: "",
+            messages: &messages,
+            tools: &tools,
+            profile: &profile,
+        });
+        assert_eq!(wire[1]["content"][0]["type"], "image_url");
+        assert_eq!(wire[1]["content"][0]["image_url"]["url"], "data:image/png;base64,QUJD");
+        assert_eq!(wire[1]["content"][1]["text"], "What is on the screen?");
     }
 }

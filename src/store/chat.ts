@@ -69,17 +69,22 @@ export const useChat = create<ChatState>()((set, get) => {
       ui.showFlash(null);
       // Answers appear in the chat, even if the panel last showed another view.
       if (ui.view !== "chat") useUi.setState({ view: "chat" });
+      // A screenshot waiting above the composer belongs to this question.
+      const screenshot = ui.screenshot;
+      if (screenshot) ui.setScreenshot(null);
       const assistantId = crypto.randomUUID();
       set((state) => ({
         running: true,
         messages: [
           ...state.messages,
-          { id: crypto.randomUUID(), role: "user", text },
+          { id: crypto.randomUUID(), role: "user", text, image: screenshot?.data },
           { id: assistantId, role: "assistant", parts: [], status: "streaming" },
         ],
       }));
 
-      await stream(assistantId, (onEvent) => api.agentSend(text, ui.profileId, onEvent));
+      await stream(assistantId, (onEvent) =>
+        api.agentSend(text, ui.profileId, onEvent, screenshot ? [screenshot.data] : undefined),
+      );
 
       // Still compact means everything ran via the fast path: confirm briefly, then get out of the way.
       // Failures open the panel instead, where the full message (and e.g. the keys view) fits.

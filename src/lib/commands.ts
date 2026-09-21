@@ -15,6 +15,7 @@ export interface SlashCommand {
   description:
     | "commands.clear"
     | "commands.history"
+    | "commands.screenshot"
     | "commands.web"
     | "commands.translate"
     | "commands.model"
@@ -71,6 +72,12 @@ export const COMMANDS: SlashCommand[] = [
       if (profile.available) ui.setProfile(profile.id);
       else ui.openSettings("keys");
     },
+  },
+  {
+    name: "screenshot",
+    aliases: ["shot"],
+    description: "commands.screenshot",
+    run: () => void useUi.getState().captureScreenshot(),
   },
   { name: "tools", description: "commands.tools", run: () => useUi.getState().setView("tools") },
   { name: "settings", description: "commands.settings", run: () => useUi.getState().openSettings("general") },

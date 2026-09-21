@@ -8,6 +8,7 @@ use tokio_util::sync::CancellationToken;
 use super::sse::{self, Flow, ReadOutcome};
 use super::{
     parse_arguments, status_error, transport_error, ChatMessage, LlmError, LlmRequest, NativeTurn, Role, ToolCall,
+    IMAGE_MEDIA_TYPE,
 };
 use crate::config::ProviderSettings;
 
@@ -261,6 +262,21 @@ impl AnthropicClient {
         let mut wire: Vec<Value> = Vec::new();
         for message in request.messages {
             match message.role {
+                // With pictures the content becomes blocks: the picture first, then the question.
+                Role::User if !message.images.is_empty() => {
+                    let mut blocks: Vec<Value> = message
+                        .images
+                        .iter()
+                        .map(|image| {
+                            json!({
+                                "type": "image",
+                                "source": { "type": "base64", "media_type": IMAGE_MEDIA_TYPE, "data": image },
+                            })
+                        })
+                        .collect();
+                    blocks.push(json!({ "type": "text", "text": message.content }));
+                    wire.push(json!({ "role": "user", "content": blocks }));
+                }
                 Role::User => wire.push(json!({ "role": "user", "content": message.content })),
                 Role::Assistant => {
                     let content = match &message.native {
@@ -351,6 +367,7 @@ mod tests {
             provider: "anthropic".into(),
             model: model.into(),
             tools: true,
+            vision: true,
             think: None,
             temperature: None,
             effort: None,
@@ -412,5 +429,22 @@ mod tests {
         assert!(supports_fallbacks("claude-opus-5"));
         assert!(supports_fallbacks("claude-fable-5-1"));
         assert!(!supports_fallbacks("claude-haiku-4-5"));
+    }
+
+    #[test]
+    fn a_screenshot_becomes_an_image_block_before_the_question() {
+        let messages = [ChatMessage::user_with_images("What is this error?", vec!["QUJD".into()])];
+        let tools: Vec<ToolDef> = Vec::new();
+        let profile = profile("claude-opus-5");
+        let wire = client().wire_messages(&LlmRequest {
+            system: "",
+            messages: &messages,
+            tools: &tools,
+            profile: &profile,
+        });
+        assert_eq!(wire[0]["content"][0]["type"], "image");
+        assert_eq!(wire[0]["content"][0]["source"]["media_type"], "image/png");
+        assert_eq!(wire[0]["content"][0]["source"]["data"], "QUJD");
+        assert_eq!(wire[0]["content"][1]["text"], "What is this error?");
     }
 }

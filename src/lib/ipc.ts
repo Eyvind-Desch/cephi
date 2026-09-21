@@ -57,6 +57,16 @@ export interface ProfileInfo {
   local: boolean;
   /** False when the provider's API key is missing. */
   available: boolean;
+  /** Whether a screenshot can be sent to this model. */
+  vision: boolean;
+}
+
+/** `src-tauri/src/desktop/capture.rs` */
+export interface Screenshot {
+  /** Base64 PNG, without the `data:` prefix. */
+  data: string;
+  width: number;
+  height: number;
 }
 
 export interface ToolInfo {
@@ -211,11 +221,19 @@ export const api = {
   mcpRemoveServer: (name: string) => invoke<ConfigSnapshot>("mcp_remove_server", { name }),
 
   /** Resolves when the run has finished, been cancelled or failed. */
-  agentSend: (text: string, profileId: string | null, onEvent: (event: AgentEvent) => void) => {
+  agentSend: (
+    text: string,
+    profileId: string | null,
+    onEvent: (event: AgentEvent) => void,
+    /** Screenshots (base64 PNG) the question is about. */
+    images?: string[],
+  ) => {
     const channel = new Channel<AgentEvent>();
     channel.onmessage = onEvent;
-    return invoke<void>("agent_send", { text, profileId, onEvent: channel });
+    return invoke<void>("agent_send", { text, images, profileId, onEvent: channel });
   },
+  /** Screenshot of the monitor the mouse is on; Cephi hides itself for the shot. */
+  screenshotCapture: () => invoke<Screenshot>("screenshot_capture"),
   /** Lets the model answer from the latest tool results (e.g. summarize search results). */
   agentContinue: (profileId: string | null, onEvent: (event: AgentEvent) => void) => {
     const channel = new Channel<AgentEvent>();

@@ -6,8 +6,8 @@ use serde::Deserialize;
 use tauri::{AppHandle, Emitter, Manager, Monitor, Window};
 use windows_sys::Win32::System::Threading::AttachThreadInput;
 use windows_sys::Win32::UI::WindowsAndMessaging::{
-    BringWindowToTop, GetForegroundWindow, GetWindowThreadProcessId, SetForegroundWindow, SetWindowPos,
-    SWP_NOACTIVATE, SWP_NOOWNERZORDER, SWP_NOZORDER,
+    BringWindowToTop, GetForegroundWindow, GetWindowThreadProcessId, SetForegroundWindow, SetWindowPos, SWP_NOACTIVATE,
+    SWP_NOOWNERZORDER, SWP_NOZORDER,
 };
 
 use crate::config::{Anchor, WindowSettings};

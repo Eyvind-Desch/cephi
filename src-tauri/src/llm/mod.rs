@@ -28,6 +28,13 @@ pub use openai::OpenAiClient;
 
 /// Id of the built-in local provider (configured in `settings.ollama`).
 pub const LOCAL_PROVIDER_ID: &str = "ollama";
+/// Screenshots are PNG (see `desktop::capture`); every provider is told the same type.
+pub const IMAGE_MEDIA_TYPE: &str = "image/png";
+
+/// `data:image/png;base64,…` as the OpenAI-compatible APIs expect it.
+pub fn data_url(base64: &str) -> String {
+    format!("data:{IMAGE_MEDIA_TYPE};base64,{base64}")
+}
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
@@ -43,6 +50,9 @@ pub enum Role {
 pub struct ChatMessage {
     pub role: Role,
     pub content: String,
+    /// User only: pictures (PNG, base64) the question is about, e.g. a screenshot.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub images: Vec<String>,
     /// Assistant only.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub tool_calls: Vec<ToolCall>,
@@ -95,6 +105,7 @@ impl ChatMessage {
         Self {
             role,
             content: content.into(),
+            images: Vec::new(),
             tool_calls: Vec::new(),
             tool_call_id: None,
             tool_name: None,
@@ -105,6 +116,14 @@ impl ChatMessage {
 
     pub fn user(content: impl Into<String>) -> Self {
         Self::new(Role::User, content)
+    }
+
+    /// A question about pictures (PNG, base64), e.g. "what does this error mean?" plus a screenshot.
+    pub fn user_with_images(content: impl Into<String>, images: Vec<String>) -> Self {
+        Self {
+            images,
+            ..Self::new(Role::User, content)
+        }
     }
 
     pub fn assistant(content: impl Into<String>) -> Self {

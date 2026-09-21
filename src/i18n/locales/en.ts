@@ -65,6 +65,14 @@ export const en = {
     explainPrompt: "Explain this briefly:\n\n{{text}}",
     withContext: "{{question}}\n\nSelected text:\n{{text}}",
   },
+  screenshot: {
+    take: "Screenshot for a question",
+    alt: "Screenshot",
+    ready: "Screenshot attached – ask about it.",
+    describe: "What is on it?",
+    describePrompt: "What can you see on this screenshot?",
+    noVision: "{{model}} cannot look at pictures. Pick a model with vision in the header.",
+  },
   pageChip: {
     summarize: "Summarize",
     summarizePrompt: "Summarize this page briefly: {{title}}\n{{url}}",
@@ -73,6 +81,7 @@ export const en = {
   commands: {
     clear: "Start a new chat",
     history: "Earlier chats",
+    screenshot: "Screenshot for a question about the screen",
     web: "Open the web tab or search",
     translate: "Open the translator",
     model: "Switch the model",
@@ -157,6 +166,7 @@ export const en = {
     newChat: "New chat",
     newChatShortcut: "Ctrl+N",
     history: "Earlier chats",
+    screenshot: "Screenshot for a question about the screen",
     pin: "Pin",
     autostartUnavailable: "Only in the installed version",
     settings: "Settings",

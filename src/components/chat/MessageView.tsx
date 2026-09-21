@@ -21,7 +21,14 @@ export const MessageView = memo(function MessageView({ message, isLast }: { mess
   if (message.role === "user") {
     return (
       <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="flex justify-end">
-        <div className="max-w-[85%] rounded-2xl rounded-br-md border border-line bg-raised px-3.5 py-2 leading-relaxed whitespace-pre-wrap text-fg">
+        <div className="max-w-[85%] space-y-2 rounded-2xl rounded-br-md border border-line bg-raised px-3.5 py-2 leading-relaxed whitespace-pre-wrap text-fg">
+          {message.image && (
+            <img
+              src={`data:image/png;base64,${message.image}`}
+              alt={t("screenshot.alt")}
+              className="max-h-40 w-full rounded-lg border border-line object-cover object-top"
+            />
+          )}
           {message.text}
         </div>
       </motion.div>

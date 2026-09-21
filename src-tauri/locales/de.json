@@ -33,6 +33,10 @@
     "dev_build": "Mit Windows starten geht nur in der installierten Version (der Entwicklungs-Build braucht den Dev-Server).",
     "failed": "Der Windows-Autostart-Eintrag konnte nicht geändert werden (Fehler %{code})."
   },
+  "capture": {
+    "failed": "Screenshot fehlgeschlagen: %{error}",
+    "no_vision": "Das Modell „%{model}“ kann keine Bilder ansehen. Wähle in den Einstellungen ein Modell mit Bildverständnis (z. B. ein Cloud-Modell oder ein lokales Vision-Modell)."
+  },
   "clipboard": {
     "unavailable": "Zwischenablage nicht verfügbar: %{error}",
     "no_text": "Zwischenablage enthält keinen Text: %{error}",

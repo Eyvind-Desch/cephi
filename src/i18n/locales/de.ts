@@ -63,6 +63,14 @@ export const de: Locale = {
     explainPrompt: "Erkläre das kurz:\n\n{{text}}",
     withContext: "{{question}}\n\nMarkierter Text:\n{{text}}",
   },
+  screenshot: {
+    take: "Screenshot für eine Frage",
+    alt: "Screenshot",
+    ready: "Screenshot angehängt – frag etwas dazu.",
+    describe: "Was ist darauf?",
+    describePrompt: "Was siehst du auf diesem Screenshot?",
+    noVision: "{{model}} kann keine Bilder ansehen. Wähle oben ein Modell mit Bildverständnis.",
+  },
   pageChip: {
     summarize: "Zusammenfassen",
     summarizePrompt: "Fasse diese Seite kurz zusammen: {{title}}\n{{url}}",
@@ -71,6 +79,7 @@ export const de: Locale = {
   commands: {
     clear: "Neuen Chat beginnen",
     history: "Frühere Chats",
+    screenshot: "Screenshot für eine Frage zum Bildschirm",
     web: "Web-Tab öffnen oder suchen",
     translate: "Übersetzer öffnen",
     model: "Modell wechseln",
@@ -155,6 +164,7 @@ export const de: Locale = {
     newChat: "Neuer Chat",
     newChatShortcut: "Strg+N",
     history: "Frühere Chats",
+    screenshot: "Screenshot für eine Frage zum Bildschirm",
     pin: "Anpinnen",
     autostartUnavailable: "Nur in der installierten Version",
     settings: "Einstellungen",

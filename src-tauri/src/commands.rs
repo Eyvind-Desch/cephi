@@ -14,6 +14,7 @@ use crate::desktop::web::{self, WebState};
 use crate::desktop::window::{self, WindowMode};
 use crate::error::{AppError, AppResult};
 use crate::history::ArchivedChat;
+use crate::desktop::capture::ScreenshotImage as Screenshot;
 use crate::secrets::SecretGroupInfo;
 use crate::services::{self, Service, ServiceStatus};
 use crate::state::AppState;
@@ -56,14 +57,26 @@ pub fn config_open_folder(app: AppHandle) -> AppResult<()> {
 }
 
 #[tauri::command]
+/// `images`: screenshots (PNG, base64) the question is about.
 pub async fn agent_send(
     app: AppHandle,
     state: State<'_, AppState>,
     text: String,
+    images: Option<Vec<String>>,
     profile_id: Option<String>,
     on_event: Channel<AgentEvent>,
 ) -> AppResult<()> {
-    agent::run(&app, &state, Input::Message(text), profile_id, on_event).await
+    let input = Input::Message {
+        text,
+        images: images.unwrap_or_default(),
+    };
+    agent::run(&app, &state, input, profile_id, on_event).await
+}
+
+/// Takes a screenshot of the monitor the mouse is on (without Cephi itself) for a question about it.
+#[tauri::command]
+pub async fn screenshot_capture(app: AppHandle) -> AppResult<Screenshot> {
+    crate::app::screenshot(&app).await
 }
 
 /// Lets the model answer from the latest tool results (e.g. summarize search results).

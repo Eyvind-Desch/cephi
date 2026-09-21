@@ -34,9 +34,13 @@ Keys are stored in the Windows Credential Manager as `Cephi/<providerId>_api_key
 "profiles": [
   { "id": "fast", "label": "Fast", "model": "assistant-fast:latest" },
   { "id": "claude", "label": "Claude", "provider": "anthropic", "model": "claude-opus-5", "effort": "low" },
-  { "id": "gemini", "label": "Gemini", "provider": "gemini", "model": "gemini-3.8-flash" }
+  { "id": "gemini", "label": "Gemini", "provider": "gemini", "model": "gemini-3.8-flash", "vision": true }
 ]
 ```
+
+`"vision": true` marks a profile as able to look at pictures; only those may be asked about a screenshot.
+The shipped Claude and Gemini profiles have it, local models need an actual vision model (e.g. `qwen2.5vl`,
+`gemma3`, `llava`).
 
 | Provider field | Meaning |
 |---|---|

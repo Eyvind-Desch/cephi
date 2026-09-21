@@ -7,7 +7,7 @@ use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_opener::OpenerExt;
 
 use crate::config::{self, ConfigPaths, ConfigSnapshot, Diagnostic};
-use crate::desktop::{autostart, hotkey, tray, window};
+use crate::desktop::{autostart, capture, hotkey, tray, window};
 use crate::error::{AppError, AppResult};
 use crate::history::ChatStore;
 use crate::launcher::AppIndex;
@@ -262,6 +262,34 @@ pub async fn save_chat(state: &AppState, ui: serde_json::Value) -> AppResult<()>
 pub async fn new_chat(state: &AppState) -> AppResult<()> {
     state.agent.reset().await;
     state.chats.archive().map_err(AppError::from)
+}
+
+/// Time for the window to disappear before the picture is taken.
+const HIDE_BEFORE_CAPTURE: Duration = Duration::from_millis(180);
+
+/// A screenshot of the monitor the mouse is on. Cephi hides itself first, so the picture shows
+/// what is behind it, and comes back afterwards.
+pub async fn screenshot(app: &AppHandle) -> AppResult<capture::ScreenshotImage> {
+    let window = app.get_window(window::MAIN_LABEL);
+    let was_visible = window.as_ref().is_some_and(|w| w.is_visible().unwrap_or(false));
+    if was_visible {
+        if let Some(window) = &window {
+            let _ = window.hide();
+        }
+        tokio::time::sleep(HIDE_BEFORE_CAPTURE).await;
+    }
+
+    // GDI and COM: off the async runtime threads.
+    let shot = tauri::async_runtime::spawn_blocking(capture::monitor_at_cursor)
+        .await
+        .map_err(|e| AppError::msg(format!("internal error: {e}")))?;
+
+    if was_visible {
+        if let Err(e) = window::show(app) {
+            log::warn!("show after screenshot: {e}");
+        }
+    }
+    shot.map(Into::into).map_err(AppError::msg)
 }
 
 /// Opens an archived chat: the current one is archived, the model continues the old conversation.

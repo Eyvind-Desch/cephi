@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { setLanguage } from "../i18n";
-import { api, type ConfigSnapshot, type WindowMode } from "../lib/ipc";
+import { errorText } from "../lib/errors";
+import { api, type ConfigSnapshot, type Screenshot, type WindowMode } from "../lib/ipc";
 
 export type PanelView = "chat" | "history" | "settings" | "tools" | "web" | "translate";
 export type SettingsTab = "general" | "keys" | "mcp";
@@ -38,6 +39,10 @@ interface UiState {
   selection: string | null;
   /** The web tab's page the next question is about ("ask Cephi about this page"). */
   pageContext: PageContext | null;
+  /** Screenshot waiting above the composer for a question about it. */
+  screenshot: Screenshot | null;
+  /** A screenshot is being taken (Cephi hides itself meanwhile). */
+  capturing: boolean;
   /** Section shown on the settings page. */
   settingsTab: SettingsTab;
 
@@ -54,6 +59,9 @@ interface UiState {
   setOverlay: (open: boolean) => void;
   setSelection: (text: string | null) => void;
   setPageContext: (page: PageContext | null) => void;
+  setScreenshot: (shot: Screenshot | null) => void;
+  /** Takes a screenshot and puts it above the composer. */
+  captureScreenshot: () => Promise<void>;
   toggleWebLarge: () => void;
 }
 
@@ -79,6 +87,8 @@ export const useUi = create<UiState>()((set, get) => {
     webLarge: false,
     selection: null,
     pageContext: null,
+    screenshot: null,
+    capturing: false,
     settingsTab: "general",
 
     expand: () => {
@@ -124,6 +134,22 @@ export const useUi = create<UiState>()((set, get) => {
     setSelection: (selection) => set({ selection }),
 
     setPageContext: (pageContext) => set({ pageContext }),
+
+    setScreenshot: (screenshot) => set({ screenshot }),
+
+    captureScreenshot: async () => {
+      if (get().capturing) return;
+      set({ capturing: true, flash: null });
+      try {
+        set({ screenshot: await api.screenshotCapture() });
+        get().setView("chat");
+        get().expand();
+      } catch (error) {
+        set({ flash: { ok: false, text: errorText(error) } });
+      } finally {
+        set({ capturing: false });
+      }
+    },
 
     setOverlay: (open) => set((s) => ({ overlays: Math.max(0, s.overlays + (open ? 1 : -1)) })),
 

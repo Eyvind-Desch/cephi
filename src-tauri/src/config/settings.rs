@@ -42,6 +42,10 @@ pub struct Profile {
     /// Whether the model may call tools.
     #[serde(default = "default_true")]
     pub tools: bool,
+    /// Whether the model can look at pictures (screenshots). Cloud models usually can; a local
+    /// model needs to be a vision model (e.g. `qwen2.5vl`, `gemma3`, `llava`).
+    #[serde(default)]
+    pub vision: bool,
     /// Ollama: enable/disable the model's reasoning mode. `None` = model default.
     #[serde(default)]
     pub think: Option<bool>,
@@ -301,6 +305,7 @@ fn local_profile(id: &str, label: LocalizedText, model: &str) -> Profile {
         provider: default_provider(),
         model: model.into(),
         tools: true,
+        vision: false,
         think: None,
         temperature: None,
         effort: None,
@@ -337,10 +342,12 @@ impl Default for Settings {
                 Profile {
                     provider: "anthropic".into(),
                     effort: Some("low".into()),
+                    vision: true,
                     ..local_profile("claude", LocalizedText::plain("Claude"), "claude-opus-5")
                 },
                 Profile {
                     provider: "gemini".into(),
+                    vision: true,
                     ..local_profile("gemini", LocalizedText::plain("Gemini"), "gemini-3.8-flash")
                 },
             ],

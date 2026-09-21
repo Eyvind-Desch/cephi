@@ -3,7 +3,7 @@
  *
  * Open http://localhost:1420/?mode=expanded&view=settings&tab=keys&lang=de
  *   mode: compact | expanded | large   view: chat | settings | tools | web | translate   tab: general | keys | mcp   chat: demo | results | code   lang: en | de   keys: some
- *   draft: text in the composer (e.g. "/" shows the commands)   web: page (web tab with a loaded page)   service: stopped (translator container down)   selection: 1 (text picked up from another app)   pageChip: 1 (question about the web tab's page)   flash: volume (level bar in the compact bar)
+ *   draft: text in the composer (e.g. "/" shows the commands)   web: page (web tab with a loaded page)   service: stopped (translator container down)   selection: 1 (text picked up from another app)   pageChip: 1 (question about the web tab's page)   flash: volume (level bar in the compact bar)   shot: 1 (screenshot waiting above the composer)
  *
  * Used to review UI changes (and take headless screenshots) without touching the running app.
  */
@@ -196,6 +196,25 @@ const demoChat: Message[] = [
   },
 ];
 
+/** Stand-in for a real screenshot: a gradient with a window-like shape, drawn in the browser. */
+function demoScreenshot(): string {
+  const canvas = document.createElement("canvas");
+  canvas.width = 320;
+  canvas.height = 180;
+  const context = canvas.getContext("2d");
+  if (!context) return "";
+  const gradient = context.createLinearGradient(0, 0, 320, 180);
+  gradient.addColorStop(0, "#1b1b22");
+  gradient.addColorStop(1, "#3a3560");
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, 320, 180);
+  context.fillStyle = "rgba(255,255,255,0.10)";
+  context.fillRect(30, 28, 180, 110);
+  context.fillStyle = "rgba(255,255,255,0.35)";
+  for (let line = 0; line < 5; line++) context.fillRect(42, 48 + line * 16, 120 - line * 14, 5);
+  return canvas.toDataURL("image/png").replace(/^data:image\/png;base64,/, "");
+}
+
 const FENCE = "```";
 const codeChat: Message[] = [
   { id: "c1", role: "user", text: "Wie liste ich die größten Dateien auf?" },
@@ -260,6 +279,8 @@ export function installPreview() {
         case "mcp_save_server":
         case "mcp_remove_server":
           return config;
+        case "screenshot_capture":
+          return { data: demoScreenshot(), width: 320, height: 180 };
         case "chat_archive_list":
           return [
             { id: "2026-09-18_09-12-03", savedAt: new Date().toISOString(), title: lang === "de" ? "Wie ist das Wetter in Hamburg?" : "What is the weather in Hamburg?", messages: 4 },
@@ -294,6 +315,9 @@ export function installPreview() {
   });
   if (params.get("chat") === "demo") useChat.setState({ messages: demoChat });
   if (params.get("chat") === "code") useChat.setState({ messages: codeChat });
+  if (params.get("shot") === "1") {
+    useUi.setState({ screenshot: { data: demoScreenshot(), width: 320, height: 180 } });
+  }
   if (params.get("flash") === "volume") {
     useUi.setState({ flash: { ok: true, text: "Lautstärke: 40 %", volume: { percent: 40, muted: false } } });
   }
@@ -334,7 +358,8 @@ function profile(
   available: boolean,
 ) {
   const providerIcon = local ? "ollama" : provider;
-  return { id, label, model, tools: true, provider, providerLabel, providerIcon, local, available };
+  // Local demo models see no pictures, cloud ones do.
+  return { id, label, model, tools: true, provider, providerLabel, providerIcon, local, available, vision: !local };
 }
 
 function aiGroup(id: string, title: string, icon: string, usedBy: string[], isSet: boolean): SecretGroup {

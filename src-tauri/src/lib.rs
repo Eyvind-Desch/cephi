@@ -62,6 +62,7 @@ pub fn run() {
             commands::mcp_save_server,
             commands::mcp_remove_server,
             commands::agent_send,
+            commands::screenshot_capture,
             commands::agent_continue,
             commands::agent_preload,
             commands::agent_cancel,
