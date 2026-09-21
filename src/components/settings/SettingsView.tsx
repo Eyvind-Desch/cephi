@@ -17,16 +17,17 @@ export function SettingsView() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex items-center gap-2 px-2 pt-2">
+      <div className="space-y-2 px-3 pt-2">
         <button
           type="button"
           onClick={() => setView("chat")}
           title={t("keys.backTitle")}
-          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12.5px] text-muted transition-colors hover:bg-sunken hover:text-fg"
+          className="-ml-1 flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[12.5px] text-muted transition-colors hover:bg-sunken hover:text-fg"
         >
           <ArrowLeft size={14} /> {t("keys.back")}
         </button>
-        <div role="tablist" className="ml-auto flex gap-0.5 rounded-lg bg-sunken p-0.5">
+        {/* One row across the whole width: calmer than a second cluster of tabs next to the header. */}
+        <div role="tablist" className="grid grid-cols-3 gap-0.5 rounded-lg bg-sunken p-0.5">
           {TABS.map((id) => (
             <button
               key={id}
@@ -35,7 +36,7 @@ export function SettingsView() {
               aria-selected={tab === id}
               onClick={() => openSettings(id)}
               className={clsx(
-                "rounded-md px-2.5 py-1 text-[12.5px] transition-colors",
+                "rounded-md py-1 text-[12.5px] transition-colors",
                 tab === id ? "bg-raised text-fg shadow-sm" : "text-muted hover:text-fg",
               )}
             >
@@ -45,7 +46,7 @@ export function SettingsView() {
         </div>
       </div>
 
-      <div className="selectable flex-1 overflow-y-auto px-4 pt-3 pb-5">
+      <div className="selectable flex-1 overflow-y-auto px-3 pt-3 pb-5">
         {tab === "general" && <GeneralSection />}
         {tab === "keys" && <KeysSection />}
         {tab === "mcp" && <McpSection />}

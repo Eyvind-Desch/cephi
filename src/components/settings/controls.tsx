@@ -36,11 +36,11 @@ export function Row({
   children: ReactNode;
 }) {
   return (
-    <div className="px-3 py-2.5">
+    <div className="px-3 py-2">
       <div className="flex items-center gap-3">
         <div className="min-w-0 flex-1">
           <div className="text-[13px] text-fg">{label}</div>
-          {hint && <div className="text-[11.5px] leading-snug text-subtle">{hint}</div>}
+          {hint && <div className="mt-0.5 text-[11px] leading-snug text-subtle">{hint}</div>}
         </div>
         <div className="shrink-0">{children}</div>
       </div>

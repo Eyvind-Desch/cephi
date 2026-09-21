@@ -72,10 +72,17 @@ export function GeneralSection() {
             onChange={(enabled) => void api.autostartSet(enabled).then(setAutostart)}
           />
         </Row>
+        <Row label={t("settings.general.hideOnBlur")} hint={t("settings.general.hideOnBlurHint")} error={errorFor("window")}>
+          <Toggle
+            label={t("settings.general.hideOnBlur")}
+            checked={general.hideOnBlur}
+            onChange={(hideOnBlur) => save("window", { window: { hideOnBlur } })}
+          />
+        </Row>
       </Card>
 
       <Card title={t("settings.general.hotkeys")}>
-        <Row label={t("settings.general.hotkey")} hint={t("settings.general.hotkeyHint")} error={errorFor("hotkey")}>
+        <Row label={t("settings.general.hotkey")} error={errorFor("hotkey")}>
           <HotkeyField
             label={t("settings.general.hotkey")}
             value={config.hotkey}
@@ -98,13 +105,6 @@ export function GeneralSection() {
       </Card>
 
       <Card title={t("settings.general.behavior")}>
-        <Row label={t("settings.general.hideOnBlur")} hint={t("settings.general.hideOnBlurHint")} error={errorFor("window")}>
-          <Toggle
-            label={t("settings.general.hideOnBlur")}
-            checked={general.hideOnBlur}
-            onChange={(hideOnBlur) => save("window", { window: { hideOnBlur } })}
-          />
-        </Row>
         <Row
           label={t("settings.general.summarize")}
           hint={t("settings.general.summarizeHint")}

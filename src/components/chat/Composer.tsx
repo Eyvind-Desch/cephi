@@ -1,4 +1,4 @@
-import { ArrowUp, Camera, Loader2, Square } from "lucide-react";
+import { ArrowUp, Square } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { matchCommands, parseCommand, type SlashCommand } from "../../lib/commands";
@@ -24,7 +24,6 @@ export function Composer({ compact = false }: ComposerProps) {
   const running = useChat((s) => s.running);
   const send = useChat((s) => s.send);
   const cancel = useChat((s) => s.cancel);
-  const capturing = useUi((s) => s.capturing);
   const expand = useUi((s) => s.expand);
   const clearDraft = useCallback(() => setText(""), [setText]);
   const items = useCommandItems(text, clearDraft);
@@ -143,17 +142,9 @@ export function Composer({ compact = false }: ComposerProps) {
               : "max-h-40 min-h-7 flex-1 resize-none bg-transparent py-1 text-[14px] leading-6 text-fg outline-none placeholder:text-subtle"
           }
         />
-        {!running && <VoiceButton />}
-        {/* A screenshot is a question about the screen: only useful with the panel open. */}
-        {!compact && !running && (
-          <IconButton
-            icon={capturing ? Loader2 : Camera}
-            label={t("screenshot.take")}
-            disabled={capturing}
-            onClick={() => void useUi.getState().captureScreenshot()}
-            className={capturing ? "animate-spin" : undefined}
-          />
-        )}
+        {/* Dictation is the only extra button here; the screenshot lives in the ⋯ menu
+            and in /screenshot, so the input line stays calm. */}
+        {!compact && !running && <VoiceButton />}
         {running ? (
           <IconButton icon={Square} label={t("composer.stop")} onClick={cancel} className="text-danger" />
         ) : (
