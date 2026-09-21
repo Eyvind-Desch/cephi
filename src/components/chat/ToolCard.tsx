@@ -152,7 +152,7 @@ export function ToolCard({ part }: { part: ToolPart }) {
 function Detail({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="space-y-1">
-      <div className="text-caption font-medium tracking-wide text-subtle uppercase">{label}</div>
+      <div className="text-caption font-medium tracking-wider text-subtle uppercase">{label}</div>
       {children}
     </div>
   );

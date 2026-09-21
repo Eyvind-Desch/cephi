@@ -13,6 +13,7 @@ export const en = {
     cancel: "Cancel",
     back: "Chat",
     backTitle: "Back to chat (Esc)",
+    dismiss: "Discard",
   },
   composer: {
     placeholder: "Ask me anything…",
@@ -60,7 +61,6 @@ export const en = {
     durationS: "{{value}} s",
   },
   selection: {
-    dismiss: "Discard",
     translate: "Translate",
     explain: "Explain",
     none: "No text selected",

@@ -1,8 +1,8 @@
-import { FileText, Globe, X } from "lucide-react";
-import { motion } from "motion/react";
+import { FileText, Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useChat } from "../../store/chat";
 import { useUi } from "../../store/ui";
+import { Chip, ChipAction } from "./Chip";
 
 /** The web tab's page the next question is about: shown above the composer with a quick summary action. */
 export function PageChip() {
@@ -16,36 +16,22 @@ export function PageChip() {
   const host = hostOf(page.url);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 4 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="mb-2 flex items-center gap-2 rounded-xl border border-line bg-raised py-1.5 pr-1.5 pl-3"
-    >
+    <Chip align="center" onDismiss={() => setPageContext(null)}>
       <Globe size={13} className="shrink-0 text-subtle" />
       <span className="min-w-0 flex-1 truncate text-body text-muted" title={page.url}>
         {page.title || host}
         {page.title && <span className="text-subtle"> · {host}</span>}
       </span>
-      <button
-        type="button"
+      <ChipAction
+        icon={FileText}
+        label={t("pageChip.summarize")}
         disabled={running}
         onClick={() => {
           setPageContext(null);
           void send(t("pageChip.summarizePrompt", { url: page.url, title: page.title || host }));
         }}
-        className="flex shrink-0 items-center gap-1.5 rounded-lg border border-line px-2.5 py-1 text-body text-muted select-none hover:bg-sunken hover:text-fg disabled:opacity-40"
-      >
-        <FileText size={13} /> {t("pageChip.summarize")}
-      </button>
-      <button
-        type="button"
-        onClick={() => setPageContext(null)}
-        title={t("selection.dismiss")}
-        className="grid size-6 shrink-0 place-items-center rounded-md text-subtle hover:bg-sunken hover:text-fg"
-      >
-        <X size={13} />
-      </button>
-    </motion.div>
+      />
+    </Chip>
   );
 }
 

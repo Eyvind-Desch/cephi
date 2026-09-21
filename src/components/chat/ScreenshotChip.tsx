@@ -1,9 +1,9 @@
-import { AlertTriangle, Eye, Sparkles, X } from "lucide-react";
-import { motion } from "motion/react";
+import { AlertTriangle, Eye, Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { ProfileInfo } from "../../lib/ipc";
 import { useChat } from "../../store/chat";
 import { useUi } from "../../store/ui";
+import { Chip, ChipAction } from "./Chip";
 
 const EMPTY_PROFILES: ProfileInfo[] = [];
 
@@ -24,55 +24,37 @@ export function ScreenshotChip() {
   const seeing = profiles.find((p) => p.vision && p.available);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 4 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="mb-2 rounded-xl border border-line bg-raised p-2"
-    >
-      <div className="flex items-start gap-2.5">
-        <img
-          src={`data:image/png;base64,${screenshot.data}`}
-          alt={t("screenshot.alt")}
-          className="h-14 w-24 shrink-0 rounded-lg border border-line object-cover object-top"
-        />
-        <div className="min-w-0 flex-1 space-y-1.5">
-          <p className="text-body text-muted">{t("screenshot.ready")}</p>
-          {blind ? (
-            <div className="space-y-1.5">
-              <p className="flex items-start gap-1.5 text-hint leading-snug text-warning">
-                <AlertTriangle size={13} className="mt-0.5 shrink-0" />
-                <span>{t("screenshot.noVision", { model: profile?.label })}</span>
-              </p>
-              {seeing && (
-                <button
-                  type="button"
-                  onClick={() => setProfile(seeing.id)}
-                  className="flex items-center gap-1.5 rounded-lg border border-line px-2.5 py-1 text-body text-muted select-none hover:bg-sunken hover:text-fg"
-                >
-                  <Eye size={13} /> {t("screenshot.switchModel", { model: seeing.label })}
-                </button>
-              )}
-            </div>
-          ) : (
-            <button
-              type="button"
-              disabled={running}
-              onClick={() => void send(t("screenshot.describePrompt"))}
-              className="flex items-center gap-1.5 rounded-lg border border-line px-2.5 py-1 text-body text-muted select-none hover:bg-sunken hover:text-fg disabled:opacity-40"
-            >
-              <Sparkles size={13} /> {t("screenshot.describe")}
-            </button>
-          )}
-        </div>
-        <button
-          type="button"
-          onClick={() => setScreenshot(null)}
-          title={t("selection.dismiss")}
-          className="grid size-6 shrink-0 place-items-center rounded-md text-subtle hover:bg-sunken hover:text-fg"
-        >
-          <X size={13} />
-        </button>
+    <Chip onDismiss={() => setScreenshot(null)}>
+      <img
+        src={`data:image/png;base64,${screenshot.data}`}
+        alt={t("screenshot.alt")}
+        className="h-14 w-24 shrink-0 rounded-lg border border-line object-cover object-top"
+      />
+      <div className="min-w-0 flex-1 space-y-1.5">
+        <p className="text-body text-muted">{t("screenshot.ready")}</p>
+        {blind ? (
+          <div className="space-y-1.5">
+            <p className="flex items-start gap-1.5 text-hint leading-snug text-warning">
+              <AlertTriangle size={13} className="mt-0.5 shrink-0" />
+              <span>{t("screenshot.noVision", { model: profile?.label })}</span>
+            </p>
+            {seeing && (
+              <ChipAction
+                icon={Eye}
+                label={t("screenshot.switchModel", { model: seeing.label })}
+                onClick={() => setProfile(seeing.id)}
+              />
+            )}
+          </div>
+        ) : (
+          <ChipAction
+            icon={Sparkles}
+            label={t("screenshot.describe")}
+            disabled={running}
+            onClick={() => void send(t("screenshot.describePrompt"))}
+          />
+        )}
       </div>
-    </motion.div>
+    </Chip>
   );
 }

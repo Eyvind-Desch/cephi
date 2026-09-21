@@ -181,7 +181,7 @@ function ServerRow({
 
               {tools.length > 0 && (
                 <div className="space-y-1">
-                  <div className="text-caption font-medium tracking-wide text-subtle uppercase">
+                  <div className="text-caption font-medium tracking-wider text-subtle uppercase">
                     {server.permission === "auto" ? t("settings.mcp.toolsAuto") : t("settings.mcp.toolsApprove")}
                   </div>
                   <ul className="space-y-0.5">

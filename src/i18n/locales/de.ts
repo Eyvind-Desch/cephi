@@ -11,6 +11,7 @@ export const de: Locale = {
     cancel: "Abbrechen",
     back: "Chat",
     backTitle: "Zurück zum Chat (Esc)",
+    dismiss: "Verwerfen",
   },
   composer: {
     placeholder: "Frag mich was…",
@@ -58,7 +59,6 @@ export const de: Locale = {
     durationS: "{{value}} s",
   },
   selection: {
-    dismiss: "Verwerfen",
     translate: "Übersetzen",
     explain: "Erklären",
     none: "Kein Text markiert",
