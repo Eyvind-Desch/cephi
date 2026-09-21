@@ -19,10 +19,14 @@ use tokio::net::TcpListener;
 const LOGIN_TIMEOUT: Duration = Duration::from_secs(300);
 /// A credential entry holds at most 2560 bytes, tokens can be longer: they are stored in pieces.
 const CHUNK_BYTES: usize = 2000;
+/// A redirect request is a single line; more than this is not one.
+const MAX_REQUEST_BYTES: usize = 16_384;
 /// Shown to the server during registration.
 const CLIENT_NAME: &str = "Cephi";
 
-/// Vault name of a server's first token chunk (the rest get `_2`, `_3`, …).
+/// Vault name of a server's token chunk. The fingerprint keeps servers apart whose names only
+/// differ in characters the vault does not allow ("my-server" and "my_server"), and keeps a long
+/// name from colliding with another one after being cut to length.
 fn secret_name(server: &str, index: usize) -> String {
     let clean: String = server
         .chars()
@@ -33,14 +37,19 @@ fn secret_name(server: &str, index: usize) -> String {
                 '_'
             }
         })
+        .take(30)
         .collect();
-    let base = format!("mcp_oauth_{clean}");
-    let base: String = base.chars().take(56).collect();
-    if index == 0 {
-        base
-    } else {
-        format!("{base}_{}", index + 1)
+    format!("mcp_oauth_{clean}_{:08x}_p{index}", fingerprint(server))
+}
+
+/// FNV-1a over the server name; it only has to separate names, not to be cryptographic.
+fn fingerprint(server: &str) -> u32 {
+    let mut hash: u32 = 0x811c_9dc5;
+    for byte in server.as_bytes() {
+        hash ^= u32::from(*byte);
+        hash = hash.wrapping_mul(0x0100_0193);
     }
+    hash
 }
 
 /// Whether a server has been logged in before.
@@ -206,12 +215,17 @@ async fn wait_for_callback(listener: TcpListener, port: u16) -> Result<String, S
             .await
             .map_err(|e| t!("mcp.login_failed", error = e).to_string())?;
 
-        let mut buffer = vec![0u8; 8192];
-        let read = stream
-            .read(&mut buffer)
-            .await
-            .map_err(|e| t!("mcp.login_failed", error = e).to_string())?;
-        let request = String::from_utf8_lossy(&buffer[..read]);
+        // The request may arrive in several pieces; the first line is all that matters.
+        let mut raw = Vec::new();
+        let mut buffer = [0u8; 2048];
+        while !raw.contains(&b'\n') && raw.len() < MAX_REQUEST_BYTES {
+            match stream.read(&mut buffer).await {
+                Ok(0) => break,
+                Ok(read) => raw.extend_from_slice(&buffer[..read]),
+                Err(e) => return Err(t!("mcp.login_failed", error = e).to_string()),
+            }
+        }
+        let request = String::from_utf8_lossy(&raw);
         let Some(path) = request_path(&request) else { continue };
 
         let body = t!("mcp.login_done").to_string();
@@ -250,10 +264,13 @@ mod tests {
     #[test]
     fn secret_names_are_valid_and_unique_per_server() {
         let first = secret_name("GitHub-MCP", 0);
-        assert_eq!(first, "mcp_oauth_github_mcp");
+        assert!(first.starts_with("mcp_oauth_github_mcp_"), "{first}");
         assert!(crate::secrets::is_valid_name(&first));
-        assert_eq!(secret_name("GitHub-MCP", 1), "mcp_oauth_github_mcp_2");
+        assert_ne!(secret_name("GitHub-MCP", 1), first, "chunks differ");
         assert_ne!(secret_name("notion", 0), first);
+        // Names the vault cannot tell apart on their own stay separate through the fingerprint.
+        assert_ne!(secret_name("my-server", 0), secret_name("my_server", 0));
+        assert_ne!(secret_name("foo", 1), secret_name("foo_p1", 0));
         // The vault limits names to 64 characters.
         assert!(crate::secrets::is_valid_name(&secret_name(&"x".repeat(80), 9)));
     }
@@ -261,6 +278,10 @@ mod tests {
     /// Touches the real Credential Manager, like the other secret tests.
     #[test]
     fn long_tokens_survive_the_vault_in_pieces() {
+        // The vault is a shared resource: parallel writes from other tests fail intermittently.
+        let _serial = crate::secrets::CREDENTIAL_MANAGER
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
         let server = format!("test{}", uuid::Uuid::new_v4().simple());
         // Longer than one credential entry, with spaces exactly at the chunk borders.
         let token = format!(

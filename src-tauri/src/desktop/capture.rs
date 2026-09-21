@@ -9,7 +9,7 @@ use windows::Win32::Graphics::Imaging::{
     WICBitmapEncoderNoCache, WICBitmapInterpolationModeFant,
 };
 use windows::Win32::System::Com::{
-    CoCreateInstance, CoInitializeEx, IStream, CLSCTX_INPROC_SERVER, COINIT_APARTMENTTHREADED,
+    CoCreateInstance, CoInitializeEx, IStream, CLSCTX_INPROC_SERVER, COINIT_MULTITHREADED,
 };
 
 use windows::Win32::Foundation::HGLOBAL;
@@ -103,6 +103,10 @@ fn grab() -> Result<(Vec<u8>, u32, u32), String> {
             return Err(failed("GetDC"));
         }
         let memory_dc = CreateCompatibleDC(screen_dc);
+        if memory_dc.is_null() {
+            ReleaseDC(std::ptr::null_mut(), screen_dc);
+            return Err(failed("CreateCompatibleDC"));
+        }
         let mut header: BITMAPINFO = std::mem::zeroed();
         header.bmiHeader = BITMAPINFOHEADER {
             biSize: std::mem::size_of::<BITMAPINFOHEADER>() as u32,
@@ -137,7 +141,12 @@ fn grab() -> Result<(Vec<u8>, u32, u32), String> {
                 Err(failed("BitBlt"))
             } else {
                 let len = (width as usize) * (height as usize) * 4;
-                Ok(std::slice::from_raw_parts(bits as *const u8, len).to_vec())
+                let mut pixels = std::slice::from_raw_parts(bits as *const u8, len).to_vec();
+                // BitBlt leaves the alpha byte at zero; without this the PNG is fully transparent.
+                for pixel in pixels.as_chunks_mut::<4>().0 {
+                    pixel[3] = 0xff;
+                }
+                Ok(pixels)
             };
             SelectObject(memory_dc, previous);
             pixels.map(|pixels| (pixels, width as u32, height as u32))
@@ -174,8 +183,9 @@ fn encode_png(
 ) -> Result<Vec<u8>, String> {
     // SAFETY: COM calls on interfaces created here; the pixel buffer outlives the source bitmap.
     unsafe {
-        // The capture may run on any worker thread; WIC is happy in an apartment of its own.
-        let _ = CoInitializeEx(None, COINIT_APARTMENTTHREADED);
+        // The capture runs on a shared worker thread: the multi-threaded apartment needs no message
+        // pump and can be joined again and again.
+        let _ = CoInitializeEx(None, COINIT_MULTITHREADED);
         let factory: IWICImagingFactory =
             CoCreateInstance(&CLSID_WICImagingFactory, None, CLSCTX_INPROC_SERVER).map_err(com("WIC factory"))?;
 

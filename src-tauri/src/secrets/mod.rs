@@ -8,6 +8,9 @@
 
 mod catalog;
 mod store;
+/// Tests that touch the real Credential Manager take this lock; parallel writes fail.
+#[cfg(test)]
+pub(crate) use store::tests::CREDENTIAL_MANAGER;
 
 pub use catalog::{overview, SecretGroupInfo};
 pub use store::{delete, get, is_set, is_valid_name, set};

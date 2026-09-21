@@ -25,22 +25,33 @@ pub fn relevant(tools: Vec<McpTool>, request: &str, used: &HashSet<String>, limi
         return tools;
     }
     let words = words(request);
-    let mut scored: Vec<(usize, usize, McpTool)> = tools
+    let scored: Vec<(usize, usize, McpTool)> = tools
         .into_iter()
         .enumerate()
         .map(|(index, tool)| (score(&tool, &words, used), index, tool))
         .filter(|(score, _, _)| *score > 0)
         .collect();
-    // Best first; the stable sort keeps the original order among equals.
-    scored.sort_by_key(|(score, _, _)| Reverse(*score));
-    scored.truncate(limit);
-    scored.sort_by_key(|(_, index, _)| *index);
-    scored.into_iter().map(|(_, _, tool)| tool).collect()
+
+    // Tools from the chat history must not fill every slot: a long chat would then crowd out the
+    // tool the current request is actually about.
+    let (history, mut matching): (Vec<_>, Vec<_>) = scored.into_iter().partition(|(s, _, _)| *s >= USED_SCORE);
+    matching.sort_by_key(|(score, _, _)| Reverse(*score));
+    let for_request = (limit - limit / 2).min(matching.len());
+    let from_history = history.len().min(limit - for_request);
+
+    let mut chosen: Vec<(usize, usize, McpTool)> = history.into_iter().take(from_history).collect();
+    chosen.extend(matching.into_iter().take(limit - from_history));
+    // Back into catalog order, which is what the model sees.
+    chosen.sort_by_key(|(_, index, _)| *index);
+    chosen.into_iter().map(|(_, _, tool)| tool).collect()
 }
+
+/// Score of a tool that was already used in this chat; higher than any word match can reach.
+const USED_SCORE: usize = 100;
 
 fn score(tool: &McpTool, request: &[String], used: &HashSet<String>) -> usize {
     if used.contains(&tool.exposed) {
-        return 100;
+        return USED_SCORE;
     }
     let name = words(&tool.name.replace('_', " "));
     let server = words(&tool.server.replace(['_', '-'], " "));
@@ -67,7 +78,7 @@ fn similar(a: &str, b: &str) -> bool {
 const STOP_WORDS: [&str; 40] = [
     "the", "and", "for", "with", "from", "this", "that", "into", "about", "your", "you", "are", "can", "all", "new",
     "not", "der", "die", "das", "und", "ein", "eine", "einen", "mit", "von", "für", "auf", "ist", "wie", "was",
-    "bitte", "mir", "mich", "den", "dem", "des", "zu", "aus", "oder", "nicht",
+    "bitte", "mir", "mich", "den", "dem", "des", "aus", "oder", "nicht", "ich",
 ];
 
 fn words(text: &str) -> Vec<String> {
@@ -138,6 +149,23 @@ mod tests {
     #[test]
     fn unrelated_requests_get_no_mcp_tools() {
         assert!(relevant(catalog(), "wie spät ist es", &HashSet::new(), 3).is_empty());
+    }
+
+    #[test]
+    fn the_chat_history_does_not_crowd_out_the_fitting_tool() {
+        // Four tools used earlier, but the request is about a fifth one.
+        let used: HashSet<String> = [
+            "github__create_issue",
+            "github__search_code",
+            "github__list_pull_requests",
+            "notion__search",
+        ]
+        .iter()
+        .map(|name| (*name).to_string())
+        .collect();
+        let picked = relevant(catalog(), "read the file notes.txt", &used, 4);
+        assert!(names(&picked).contains(&"files__read_file"), "{:?}", names(&picked));
+        assert_eq!(picked.len(), 4);
     }
 
     #[test]

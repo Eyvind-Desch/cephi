@@ -266,12 +266,18 @@ pub async fn new_chat(state: &AppState) -> AppResult<()> {
 
 /// Stops the recording and turns it into text. An empty result means nothing was understood.
 pub async fn dictate(state: &AppState) -> AppResult<String> {
-    let wav = state.recorder.stop().map_err(AppError::msg)?;
+    state.recorder.request_stop();
+    // Give the recording thread a moment to hand over what is still in the audio buffer.
+    tokio::time::sleep(RECORDER_DRAIN).await;
+    let wav = state.recorder.take().map_err(AppError::msg)?;
     let config = state.config();
     crate::voice::transcribe(&state.http, &config.settings.voice, wav)
         .await
         .map_err(AppError::msg)
 }
+
+/// How long the recording thread gets to drain its buffer after a stop.
+const RECORDER_DRAIN: Duration = Duration::from_millis(60);
 
 /// Time for the window to disappear before the picture is taken.
 const HIDE_BEFORE_CAPTURE: Duration = Duration::from_millis(180);
