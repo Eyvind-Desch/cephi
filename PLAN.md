@@ -129,6 +129,9 @@ next stage begins. Whatever isn't a nuisance goes into the backlog instead of th
 
 ### Backlog (polish)
 - [x] Clean-up pass 2026-09-21: one type/icon scale, favicons drawn locally (no icon service), stricter content policy, screenshots never written to disk
+- [x] Performance pass 2026-09-21: views and highlight.js load on demand (main chunk 799 → 568 kB),
+  streamed tokens reach the store in 40 ms batches instead of one render per token, the chat sent to the
+  model is capped (`agent::context`), `app.rs` split into one file per page
 
 - [x] When launched from the terminal, the window stays hidden (Windows foreground lock): `AttachThreadInput` + `SetForegroundWindow` when `set_focus` loses (needs a real-world test)
 - [x] Code highlighting in responses (highlight.js core, ~20 languages, language label + copy)
