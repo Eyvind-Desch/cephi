@@ -433,7 +433,10 @@ mod tests {
 
     #[test]
     fn a_screenshot_becomes_an_image_block_before_the_question() {
-        let messages = [ChatMessage::user_with_images("What is this error?", vec!["QUJD".into()])];
+        let messages = [ChatMessage::user_with_images(
+            "What is this error?",
+            vec!["QUJD".into()],
+        )];
         let tools: Vec<ToolDef> = Vec::new();
         let profile = profile("claude-opus-5");
         let wire = client().wire_messages(&LlmRequest {

@@ -42,11 +42,11 @@ impl AppState {
     ) -> Self {
         Self {
             paths,
+            mcp: McpManager::new(http.clone()),
             http,
             agent: AgentController::default(),
             window: WindowController::default(),
             web: WebController::default(),
-            mcp: McpManager::default(),
             launcher,
             chats,
             spotify: SpotifyClient::default(),

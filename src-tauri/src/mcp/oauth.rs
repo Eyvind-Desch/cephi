@@ -26,7 +26,13 @@ const CLIENT_NAME: &str = "Cephi";
 fn secret_name(server: &str, index: usize) -> String {
     let clean: String = server
         .chars()
-        .map(|c| if c.is_ascii_alphanumeric() { c.to_ascii_lowercase() } else { '_' })
+        .map(|c| {
+            if c.is_ascii_alphanumeric() {
+                c.to_ascii_lowercase()
+            } else {
+                '_'
+            }
+        })
         .collect();
     let base = format!("mcp_oauth_{clean}");
     let base: String = base.chars().take(56).collect();
@@ -61,17 +67,49 @@ struct VaultStore {
     server: String,
 }
 
+/// Brackets a piece: the vault trims whitespace, which would eat a space at a chunk border.
+const FENCE: char = '#';
+
+/// Reads a server's token pieces back into one string (empty: nothing stored).
+fn read_chunks(server: &str) -> Result<String, String> {
+    let mut json = String::new();
+    for index in 0.. {
+        match crate::secrets::get(&secret_name(server, index))? {
+            // Exactly one fence per side: the value itself may contain that character.
+            Some(part) => json.push_str(
+                part.strip_prefix(FENCE)
+                    .and_then(|p| p.strip_suffix(FENCE))
+                    .unwrap_or(&part),
+            ),
+            None => break,
+        }
+    }
+    Ok(json)
+}
+
+/// Stores a string in pieces of [`CHUNK_BYTES`]; old pieces are removed first.
+fn write_chunks(server: &str, value: &str) -> Result<(), String> {
+    forget(server);
+    // Chunk on character boundaries: a split UTF-8 sequence would not survive the vault.
+    let mut rest = value;
+    let mut index = 0;
+    while !rest.is_empty() {
+        let mut end = rest.len().min(CHUNK_BYTES);
+        while !rest.is_char_boundary(end) {
+            end -= 1;
+        }
+        let (chunk, remainder) = rest.split_at(end);
+        crate::secrets::set(&secret_name(server, index), &format!("{FENCE}{chunk}{FENCE}"))?;
+        rest = remainder;
+        index += 1;
+    }
+    Ok(())
+}
+
 #[async_trait]
 impl CredentialStore for VaultStore {
     async fn load(&self) -> Result<Option<StoredCredentials>, rmcp::transport::auth::AuthError> {
-        let mut json = String::new();
-        for index in 0.. {
-            match crate::secrets::get(&secret_name(&self.server, index)) {
-                Ok(Some(part)) => json.push_str(&part),
-                Ok(None) => break,
-                Err(e) => return Err(rmcp::transport::auth::AuthError::InternalError(e)),
-            }
-        }
+        let json = read_chunks(&self.server).map_err(rmcp::transport::auth::AuthError::InternalError)?;
         if json.is_empty() {
             return Ok(None);
         }
@@ -87,14 +125,7 @@ impl CredentialStore for VaultStore {
     async fn save(&self, credentials: StoredCredentials) -> Result<(), rmcp::transport::auth::AuthError> {
         let json = serde_json::to_string(&credentials)
             .map_err(|e| rmcp::transport::auth::AuthError::InternalError(e.to_string()))?;
-        // Old, possibly longer credentials must not leave pieces behind.
-        forget(&self.server);
-        for (index, chunk) in json.as_bytes().chunks(CHUNK_BYTES).enumerate() {
-            let part = String::from_utf8_lossy(chunk).to_string();
-            crate::secrets::set(&secret_name(&self.server, index), &part)
-                .map_err(rmcp::transport::auth::AuthError::InternalError)?;
-        }
-        Ok(())
+        write_chunks(&self.server, &json).map_err(rmcp::transport::auth::AuthError::InternalError)
     }
 
     async fn clear(&self) -> Result<(), rmcp::transport::auth::AuthError> {
@@ -225,6 +256,57 @@ mod tests {
         assert_ne!(secret_name("notion", 0), first);
         // The vault limits names to 64 characters.
         assert!(crate::secrets::is_valid_name(&secret_name(&"x".repeat(80), 9)));
+    }
+
+    /// Touches the real Credential Manager, like the other secret tests.
+    #[test]
+    fn long_tokens_survive_the_vault_in_pieces() {
+        let server = format!("test{}", uuid::Uuid::new_v4().simple());
+        // Longer than one credential entry, with spaces exactly at the chunk borders.
+        let token = format!(
+            "{}a b{} c{}#x#",
+            " ".repeat(CHUNK_BYTES - 1),
+            " ".repeat(CHUNK_BYTES),
+            "#".repeat(CHUNK_BYTES)
+        );
+        write_chunks(&server, &token).unwrap();
+        assert!(is_logged_in(&server));
+        assert_eq!(read_chunks(&server).unwrap(), token);
+
+        // A shorter token must not leave older pieces behind.
+        write_chunks(&server, "short").unwrap();
+        assert_eq!(read_chunks(&server).unwrap(), "short");
+
+        forget(&server);
+        assert!(!is_logged_in(&server));
+        assert_eq!(read_chunks(&server).unwrap(), "");
+    }
+
+    /// The browser sends the redirect to the loopback port; only that one carries the code.
+    #[tokio::test]
+    async fn the_callback_server_answers_the_browser_and_returns_the_url() {
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let port = listener.local_addr().unwrap().port();
+        let server = tokio::spawn(wait_for_callback(listener, port));
+
+        // A browser also asks for the favicon; it must not end the wait.
+        for request in [
+            "GET /favicon.ico HTTP/1.1
+
+",
+            "GET /callback?code=abc&state=xyz HTTP/1.1
+
+",
+        ] {
+            let mut stream = tokio::net::TcpStream::connect(("127.0.0.1", port)).await.unwrap();
+            stream.write_all(request.as_bytes()).await.unwrap();
+            let mut answer = String::new();
+            stream.read_to_string(&mut answer).await.unwrap();
+            assert!(answer.starts_with("HTTP/1.1 200 OK"), "{answer}");
+        }
+
+        let callback = server.await.unwrap().unwrap();
+        assert_eq!(callback, format!("http://127.0.0.1:{port}/callback?code=abc&state=xyz"));
     }
 
     #[test]

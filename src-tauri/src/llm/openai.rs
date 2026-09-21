@@ -344,7 +344,10 @@ mod tests {
             fallbacks: false,
         };
         let client = OpenAiClient::new(reqwest::Client::new(), &provider, "key".into());
-        let messages = [ChatMessage::user_with_images("What is on the screen?", vec!["QUJD".into()])];
+        let messages = [ChatMessage::user_with_images(
+            "What is on the screen?",
+            vec!["QUJD".into()],
+        )];
         let tools: Vec<ToolDef> = Vec::new();
         let wire = client.wire_messages(&LlmRequest {
             system: "",

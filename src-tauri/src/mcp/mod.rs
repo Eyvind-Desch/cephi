@@ -88,9 +88,18 @@ pub struct McpManager {
     connections: tokio::sync::Mutex<BTreeMap<String, Connection>>,
     /// Kept separately so the tool list can be read without waiting for a server that is starting.
     catalog: RwLock<Catalog>,
+    /// Shared client for online servers (connection pool, proxy settings, user agent).
+    http: reqwest::Client,
 }
 
 impl McpManager {
+    pub fn new(http: reqwest::Client) -> Self {
+        Self {
+            http,
+            ..Default::default()
+        }
+    }
+
     pub fn tools(&self) -> Vec<McpTool> {
         self.catalog.read().expect("mcp catalog lock poisoned").tools.clone()
     }
@@ -171,11 +180,14 @@ impl McpManager {
                 &failures,
                 to_start.iter().map(|(n, _)| n.as_str()).collect(),
             );
-            let started = futures_util::future::join_all(to_start.into_iter().map(|(name, server)| async move {
-                let result = tokio::time::timeout(CONNECT_TIMEOUT, connect(&name, &server))
-                    .await
-                    .unwrap_or_else(|_| Err(t!("mcp.timeout").into()));
-                (name, result)
+            let started = futures_util::future::join_all(to_start.into_iter().map(|(name, server)| {
+                let http = self.http.clone();
+                async move {
+                    let result = tokio::time::timeout(CONNECT_TIMEOUT, connect(&name, &server, &http))
+                        .await
+                        .unwrap_or_else(|_| Err(t!("mcp.timeout").into()));
+                    (name, result)
+                }
             }))
             .await;
             for (name, result) in started {
@@ -274,7 +286,7 @@ impl McpManager {
     }
 }
 
-async fn connect(name: &str, server: &ServerConfig) -> Result<Connection, String> {
+async fn connect(name: &str, server: &ServerConfig, http: &reqwest::Client) -> Result<Connection, String> {
     let client = match server.transport()? {
         Transport::Process { command } => {
             let mut cmd = rmcp::transport::which_command(command)
@@ -318,7 +330,7 @@ async fn connect(name: &str, server: &ServerConfig) -> Result<Connection, String
             let mut config = StreamableHttpClientTransportConfig::with_uri(url);
             config.custom_headers = headers;
             // Servers with a browser login get a client that sends (and refreshes) the token.
-            match oauth::client(&reqwest::Client::new(), name, url).await? {
+            match oauth::client(http, name, url).await? {
                 Some(authorized) => {
                     let transport = StreamableHttpClientTransport::with_client(authorized, config);
                     ().serve(transport)

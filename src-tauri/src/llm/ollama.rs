@@ -287,7 +287,10 @@ mod tests {
     fn a_screenshot_travels_next_to_the_question() {
         let settings = crate::config::Settings::default();
         let profile = settings.profile(Some("fast")).clone();
-        let messages = [ChatMessage::user_with_images("What is on the screen?", vec!["QUJD".into()])];
+        let messages = [ChatMessage::user_with_images(
+            "What is on the screen?",
+            vec!["QUJD".into()],
+        )];
         let tools: Vec<ToolDef> = Vec::new();
         let wire = wire_messages(&LlmRequest {
             system: "",
