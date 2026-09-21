@@ -3,6 +3,7 @@
   "name": "google_search",
   "title": { "en": "Google search", "de": "Google-Suche" },
   "description": "Shows a Google search in Cephi's web tab. Use this only when the user explicitly wants to google something or see Google. To answer a question from the web, use web_search instead.",
+  "keywords": {"en":"google search browser","de":"google suche browser"},
   "permission": "auto",
   "parameters": {
     "type": "object",

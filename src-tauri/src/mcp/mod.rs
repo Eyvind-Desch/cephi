@@ -6,9 +6,8 @@
 
 pub mod config;
 pub mod oauth;
-pub mod select;
 
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap};
 use std::process::Stdio;
 use std::sync::RwLock;
 use std::time::Duration;
@@ -118,15 +117,20 @@ impl McpManager {
             .cloned()
     }
 
-    /// Definitions for the model; above `limit` tools only those relevant to `request`
-    /// (and the ones in `used`, called earlier in the chat).
-    pub fn definitions_for(&self, request: &str, used: &HashSet<String>, limit: usize) -> Vec<ToolDef> {
-        select::relevant(self.tools(), request, used, limit)
+    /// What the model may call, each with the server it comes from (see `tools::select`).
+    pub fn offered(&self) -> Vec<(ToolDef, String)> {
+        self.tools()
             .into_iter()
-            .map(|tool| ToolDef {
-                name: tool.exposed,
-                description: tool.description,
-                parameters: tool.input_schema,
+            .map(|tool| {
+                let server = tool.server;
+                (
+                    ToolDef {
+                        name: tool.exposed,
+                        description: tool.description,
+                        parameters: tool.input_schema,
+                    },
+                    server,
+                )
             })
             .collect()
     }

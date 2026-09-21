@@ -38,6 +38,23 @@ impl Tool {
         }
     }
 
+    /// What a request is matched against when not every tool fits into the budget: the title and
+    /// keywords in the user's language, plus the trigger phrases, which are written the way people
+    /// actually ask ("spiele … auf spotify").
+    fn match_words(&self) -> String {
+        let locale = rust_i18n::locale();
+        let mut words = self.title();
+        if let Some(keywords) = &self.manifest.keywords {
+            words.push(' ');
+            words.push_str(keywords.resolve(&locale));
+        }
+        for trigger in &self.manifest.triggers {
+            words.push(' ');
+            words.push_str(trigger.pattern());
+        }
+        words
+    }
+
     pub fn normalize_args(&self, raw: &Value) -> Result<Args, String> {
         args::normalize(&self.manifest.parameters, raw)
     }
@@ -124,8 +141,13 @@ impl ToolRegistry {
         self.tools.len()
     }
 
-    pub fn definitions(&self) -> Vec<ToolDef> {
-        self.tools.values().map(Tool::definition).collect()
+    /// What the model may call, each with its title in the user's language: the title is what a
+    /// request usually names ("Websuche"), so `tools::select` matches on it.
+    pub fn offered(&self) -> Vec<(ToolDef, String)> {
+        self.tools
+            .values()
+            .map(|tool| (tool.definition(), tool.match_words()))
+            .collect()
     }
 
     /// All trigger matches for `input`, most specific first, with raw (unvalidated) arguments.

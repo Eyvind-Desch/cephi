@@ -24,6 +24,11 @@ pub struct ToolManifest {
     pub title: Option<LocalizedText>,
     /// For the model; English recommended (small models select tools more reliably).
     pub description: String,
+    /// Words people use for this tool, in their language ("Arbeitsspeicher RAM CPU"). A local model
+    /// only gets the tools that fit the request (`tools::select`), and a German question rarely
+    /// shares words with an English description.
+    #[serde(default)]
+    pub keywords: Option<LocalizedText>,
     #[serde(default = "default_true")]
     pub enabled: bool,
     #[serde(default)]

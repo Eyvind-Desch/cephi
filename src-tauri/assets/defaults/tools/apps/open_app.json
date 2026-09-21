@@ -3,6 +3,7 @@
   "name": "open_app",
   "title": { "en": "Launch app", "de": "App starten" },
   "description": "Starts an installed program or app, e.g. Discord, Steam, Excel or Calculator. The name may be inexact.",
+  "keywords": {"en":"open start launch program app","de":"öffne starte programm anwendung app"},
   "permission": "auto",
   "parameters": {
     "type": "object",

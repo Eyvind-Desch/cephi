@@ -3,6 +3,7 @@
   "name": "media_control",
   "title": { "en": "Media & volume", "de": "Medien & Lautstärke" },
   "description": "Controls playback and volume: play/pause, next or previous track, set the volume to a level (set_volume with level 0-100), louder or quieter (volume_up/volume_down with amount in percentage points), mute and unmute.",
+  "keywords": {"en":"volume louder quieter mute pause play next track","de":"lautstärke lauter leiser stumm pause abspielen nächster lied musik"},
   "permission": "auto",
   "parameters": {
     "type": "object",

@@ -3,6 +3,7 @@
   "name": "fetch_page",
   "title": { "en": "Read page", "de": "Seite lesen" },
   "description": "Reads a web page and returns its text. Use it when search excerpts are not enough, e.g. to read an article from the results or a page the user names. Only public web addresses.",
+  "keywords": {"en":"read page article content website text","de":"seite lesen lies vorlesen artikel inhalt webseite text zusammenfassen"},
   "permission": "auto",
   "parameters": {
     "type": "object",

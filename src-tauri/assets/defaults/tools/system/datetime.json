@@ -3,6 +3,7 @@
   "name": "datetime",
   "title": { "en": "Date & time", "de": "Datum & Uhrzeit" },
   "description": "Returns the current date, weekday and time.",
+  "keywords": {"en":"time date today clock weekday","de":"uhrzeit datum heute zeit wochentag kalender spät"},
   "permission": "auto",
   "action": {
     "type": "builtin",

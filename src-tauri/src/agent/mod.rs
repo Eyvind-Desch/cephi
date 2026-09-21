@@ -16,10 +16,10 @@ use rust_i18n::t;
 use crate::config::Config;
 use crate::error::{AppError, AppResult};
 use crate::llm::{ChatMessage, LlmClient, LlmError, LlmRequest, Role, ToolCall, LOCAL_PROVIDER_ID};
-use crate::mcp::{self, McpTool};
+use crate::mcp::McpTool;
 use crate::services;
 use crate::state::AppState;
-use crate::tools::{self, ExecContext, Permission, ToolOutput};
+use crate::tools::{self, select, ExecContext, Permission, ToolOutput};
 
 pub use events::AgentEvent;
 
@@ -208,19 +208,28 @@ impl Run<'_> {
             Err(error) => return Err(error.to_string()),
         };
         let tool_definitions = if profile.tools {
-            let mut definitions = self.config.tools.definitions();
-            // Small local models get only the MCP tools that fit the request (see `mcp::select`).
+            // Cephi's own tools and the MCP tools share one budget. A local model reads every
+            // definition before it answers (~1500 tokens for all of them), so it only gets the ones
+            // that fit the request; a cloud model gets everything (see `tools::select`).
+            let mut offered = self.config.tools.offered();
+            offered.extend(self.state.mcp.offered());
             let limit = if profile.provider == LOCAL_PROVIDER_ID {
-                mcp::select::LOCAL_LIMIT
+                select::LOCAL_LIMIT
             } else {
-                mcp::select::CLOUD_LIMIT
+                select::CLOUD_LIMIT
             };
-            definitions.extend(
-                self.state
-                    .mcp
-                    .definitions_for(&recent_requests(history), &used_tools(history), limit),
+            let chosen = select::relevant(
+                offered,
+                |(definition, context)| select::Candidate {
+                    name: &definition.name,
+                    context,
+                    description: &definition.description,
+                },
+                &recent_requests(history),
+                &used_tools(history),
+                limit,
             );
-            definitions
+            chosen.into_iter().map(|(definition, _)| definition).collect()
         } else {
             Vec::new()
         };

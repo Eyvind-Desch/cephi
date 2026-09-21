@@ -11,6 +11,7 @@ mod executor;
 mod localized;
 mod manifest;
 mod registry;
+pub mod select;
 mod template;
 mod trigger;
 

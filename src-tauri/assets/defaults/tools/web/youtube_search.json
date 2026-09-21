@@ -3,6 +3,7 @@
   "name": "youtube_search",
   "title": { "en": "YouTube search", "de": "YouTube-Suche" },
   "description": "Searches for videos on YouTube and opens the results in the browser.",
+  "keywords": {"en":"youtube video watch","de":"youtube video ansehen schauen"},
   "permission": "auto",
   "parameters": {
     "type": "object",

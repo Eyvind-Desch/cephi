@@ -3,6 +3,7 @@
   "name": "radio",
   "title": { "en": "Bluetooth & Wi-Fi", "de": "Bluetooth & WLAN" },
   "description": "Turns Bluetooth or Wi-Fi on or off, or checks the current state. Use state=status before claiming anything about the state.",
+  "keywords": {"en":"bluetooth wifi wlan airplane radio","de":"bluetooth wlan wifi flugmodus funk"},
   "permission": "auto",
   "parameters": {
     "type": "object",

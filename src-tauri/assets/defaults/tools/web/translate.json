@@ -3,6 +3,7 @@
   "name": "translate",
   "title": { "en": "Translate", "de": "Übersetzen" },
   "description": "Translates text between German and English offline. German text is translated into English, other text into German, unless a target language is given. Use this when the user wants to translate something or asks what a word means in another language.",
+  "keywords": {"en":"translate translation english german word","de":"übersetze übersetzung englisch deutsch wort bedeutet"},
   "permission": "auto",
   "parameters": {
     "type": "object",

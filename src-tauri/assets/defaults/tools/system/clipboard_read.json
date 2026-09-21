@@ -3,6 +3,7 @@
   "name": "clipboard_read",
   "title": { "en": "Read clipboard", "de": "Zwischenablage lesen" },
   "description": "Reads the text from the clipboard, e.g. when the user says 'summarize what I copied'.",
+  "keywords": {"en":"clipboard paste copied","de":"zwischenablage eingefügt kopiert"},
   "permission": "auto",
   "action": {
     "type": "builtin",

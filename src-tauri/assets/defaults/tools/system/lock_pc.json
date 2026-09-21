@@ -3,6 +3,7 @@
   "name": "lock_pc",
   "title": { "en": "Lock PC", "de": "PC sperren" },
   "description": "Locks the Windows screen.",
+  "keywords": {"en":"lock screen lockscreen away","de":"sperren bildschirm sperrbildschirm abwesend"},
   "permission": "confirm",
   "action": {
     "type": "launch",

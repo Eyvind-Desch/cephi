@@ -3,6 +3,7 @@
   "name": "system_info",
   "title": { "en": "System info", "de": "Systeminfo" },
   "description": "Returns CPU load, free memory (RAM), free disk space per drive and the PC's uptime.",
+  "keywords": {"en":"memory ram cpu disk storage battery uptime free space","de":"arbeitsspeicher ram cpu festplatte speicher akku laufzeit frei belegt"},
   "permission": "auto",
   "action": {
     "type": "powershell",

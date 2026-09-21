@@ -3,6 +3,7 @@
   "name": "open_explorer",
   "title": { "en": "Open Explorer", "de": "Explorer öffnen" },
   "description": "Opens a folder in Windows Explorer. Without a path, the Downloads folder is opened.",
+  "keywords": {"en":"explorer folder files directory","de":"explorer ordner dateien verzeichnis"},
   "permission": "auto",
   "parameters": {
     "type": "object",

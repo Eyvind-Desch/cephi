@@ -3,6 +3,7 @@
   "name": "open_settings",
   "title": { "en": "Windows Settings", "de": "Windows-Einstellungen" },
   "description": "Opens a page of the Windows Settings app.",
+  "keywords": {"en":"windows settings control panel bluetooth display sound","de":"einstellungen systemsteuerung bluetooth anzeige sound"},
   "permission": "auto",
   "parameters": {
     "type": "object",

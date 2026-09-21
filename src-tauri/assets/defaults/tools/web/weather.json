@@ -3,6 +3,7 @@
   "name": "weather",
   "title": { "en": "Weather", "de": "Wetter" },
   "description": "Returns the current weather for a location.",
+  "keywords": {"en":"weather forecast temperature rain sun","de":"wetter vorhersage temperatur regen regnen schneit sonne sonnig warm kalt grad"},
   "permission": "auto",
   "parameters": {
     "type": "object",

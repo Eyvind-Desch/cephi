@@ -3,6 +3,7 @@
   "name": "open_website",
   "title": { "en": "Open website", "de": "Webseite öffnen" },
   "description": "Opens a specific website in the browser, e.g. github.com or https://example.com.",
+  "keywords": {"en":"website url link open page","de":"webseite seite link adresse öffnen"},
   "permission": "auto",
   "parameters": {
     "type": "object",

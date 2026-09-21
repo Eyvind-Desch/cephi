@@ -3,6 +3,7 @@
   "name": "spotify_play",
   "title": "Spotify",
   "description": "Plays music on Spotify: a song, an album, an artist or a playlist. Use this when the user wants to listen to music or play something on Spotify.",
+  "keywords": {"en":"spotify music song album playlist artist","de":"spotify musik lied song album playlist künstler"},
   "permission": "auto",
   "parameters": {
     "type": "object",

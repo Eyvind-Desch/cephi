@@ -3,6 +3,7 @@
   "name": "clipboard_write",
   "title": { "en": "Copy to clipboard", "de": "In Zwischenablage kopieren" },
   "description": "Copies text to the clipboard.",
+  "keywords": {"en":"clipboard copy","de":"zwischenablage kopieren merken"},
   "permission": "auto",
   "parameters": {
     "type": "object",

@@ -22,6 +22,10 @@
       "type": "string",
       "minLength": 1
     },
+    "keywords": {
+      "description": "Words people use for this tool, e.g. \"Arbeitsspeicher RAM CPU\": a plain string or per language. With a local model only the tools that fit the request are offered, and a German question rarely shares words with an English description.",
+      "$ref": "#/definitions/localizedText"
+    },
     "enabled": {
       "description": "false = the tool is not loaded.",
       "type": "boolean",

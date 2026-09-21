@@ -40,6 +40,7 @@ in the panel, with the file name and reason. A broken tool doesn't take down the
 | `name` | ✔ | Technical name for the model: `a-z`, `0-9`, `_`, unique |
 | `title` |  | Display name in the UI. Plain string or localized object: `{ "en": "Weather", "de": "Wetter" }` |
 | `description` | ✔ | **When** the tool is used. The model decides based on this text alone: be specific! Write it in English — small models pick tools more reliably that way. |
+| `keywords` |  | Words people use for this tool (`"Arbeitsspeicher RAM CPU"`), plain or localized. See *Many tools, one small model* |
 | `enabled` |  | `false` = tool isn't loaded (default `true`) |
 | `permission` |  | `auto` = runs immediately, `confirm` = asks first (**default**) |
 | `parameters` |  | What the model should fill in (see below) |
@@ -220,6 +221,21 @@ is allowed. If the whole URL comes from the model (`{{url|raw}}`), only `http`/`
 Numeric parameters also understand `30%`, `30 %`, `30 Prozent` ("30 percent"), and `2,5` (comma as decimal separator).
 
 `open_app` only takes the quick-action path when an app matches unambiguously. Otherwise the AI takes over.
+
+## Many tools, one small model
+
+Every tool definition is part of the prompt: the 19 default tools are about 1500 tokens that a local
+model reads before writing a single word — on a slow machine that is half a minute of silence. With a
+local model Cephi therefore offers only the tools that fit the request (at most 8), plus the ones
+already used in the chat. Cloud models get all of them.
+
+Matching runs against the tool name, its `title`, `keywords` and trigger phrases in your language, and
+the description. That makes `keywords` the field worth filling in for your own tools: a German question
+("Wie viel **Arbeitsspeicher** ist frei?") shares no word with an English description ("free memory").
+
+```json
+"keywords": { "en": "memory ram cpu disk", "de": "arbeitsspeicher ram cpu festplatte" }
+```
 
 ## Tips for good tools
 
