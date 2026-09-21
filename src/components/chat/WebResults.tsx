@@ -67,19 +67,23 @@ function SourceCard({ result, number }: { result: WebResult; number: number }) {
   );
 }
 
+/**
+ * A site's initial on a colour derived from its name. Drawn here on purpose: loading real favicons
+ * from an icon service would tell that service every site your local search turned up.
+ */
 function Favicon({ host }: { host: string }) {
-  const [failed, setFailed] = useState(false);
-  if (failed || !host) return <Globe size={12} className="shrink-0" />;
+  if (!host) return <Globe size={12} className="shrink-0" />;
+  const name = host.replace(/^www\./, "");
+  // Same host, same colour, every time.
+  const hue = [...name].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) % 360, 7);
   return (
-    <img
-      src={`https://icons.duckduckgo.com/ip3/${host}.ico`}
-      alt=""
-      width={12}
-      height={12}
-      loading="lazy"
-      onError={() => setFailed(true)}
-      className="size-3 shrink-0 rounded-[3px]"
-    />
+    <span
+      aria-hidden
+      className="grid size-3 shrink-0 place-items-center rounded-[3px] text-[8px] font-semibold text-white"
+      style={{ backgroundColor: `oklch(0.62 0.12 ${hue})` }}
+    >
+      {name.charAt(0).toUpperCase()}
+    </span>
   );
 }
 

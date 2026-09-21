@@ -226,24 +226,21 @@ const MAX_IMAGE_EDGE = 1280;
  * that is what the backend announces to the models.
  */
 async function attachImage(file: File) {
-  const url = URL.createObjectURL(file);
   try {
-    const image = new Image();
-    image.src = url;
-    await image.decode();
-    const scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(image.naturalWidth, image.naturalHeight));
+    // Decoded straight from the file: a blob: URL would need a looser content policy.
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(bitmap.width, bitmap.height));
     const canvas = document.createElement("canvas");
-    canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
-    canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
     const context = canvas.getContext("2d");
     if (!context) return;
-    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
     const data = canvas.toDataURL("image/png").replace(/^data:image\/png;base64,/, "");
     useUi.getState().setScreenshot({ data, width: canvas.width, height: canvas.height });
     useUi.getState().expand();
   } catch {
     // Not a readable picture: the paste is simply ignored.
-  } finally {
-    URL.revokeObjectURL(url);
   }
 }

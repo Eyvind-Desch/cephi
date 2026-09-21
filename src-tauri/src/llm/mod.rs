@@ -51,7 +51,8 @@ pub struct ChatMessage {
     pub role: Role,
     pub content: String,
     /// User only: pictures (PNG, base64) the question is about, e.g. a screenshot.
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    /// Never written to disk: a saved chat would keep a picture of the screen (`history.rs`).
+    #[serde(skip)]
     pub images: Vec<String>,
     /// Assistant only.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]

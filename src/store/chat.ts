@@ -50,7 +50,7 @@ export const useChat = create<ChatState>()((set, get) => {
     } finally {
       set({ running: false });
       // Every finished request is saved, so the chat survives a restart.
-      void api.chatSave(get().messages).catch((e) => console.warn("chat not saved", e));
+      void api.chatSave(withoutImages(get().messages)).catch((e) => console.warn("chat not saved", e));
     }
   };
 
@@ -158,3 +158,13 @@ export const useChat = create<ChatState>()((set, get) => {
     },
   };
 });
+
+/**
+ * Messages as they go to disk. Screenshots stay in this session only: a saved chat must not keep a
+ * picture of the screen lying around (the backend drops them from the model history the same way).
+ */
+function withoutImages(messages: Message[]): Message[] {
+  return messages.map((message) =>
+    message.role === "user" && message.image ? { ...message, image: undefined } : message,
+  );
+}
