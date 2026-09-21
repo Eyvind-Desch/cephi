@@ -39,7 +39,8 @@ with *Translate* and *Explain*; typing your own question sends the text along as
 selection for that moment and **restores your clipboard afterwards**. The normal hotkey never touches the clipboard.
 
 **Screenshot:** the camera button next to the input (or `/screenshot`) takes a picture of the monitor the mouse is on —
-Cephi hides itself for the shot — and puts it above the input: *What is on it?* or your own question about it. This
+Cephi hides itself for the shot — and puts it above the input: *What is on it?* or your own question about it.
+You can also paste a picture from the clipboard (Snipping Tool, a copied image) into the input. This all
 needs a model that can look at pictures; cloud models can, a local one needs a vision model (`"vision": true` in the
 profile, see [docs/PROVIDERS.md](docs/PROVIDERS.md)).
 

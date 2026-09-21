@@ -122,6 +122,13 @@ export function Composer({ compact = false }: ComposerProps) {
           spellCheck={false}
           placeholder={running ? t("composer.placeholderRunning") : t("composer.placeholder")}
           onChange={(e) => setText(e.target.value)}
+          // A picture from the clipboard (Snipping Tool, a copied image) becomes the attachment.
+          onPaste={(e) => {
+            const file = [...e.clipboardData.items].find((item) => item.type.startsWith("image/"))?.getAsFile();
+            if (!file) return;
+            e.preventDefault();
+            void attachImage(file);
+          }}
           onKeyDown={(e) => {
             if (onCommandKey(e)) return;
             if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
@@ -216,4 +223,34 @@ function useCommandItems(text: string, clear: () => void): CommandItem[] | null 
       },
     ];
   }, [text, profiles, t, clear]);
+}
+
+/** Longest edge of an attached picture; the same size a screenshot gets. */
+const MAX_IMAGE_EDGE = 1280;
+
+/**
+ * Reads a pasted picture and puts it above the composer, like a screenshot. Always as PNG:
+ * that is what the backend announces to the models.
+ */
+async function attachImage(file: File) {
+  const url = URL.createObjectURL(file);
+  try {
+    const image = new Image();
+    image.src = url;
+    await image.decode();
+    const scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(image.naturalWidth, image.naturalHeight));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+    canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+    const context = canvas.getContext("2d");
+    if (!context) return;
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    const data = canvas.toDataURL("image/png").replace(/^data:image\/png;base64,/, "");
+    useUi.getState().setScreenshot({ data, width: canvas.width, height: canvas.height });
+    useUi.getState().expand();
+  } catch {
+    // Not a readable picture: the paste is simply ignored.
+  } finally {
+    URL.revokeObjectURL(url);
+  }
 }
