@@ -8,6 +8,9 @@ import { useUi } from "./ui";
 /** How long a successful fast-path confirmation stays visible before Cephi hides itself. */
 const AUTO_HIDE_MS = 1400;
 
+/** How long streamed tokens are collected before they reach the store (~25 updates a second). */
+const TOKEN_FLUSH_MS = 40;
+
 interface ChatState {
   messages: Message[];
   running: boolean;
@@ -39,15 +42,42 @@ export const useChat = create<ChatState>()((set, get) => {
 
   /** Runs a backend request and folds its events into the given assistant message. */
   const stream = async (assistantId: string, start: (onEvent: (event: AgentEvent) => void) => Promise<void>) => {
+    // Tokens arrive far faster than the screen refreshes, and every one of them would re-parse the
+    // Markdown of the answer so far. They are collected and written to the store in batches; every
+    // other event flushes what is waiting first, so the order stays exactly as the backend sent it.
+    let pending = "";
+    let scheduled: number | null = null;
+    const flush = () => {
+      if (scheduled !== null) {
+        clearTimeout(scheduled);
+        scheduled = null;
+      }
+      if (!pending) return;
+      const text = pending;
+      pending = "";
+      updateAssistant(assistantId, (message) => applyAgentEvent(message, { type: "token", text }));
+    };
+
     try {
       await start((event) => {
+        if (event.type === "token") {
+          pending += event.text;
+          scheduled ??= window.setTimeout(flush, TOKEN_FLUSH_MS);
+          // The panel opens with the first token, not with the first batch.
+          useUi.getState().expand();
+          return;
+        }
+        flush();
         updateAssistant(assistantId, (message) => applyAgentEvent(message, event));
         if (needsPanel(event)) useUi.getState().expand();
       });
+      flush();
     } catch (error) {
+      flush();
       updateAssistant(assistantId, (message) => applyAgentEvent(message, { type: "error", message: errorText(error) }));
       useUi.getState().expand();
     } finally {
+      flush();
       set({ running: false });
       // Every finished request is saved, so the chat survives a restart.
       void api.chatSave(withoutImages(get().messages)).catch((e) => console.warn("chat not saved", e));

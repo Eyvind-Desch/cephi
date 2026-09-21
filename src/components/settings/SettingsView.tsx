@@ -1,7 +1,7 @@
 import clsx from "clsx";
-import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useUi, type SettingsTab } from "../../store/ui";
+import { BackButton } from "../ui/BackButton";
 import { KeysSection } from "../keys/KeysSection";
 import { GeneralSection } from "./GeneralSection";
 import { McpSection } from "./McpSection";
@@ -13,19 +13,11 @@ export function SettingsView() {
   const { t } = useTranslation();
   const tab = useUi((s) => s.settingsTab);
   const openSettings = useUi((s) => s.openSettings);
-  const setView = useUi((s) => s.setView);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="space-y-2 px-3 pt-2">
-        <button
-          type="button"
-          onClick={() => setView("chat")}
-          title={t("keys.backTitle")}
-          className="-ml-1 flex items-center gap-1.5 rounded-md px-1.5 py-1 text-body text-muted transition-colors hover:bg-sunken hover:text-fg"
-        >
-          <ArrowLeft size={14} /> {t("keys.back")}
-        </button>
+      <div className="space-y-2 px-2 pt-2">
+        <BackButton />
         {/* One row across the whole width: calmer than a second cluster of tabs next to the header. */}
         <div role="tablist" className="grid grid-cols-3 gap-0.5 rounded-lg bg-sunken p-0.5">
           {TABS.map((id) => (

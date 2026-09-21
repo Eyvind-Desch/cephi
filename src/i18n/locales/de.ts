@@ -9,6 +9,8 @@ export const de: Locale = {
     copied: "Kopiert",
     save: "Speichern",
     cancel: "Abbrechen",
+    back: "Chat",
+    backTitle: "Zurück zum Chat (Esc)",
   },
   composer: {
     placeholder: "Frag mich was…",
@@ -292,8 +294,6 @@ export const de: Locale = {
     },
   },
   keys: {
-    back: "Chat",
-    backTitle: "Zurück zum Chat (Esc)",
     title: "Schlüssel",
     storageNote: "Sicher in der Windows-Anmeldeinformationsverwaltung, wird nie wieder angezeigt.",
     empty: "Gerade braucht nichts einen Schlüssel.",

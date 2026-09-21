@@ -11,6 +11,8 @@ export const en = {
     copied: "Copied",
     save: "Save",
     cancel: "Cancel",
+    back: "Chat",
+    backTitle: "Back to chat (Esc)",
   },
   composer: {
     placeholder: "Ask me anything…",
@@ -294,8 +296,6 @@ export const en = {
     },
   },
   keys: {
-    back: "Chat",
-    backTitle: "Back to chat (Esc)",
     title: "Keys",
     storageNote: "Stored securely in the Windows Credential Manager, never shown again.",
     empty: "Nothing needs a key right now.",

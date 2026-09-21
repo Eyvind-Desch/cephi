@@ -1,11 +1,11 @@
 import clsx from "clsx";
-import { ArrowLeft, MessageSquare, Search, Trash2 } from "lucide-react";
+import { MessageSquare, Search, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorText } from "../../lib/errors";
 import { api, type ArchivedChat } from "../../lib/ipc";
 import { useChat } from "../../store/chat";
-import { useUi } from "../../store/ui";
+import { BackButton } from "../ui/BackButton";
 
 /** How long "Really delete?" waits for the confirming second click. */
 const CONFIRM_DELETE_MS = 3000;
@@ -13,7 +13,6 @@ const CONFIRM_DELETE_MS = 3000;
 /** Earlier chats (`/history`): pick one to continue it, the current chat is archived meanwhile. */
 export function HistoryView() {
   const { t } = useTranslation();
-  const setView = useUi((s) => s.setView);
   const openArchived = useChat((s) => s.openArchived);
   const running = useChat((s) => s.running);
   const [chats, setChats] = useState<ArchivedChat[] | null>(null);
@@ -43,14 +42,7 @@ export function HistoryView() {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex items-center gap-2 px-2 pt-2">
-        <button
-          type="button"
-          onClick={() => setView("chat")}
-          title={t("keys.backTitle")}
-          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-body text-muted transition-colors hover:bg-sunken hover:text-fg"
-        >
-          <ArrowLeft size={14} /> {t("keys.back")}
-        </button>
+        <BackButton />
         <div className="relative ml-auto w-44">
           <Search size={13} className="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-subtle" />
           <input

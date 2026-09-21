@@ -1,8 +1,9 @@
 import clsx from "clsx";
-import { ArrowLeft, FolderCog, Plug, ShieldCheck, Zap } from "lucide-react";
+import { FolderCog, Plug, ShieldCheck, Zap } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { api, type McpServerStatus, type ToolInfo } from "../../lib/ipc";
 import { useUi } from "../../store/ui";
+import { BackButton } from "../ui/BackButton";
 
 const EMPTY_TOOLS: ToolInfo[] = [];
 const EMPTY_SERVERS: McpServerStatus[] = [];
@@ -12,20 +13,12 @@ export function ToolsView() {
   const { t } = useTranslation();
   const tools = useUi((s) => s.config?.tools ?? EMPTY_TOOLS);
   const servers = useUi((s) => s.config?.mcpServers ?? EMPTY_SERVERS);
-  const setView = useUi((s) => s.setView);
   const own = tools.filter((tool) => tool.kind !== "mcp");
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex items-center justify-between px-2 pt-2">
-        <button
-          type="button"
-          onClick={() => setView("chat")}
-          title={t("keys.backTitle")}
-          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-body text-muted transition-colors hover:bg-sunken hover:text-fg"
-        >
-          <ArrowLeft size={14} /> {t("keys.back")}
-        </button>
+        <BackButton />
         <button
           type="button"
           onClick={() => void api.configOpenFolder()}
