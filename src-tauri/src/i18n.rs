@@ -50,6 +50,8 @@ fn system_language() -> &'static str {
 #[cfg(test)]
 mod tests {
     use std::collections::{BTreeMap, BTreeSet};
+    use std::fs;
+    use std::path::Path;
 
     use serde_json::Value;
 
@@ -107,56 +109,46 @@ mod tests {
         }
     }
 
+    /// Every `.rs` file under `src/`, so a new module is covered without being listed here.
+    fn rust_sources() -> Vec<String> {
+        fn collect(dir: &Path, out: &mut Vec<String>) {
+            for entry in fs::read_dir(dir).expect("source folder is readable") {
+                let path = entry.expect("directory entry is readable").path();
+                if path.is_dir() {
+                    collect(&path, out);
+                } else if path.extension().is_some_and(|extension| extension == "rs") {
+                    out.push(fs::read_to_string(&path).expect("source file is readable"));
+                }
+            }
+        }
+        let mut out = Vec::new();
+        collect(&Path::new(env!("CARGO_MANIFEST_DIR")).join("src"), &mut out);
+        out
+    }
+
     #[test]
     fn keys_used_in_code_exist() {
         let en = catalog(EN);
-        let sources = [
-            include_str!("agent/mod.rs"),
-            include_str!("app.rs"),
-            include_str!("commands.rs"),
-            include_str!("config/settings.rs"),
-            include_str!("config/watcher.rs"),
-            include_str!("config/paths.rs"),
-            include_str!("desktop/hotkey.rs"),
-            include_str!("desktop/tray.rs"),
-            include_str!("integrations/audio.rs"),
-            include_str!("integrations/media.rs"),
-            include_str!("integrations/radio.rs"),
-            include_str!("integrations/spotify.rs"),
-            include_str!("launcher/mod.rs"),
-            include_str!("llm/mod.rs"),
-            include_str!("llm/anthropic.rs"),
-            include_str!("llm/openai.rs"),
-            include_str!("llm/ollama.rs"),
-            include_str!("config/snapshot.rs"),
-            include_str!("tools/localized.rs"),
-            include_str!("secrets/catalog.rs"),
-            include_str!("secrets/store.rs"),
-            include_str!("tools/args.rs"),
-            include_str!("tools/builtin.rs"),
-            include_str!("tools/executor.rs"),
-            include_str!("tools/manifest.rs"),
-            include_str!("tools/registry.rs"),
-            include_str!("tools/template.rs"),
-            include_str!("tools/trigger.rs"),
-        ];
         let mut unknown = Vec::new();
-        for source in sources {
-            let mut rest = source;
-            while let Some(index) = rest.find("t!(\"") {
-                // Word boundary: skip e.g. `format!("`.
-                let preceded_by_ident = rest[..index]
-                    .chars()
-                    .next_back()
-                    .is_some_and(|c| c.is_alphanumeric() || c == '_');
-                let after = &rest[index + 4..];
-                if !preceded_by_ident {
-                    let key = after.split('"').next().unwrap_or_default();
-                    if !en.contains_key(key) {
-                        unknown.push(key.to_string());
+        for source in rust_sources() {
+            // Line by line, so comments explaining `t!` are not read as calls.
+            for line in source.lines().filter(|line| !line.trim_start().starts_with("//")) {
+                let mut rest = line;
+                while let Some(index) = rest.find("t!(\"") {
+                    // Word boundary: skip e.g. `format!("`.
+                    let preceded_by_ident = rest[..index]
+                        .chars()
+                        .next_back()
+                        .is_some_and(|c| c.is_alphanumeric() || c == '_');
+                    let after = &rest[index + 4..];
+                    if !preceded_by_ident {
+                        let key = after.split('"').next().unwrap_or_default();
+                        if !en.contains_key(key) {
+                            unknown.push(key.to_string());
+                        }
                     }
+                    rest = after;
                 }
-                rest = after;
             }
         }
         assert!(

@@ -12,7 +12,7 @@
 └─────────────── invoke() · Channel<AgentEvent> · Events ─────────────────────────┘
 ┌──────────────────────────── Backend: Rust (Tauri 2) ────────────────────────────┐
 │ commands.rs   thin IPC layer, no logic                                          │
-│ app.rs        startup, config reload, hotkey registration                       │
+│ app/          what the UI asks for: lifecycle · chats · keys · settings · media │
 │ state.rs      AppState: config snapshot (Arc, swapped atomically), HTTP, agent  │
 │ config/       loads settings.json + tools, default files, schemas, watcher      │
 │ tools/        manifest format, validation, templates, execution                 │
