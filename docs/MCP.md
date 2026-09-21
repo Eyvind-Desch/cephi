@@ -69,10 +69,16 @@ Every tool costs context, and small local models choose worse the more tools the
 or description share words with the question (the last two messages), plus those already used in the chat.
 Naming the server helps: "create a GitHub issue …", "search Notion for …".
 
+## Browser login (OAuth)
+
+Online servers that want an account instead of an API key (Notion, Linear, hosted GitHub servers, …) are added
+with their URL and no header. In ⋯ → *Settings* → *MCP*, open the server and click **Log in with the browser**:
+Cephi registers itself with the server, opens its login page and waits on a loopback port for the redirect.
+The tokens land in the Windows Credential Manager (`Cephi/mcp_oauth_<server>`), never in `mcp.json`, and are
+refreshed automatically. *Forget login* removes them; deleting the server does too.
+
 ## Not supported yet
 
-- Servers that require a browser login (OAuth), e.g. some hosted SaaS servers. Use their API-key variant if they
-  have one.
 - MCP resources and prompts (only tools are used).
 
 ## Troubleshooting

@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { ChevronRight, Plus } from "lucide-react";
+import { ChevronRight, Loader2, LogIn, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorText } from "../../lib/errors";
@@ -91,7 +91,22 @@ function ServerRow({
   const tools = allTools.filter((tool) => tool.source === `mcp.json › ${name}`);
   const [error, setError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  /** A browser login is running (the window waits for the redirect). */
+  const [busy, setBusy] = useState(false);
   const state = status?.state ?? (server.disabled ? "disabled" : "starting");
+
+  /** Logs in through the browser, or forgets an existing login. */
+  const login = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      applyConfig(await (status?.loggedIn ? api.mcpLogout(name) : api.mcpLogin(name)));
+    } catch (e) {
+      setError(errorText(e));
+    } finally {
+      setBusy(false);
+    }
+  };
 
   useEffect(() => {
     if (!confirmDelete) return;
@@ -126,8 +141,12 @@ function ServerRow({
       autoApprove: approved ? [...server.autoApprove, tool] : server.autoApprove.filter((x) => x !== tool),
     });
 
-  const summary =
-    state === "running" ? t("tools.title", { count: status?.tools ?? 0 }) : t(`tools.serverState.${state}`);
+  const summary = [
+    state === "running" ? t("tools.title", { count: status?.tools ?? 0 }) : t(`tools.serverState.${state}`),
+    status?.loggedIn ? t("settings.mcp.loggedIn") : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <div>
@@ -190,7 +209,18 @@ function ServerRow({
                 </div>
               )}
 
-              <div className="flex justify-end gap-1">
+              <div className="flex items-center justify-end gap-1">
+                {server.url && (
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => void login()}
+                    className={clsx(textButtonClass, "flex items-center gap-1.5")}
+                  >
+                    {busy ? <Loader2 size={13} className="animate-spin" /> : <LogIn size={13} />}
+                    {status?.loggedIn ? t("settings.mcp.logout") : t("settings.mcp.login")}
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => (confirmDelete ? void remove() : setConfirmDelete(true))}

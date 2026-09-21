@@ -5,6 +5,7 @@
 //! unless the server or tool is approved in `mcp.json`.
 
 pub mod config;
+pub mod oauth;
 pub mod select;
 
 use std::collections::{BTreeMap, HashMap, HashSet};
@@ -57,6 +58,8 @@ pub struct ServerStatus {
     pub state: ServerState,
     pub error: Option<String>,
     pub tools: usize,
+    /// Whether a browser login (OAuth) is stored for this server.
+    pub logged_in: bool,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
@@ -262,6 +265,7 @@ impl McpManager {
                     state,
                     error: failures.get(name).cloned(),
                     tools: connection.map_or(0, |c| c.tools.len()),
+                    logged_in: oauth::is_logged_in(name),
                 }
             })
             .collect();
@@ -313,10 +317,21 @@ async fn connect(name: &str, server: &ServerConfig) -> Result<Connection, String
             }
             let mut config = StreamableHttpClientTransportConfig::with_uri(url);
             config.custom_headers = headers;
-            let transport = StreamableHttpClientTransport::from_config(config);
-            ().serve(transport)
-                .await
-                .map_err(|e| t!("mcp.start_failed", error = e).to_string())?
+            // Servers with a browser login get a client that sends (and refreshes) the token.
+            match oauth::client(&reqwest::Client::new(), name, url).await? {
+                Some(authorized) => {
+                    let transport = StreamableHttpClientTransport::with_client(authorized, config);
+                    ().serve(transport)
+                        .await
+                        .map_err(|e| t!("mcp.start_failed", error = e).to_string())?
+                }
+                None => {
+                    let transport = StreamableHttpClientTransport::from_config(config);
+                    ().serve(transport)
+                        .await
+                        .map_err(|e| t!("mcp.start_failed", error = e).to_string())?
+                }
+            }
         }
     };
 

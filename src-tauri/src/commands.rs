@@ -47,6 +47,16 @@ pub fn mcp_save_server(
 }
 
 #[tauri::command]
+pub async fn mcp_login(app: AppHandle, name: String) -> AppResult<ConfigSnapshot> {
+    crate::app::mcp_login(&app, &name).await
+}
+
+#[tauri::command]
+pub async fn mcp_logout(app: AppHandle, name: String) -> AppResult<ConfigSnapshot> {
+    crate::app::mcp_logout(&app, &name).await
+}
+
+#[tauri::command]
 pub fn mcp_remove_server(app: AppHandle, name: String) -> AppResult<ConfigSnapshot> {
     crate::app::remove_mcp_server(&app, &name)
 }

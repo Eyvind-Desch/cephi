@@ -109,6 +109,8 @@ export interface McpServerStatus {
   state: "starting" | "running" | "failed" | "disabled";
   error: string | null;
   tools: number;
+  /** Whether a browser login (OAuth) is stored for this server. */
+  loggedIn: boolean;
 }
 
 export interface Diagnostic {
@@ -221,6 +223,9 @@ export const api = {
   mcpSaveServer: (name: string, previousName: string | null, server: Partial<McpServerConfig>) =>
     invoke<ConfigSnapshot>("mcp_save_server", { name, previousName, server }),
   mcpRemoveServer: (name: string) => invoke<ConfigSnapshot>("mcp_remove_server", { name }),
+  /** Browser login for an online MCP server (OAuth); resolves once the server is connected. */
+  mcpLogin: (name: string) => invoke<ConfigSnapshot>("mcp_login", { name }),
+  mcpLogout: (name: string) => invoke<ConfigSnapshot>("mcp_logout", { name }),
 
   /** Resolves when the run has finished, been cancelled or failed. */
   agentSend: (

@@ -107,7 +107,11 @@
     "list_failed": "Der Server hat seine Tools nicht geliefert: %{error}",
     "timeout": "Der Server hat nicht rechtzeitig geantwortet.",
     "not_running": "Der MCP-Server \"%{server}\" läuft nicht.",
-    "call_failed": "Der MCP-Aufruf ist fehlgeschlagen: %{error}"
+    "call_failed": "Der MCP-Aufruf ist fehlgeschlagen: %{error}",
+    "no_url": "„%{server}“ ist ein lokaler Server; die Browser-Anmeldung gibt es nur für Online-Server.",
+    "login_failed": "Anmeldung fehlgeschlagen: %{error}",
+    "login_timeout": "Die Anmeldung wurde nicht rechtzeitig abgeschlossen.",
+    "login_done": "<!doctype html><html lang=\"de\"><head><meta charset=\"utf-8\"><title>Cephi</title></head><body style=\"font-family:Segoe UI,system-ui,sans-serif;display:grid;place-items:center;height:100vh;margin:0;background:#16161b;color:#ececf1\"><p>Angemeldet. Du kannst diesen Tab schließen und zu Cephi zurückgehen.</p></body></html>"
   },
   "media": {
     "unknown_action": "Unbekannte Medienaktion \"%{action}\".",

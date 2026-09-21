@@ -37,8 +37,8 @@ const config: ConfigSnapshot = {
     { name: "github__search_code", title: "Search code · github", description: "[github] Search code across GitHub repositories.", permission: "auto", kind: "mcp", source: "mcp.json › github", triggers: [] },
   ],
   mcpServers: [
-    { name: "github", state: "running", error: null, tools: 1 },
-    { name: "notion", state: "failed", error: "\"npx\" wurde nicht gefunden. Ist es installiert (z. B. Node.js für npx, uv für uvx)?", tools: 0 },
+    { name: "github", state: "running", error: null, tools: 1, loggedIn: true },
+    { name: "notion", state: "failed", error: "\"npx\" wurde nicht gefunden. Ist es installiert (z. B. Node.js für npx, uv für uvx)?", tools: 0, loggedIn: false },
   ],
   mcpConfig: {
     github: {

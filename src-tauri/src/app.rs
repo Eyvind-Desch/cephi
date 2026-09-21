@@ -301,6 +301,40 @@ pub async fn screenshot(app: &AppHandle) -> AppResult<capture::ScreenshotImage> 
     shot.map(Into::into).map_err(AppError::msg)
 }
 
+/// Browser login for an MCP server that uses OAuth; afterwards the server is (re)started.
+pub async fn mcp_login(app: &AppHandle, server: &str) -> AppResult<ConfigSnapshot> {
+    let state = app.state::<AppState>();
+    let config = state.config();
+    let url = config
+        .mcp
+        .mcp_servers
+        .get(server)
+        .and_then(|entry| entry.url.clone())
+        .ok_or_else(|| AppError::msg(t!("mcp.no_url", server = server)))?;
+
+    let opener = app.clone();
+    crate::mcp::oauth::login(&state.http, server, &url, move |auth_url| {
+        opener
+            .opener()
+            .open_url(auth_url, None::<&str>)
+            .map_err(|e| t!("mcp.login_failed", error = e).to_string())
+    })
+    .await
+    .map_err(AppError::msg)?;
+
+    state.mcp.restart(&[server.to_string()], &config.mcp).await;
+    Ok(snapshot(app))
+}
+
+/// Forgets a server's browser login.
+pub async fn mcp_logout(app: &AppHandle, server: &str) -> AppResult<ConfigSnapshot> {
+    let state = app.state::<AppState>();
+    crate::mcp::oauth::forget(server);
+    let config = state.config();
+    state.mcp.restart(&[server.to_string()], &config.mcp).await;
+    Ok(snapshot(app))
+}
+
 /// Opens an archived chat: the current one is archived, the model continues the old conversation.
 pub async fn open_archived_chat(state: &AppState, id: &str) -> AppResult<serde_json::Value> {
     let chat = state.chats.open_archived(id).map_err(AppError::from)?;
@@ -329,6 +363,8 @@ pub fn save_mcp_server(
 }
 
 pub fn remove_mcp_server(app: &AppHandle, name: &str) -> AppResult<ConfigSnapshot> {
+    // A deleted server keeps no login.
+    crate::mcp::oauth::forget(name);
     let state = app.state::<AppState>();
     config::edit::remove_mcp_server(&state.paths.mcp, name).map_err(AppError::msg)?;
     Ok(reload_config(app))

@@ -107,7 +107,11 @@
     "list_failed": "The server did not list its tools: %{error}",
     "timeout": "The server did not answer in time.",
     "not_running": "The MCP server \"%{server}\" is not running.",
-    "call_failed": "The MCP call failed: %{error}"
+    "call_failed": "The MCP call failed: %{error}",
+    "no_url": "\"%{server}\" is a local server; a browser login only works for online servers.",
+    "login_failed": "Login failed: %{error}",
+    "login_timeout": "The login was not finished in time.",
+    "login_done": "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>Cephi</title></head><body style=\"font-family:Segoe UI,system-ui,sans-serif;display:grid;place-items:center;height:100vh;margin:0;background:#16161b;color:#ececf1\"><p>Logged in. You can close this tab and go back to Cephi.</p></body></html>"
   },
   "media": {
     "unknown_action": "Unknown media action \"%{action}\".",

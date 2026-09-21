@@ -138,7 +138,8 @@ next stage begins. Whatever isn't a nuisance goes into the backlog instead of th
 - [x] Search: `fetch_page` tool (reads a public page as text; local/private addresses refused, also via redirect)
 - [x] Web tab: Esc (if the page does not use it), Ctrl+N, Ctrl+E and Ctrl+L also work while the page has focus
 - [x] Web tab: ask the AI about the open page (✨ in the toolbar → page chip above the input, "Summarize" or own question, read via `fetch_page`)
-- [ ] MCP: servers that need a browser login (OAuth); resources and prompts
+- [x] MCP: servers that need a browser login (OAuth): login in the settings, tokens in the Credential Manager
+- [ ] MCP: resources and prompts (only tools are used)
 - [x] MCP: send only the tools that fit the request above 8 (local) / 64 (cloud) MCP tools, word match + tools used in the chat
 - [x] Slash commands in the input (like Claude Code): `/clear`, `/web`, `/translate`, `/model`, `/tools`, `/settings`, `/mcp`, …
 
