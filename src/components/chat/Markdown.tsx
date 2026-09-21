@@ -1,9 +1,9 @@
 import { Check, Copy } from "lucide-react";
-import { isValidElement, memo, useMemo, useState, type ReactNode } from "react";
+import { isValidElement, memo, useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { highlight } from "../../lib/highlight";
+import { highlight, type Highlighted } from "../../lib/highlight";
 import type { WebResult } from "../../lib/ipc";
 import { openLink } from "../../lib/links";
 
@@ -12,7 +12,15 @@ function CodeBlock({ code, fence }: { code: string; fence: string | null }) {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const text = code.replace(/\n$/, "");
-  const highlighted = useMemo(() => highlight(text, fence), [text, fence]);
+  // The highlighter loads on the first code block; until then the code is shown plain.
+  const [highlighted, setHighlighted] = useState<Highlighted | null>(null);
+  useEffect(() => {
+    let current = true;
+    void highlight(text, fence).then((result) => current && setHighlighted(result));
+    return () => {
+      current = false;
+    };
+  }, [text, fence]);
   const label = highlighted?.language ?? fence;
 
   const copy = async () => {
