@@ -41,11 +41,11 @@ selection for that moment and **restores your clipboard afterwards**. The normal
 **Dictation:** the microphone button next to the input records what you say and writes it into the input field
 (offline via a local Whisper container, [setup](docs/VOICE.md)). `Esc` throws the recording away.
 
-**Screenshot:** the camera button next to the input (or `/screenshot`) takes a picture of the monitor the mouse is on —
+**Screenshot:** ⋯ → *Screenshot* (or `/screenshot`) takes a picture of the monitor the mouse is on —
 Cephi hides itself for the shot — and puts it above the input: *What is on it?* or your own question about it.
 You can also paste a picture from the clipboard (Snipping Tool, a copied image) into the input. This all
 needs a model that can look at pictures; cloud models can, a local one needs a vision model (`"vision": true` in the
-profile, see [docs/PROVIDERS.md](docs/PROVIDERS.md)).
+profile, see [docs/PROVIDERS.md](docs/PROVIDERS.md)). Pictures stay in the session: a saved chat never keeps a screenshot.
 
 The panel has three tabs (icons top right): **Chat**, **Web** and **Translator**. The web tab shows Google and other pages inside
 Cephi (address bar: search terms or an address) and can be enlarged; links from the chat and search results open there too.

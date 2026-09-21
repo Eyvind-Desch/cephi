@@ -16,7 +16,7 @@ const TIMEOUT: Duration = Duration::from_secs(12);
 const MAX_BYTES: usize = 3 * 1024 * 1024;
 const MAX_REDIRECTS: usize = 5;
 /// Characters of page text handed on (the agent shortens tool output further if configured lower).
-pub const MAX_TEXT_CHARS: usize = 12_000;
+const MAX_TEXT_CHARS: usize = 12_000;
 
 pub struct Page {
     /// Final address after redirects.
@@ -268,7 +268,7 @@ fn html_title(html: &str) -> String {
 }
 
 /// Readable text of a page: the article or main part if marked, without scripts, menus and footers.
-pub fn html_to_text(html: &str) -> String {
+fn html_to_text(html: &str) -> String {
     // One pattern per element: the regex crate has no backreferences to match the closing tag.
     static DROP: LazyLock<Vec<Regex>> = LazyLock::new(|| {
         let elements = [
@@ -378,6 +378,8 @@ fn decode_entities(text: &str) -> String {
         .into_owned()
 }
 
+/// Cuts page text to length. Unlike `search::excerpt` it keeps line breaks: the model reads the
+/// article structure, not a single paragraph.
 fn shorten(text: &str, max_chars: usize) -> String {
     if text.chars().count() <= max_chars {
         return text.to_string();

@@ -336,7 +336,7 @@ async fn http(
     }
 }
 
-pub fn env_var_name(param: &str) -> String {
+fn env_var_name(param: &str) -> String {
     format!("CEPHI_ARG_{}", param.to_ascii_uppercase())
 }
 

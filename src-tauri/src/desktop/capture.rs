@@ -53,7 +53,7 @@ impl From<Screenshot> for ScreenshotImage {
 }
 
 /// Standard base64 with padding (RFC 4648). Small enough to keep here instead of adding a crate.
-pub fn to_base64(bytes: &[u8]) -> String {
+fn to_base64(bytes: &[u8]) -> String {
     const ALPHABET: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     let mut out = String::with_capacity(bytes.len().div_ceil(3) * 4);
     for chunk in bytes.chunks(3) {

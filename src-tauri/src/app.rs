@@ -88,7 +88,7 @@ fn warm_up(app: &AppHandle) {
 
 /// Connects to the MCP servers from `mcp.json` in the background and tells the UI when their tools
 /// are ready (starting a server can take a while, e.g. a first `npx` download).
-pub fn sync_mcp(app: &AppHandle) {
+fn sync_mcp(app: &AppHandle) {
     let app = app.clone();
     tauri::async_runtime::spawn(async move {
         let state = app.state::<AppState>();

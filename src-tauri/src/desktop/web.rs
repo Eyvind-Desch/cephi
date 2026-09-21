@@ -290,7 +290,7 @@ fn is_web_url(url: &Url) -> bool {
 
 /// Turns address bar input into a URL: full web URLs and bare domains are opened,
 /// everything else is searched.
-pub fn resolve_input(input: &str) -> Option<Url> {
+fn resolve_input(input: &str) -> Option<Url> {
     let input = input.trim();
     if input.is_empty() {
         return None;
