@@ -99,6 +99,8 @@ export interface GeneralSettings {
   selectionHotkey: string | null;
   hideOnBlur: boolean;
   summarizeSearch: boolean;
+  /** Dictation is sent right away instead of landing in the input field. */
+  voiceSendDirectly: boolean;
 }
 
 /** `src-tauri/src/mcp/mod.rs` */
@@ -161,7 +163,7 @@ export interface WebResult {
 }
 
 /** `src-tauri/src/services/mod.rs`: Cephi's local containers (Docker in WSL). */
-export type ServiceId = "search" | "translate";
+export type ServiceId = "search" | "translate" | "voice";
 
 export interface ServiceStatus {
   id: ServiceId;
@@ -234,6 +236,11 @@ export const api = {
   },
   /** Screenshot of the monitor the mouse is on; Cephi hides itself for the shot. */
   screenshotCapture: () => invoke<Screenshot>("screenshot_capture"),
+  /** Starts recording the microphone for dictation. */
+  voiceStart: () => invoke<void>("voice_start"),
+  /** Stops the recording and returns the recognized text. */
+  voiceStop: () => invoke<string>("voice_stop"),
+  voiceCancel: () => invoke<void>("voice_cancel"),
   /** Lets the model answer from the latest tool results (e.g. summarize search results). */
   agentContinue: (profileId: string | null, onEvent: (event: AgentEvent) => void) => {
     const channel = new Channel<AgentEvent>();

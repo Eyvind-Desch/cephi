@@ -26,6 +26,7 @@ pub struct Settings {
     pub providers: Vec<ProviderSettings>,
     pub search: SearchSettings,
     pub translate: TranslateSettings,
+    pub voice: VoiceSettings,
     pub agent: AgentSettings,
     pub window: WindowSettings,
 }
@@ -147,6 +148,17 @@ pub struct TranslateSettings {
     /// Text in this language is translated into `foreign_language`, everything else into this one.
     pub native_language: String,
     pub foreign_language: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(default, rename_all = "camelCase", deny_unknown_fields)]
+pub struct VoiceSettings {
+    /// Whisper service (`infra/compose.yaml`); another host works too.
+    pub whisper_url: String,
+    /// Language of the dictation: a code such as `de` or `auto` (detect).
+    pub language: String,
+    /// Send the recognized text right away instead of putting it in the input field.
+    pub send_directly: bool,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -383,6 +395,7 @@ impl Default for Settings {
             ],
             search: SearchSettings::default(),
             translate: TranslateSettings::default(),
+            voice: VoiceSettings::default(),
             agent: AgentSettings::default(),
             window: WindowSettings::default(),
         }
@@ -417,6 +430,17 @@ impl Default for TranslateSettings {
             libretranslate_url: "http://127.0.0.1:8890".into(),
             native_language: "de".into(),
             foreign_language: "en".into(),
+        }
+    }
+}
+
+impl Default for VoiceSettings {
+    fn default() -> Self {
+        Self {
+            // Matches the port in infra/compose.yaml.
+            whisper_url: "http://127.0.0.1:8891".into(),
+            language: "auto".into(),
+            send_directly: false,
         }
     }
 }

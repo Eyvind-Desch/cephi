@@ -3,6 +3,7 @@ import { Composer } from "../chat/Composer";
 import { MessageList } from "../chat/MessageList";
 import { PageChip } from "../chat/PageChip";
 import { ScreenshotChip } from "../chat/ScreenshotChip";
+import { VoiceError } from "../chat/VoiceError";
 import { SelectionChip } from "../chat/SelectionChip";
 import { HistoryView } from "../history/HistoryView";
 import { SettingsView } from "../settings/SettingsView";
@@ -29,6 +30,7 @@ export function Panel() {
         <>
           <MessageList />
           <div className="p-3 pt-1">
+            <VoiceError />
             <SelectionChip />
             <ScreenshotChip />
             <PageChip />

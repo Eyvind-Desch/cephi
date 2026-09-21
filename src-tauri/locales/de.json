@@ -165,6 +165,7 @@
   "services": {
     "search": "Websuche",
     "translate": "Übersetzer",
+    "voice": "Spracherkennung",
     "wsl_missing": "Docker in WSL nicht erreichbar: %{error}",
     "start_failed": "Dienst konnte nicht gestartet werden: %{error}",
     "timeout": "%{service} ist nicht rechtzeitig gestartet. Prüfen: wsl -- docker compose -f ~/.cephi/infra/compose.yaml logs"
@@ -204,6 +205,12 @@
     "failed": "Seite konnte nicht gelesen werden: %{error}",
     "not_text": "Die Adresse ist keine Webseite (%{kind}).",
     "empty": "Die Seite hat keinen lesbaren Text (braucht vielleicht JavaScript)."
+  },
+  "voice": {
+    "no_microphone": "Kein Mikrofon verfügbar: %{error}",
+    "too_short": "Nichts aufgenommen. Sprich etwas länger.",
+    "unreachable": "Die Spracherkennung läuft nicht (Whisper unter %{url}).",
+    "failed": "Spracherkennung fehlgeschlagen: %{error}"
   },
   "spotify": {
     "unknown_kind": "Unbekannter Spotify-Typ \"%{kind}\".",

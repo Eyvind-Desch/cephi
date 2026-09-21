@@ -30,6 +30,7 @@ const READY_TIMEOUT: Duration = Duration::from_secs(300);
 pub enum Service {
     Search,
     Translate,
+    Voice,
 }
 
 /// Mirrored in `src/lib/ipc.ts` (`ServiceStatus`).
@@ -42,13 +43,14 @@ pub struct ServiceStatus {
 }
 
 impl Service {
-    pub const ALL: [Service; 2] = [Service::Search, Service::Translate];
+    pub const ALL: [Service; 3] = [Service::Search, Service::Translate, Service::Voice];
 
     /// Compose service name in `infra/compose.yaml`.
     fn container(self) -> &'static str {
         match self {
             Service::Search => "searxng",
             Service::Translate => "libretranslate",
+            Service::Voice => "whisper",
         }
     }
 
@@ -56,6 +58,7 @@ impl Service {
         match self {
             Service::Search => t!("services.search").into(),
             Service::Translate => t!("services.translate").into(),
+            Service::Voice => t!("services.voice").into(),
         }
     }
 
@@ -67,6 +70,8 @@ impl Service {
                 "{}/languages",
                 settings.translate.libretranslate_url.trim_end_matches('/')
             ),
+            // The API docs answer as soon as the server is up (the model loads on the first request).
+            Service::Voice => format!("{}/docs", settings.voice.whisper_url.trim_end_matches('/')),
         }
     }
 
@@ -80,13 +85,14 @@ impl Service {
 }
 
 pub async fn status(http: &reqwest::Client, settings: &Settings) -> Vec<ServiceStatus> {
-    let (search, translate) = tokio::join!(
+    let (search, translate, voice) = tokio::join!(
         Service::Search.is_running(http, settings),
-        Service::Translate.is_running(http, settings)
+        Service::Translate.is_running(http, settings),
+        Service::Voice.is_running(http, settings)
     );
     Service::ALL
         .into_iter()
-        .zip([search, translate])
+        .zip([search, translate, voice])
         .map(|(id, running)| ServiceStatus {
             id,
             title: id.title(),

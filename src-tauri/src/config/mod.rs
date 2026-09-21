@@ -21,7 +21,7 @@ use crate::tools::ToolRegistry;
 pub use paths::ConfigPaths;
 pub use settings::{
     Anchor, OllamaSettings, Profile, ProviderKind, ProviderSettings, SearchSettings, Settings, TranslateSettings,
-    WindowSettings,
+    VoiceSettings, WindowSettings,
 };
 pub use snapshot::ConfigSnapshot;
 

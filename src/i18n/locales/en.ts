@@ -65,6 +65,11 @@ export const en = {
     explainPrompt: "Explain this briefly:\n\n{{text}}",
     withContext: "{{question}}\n\nSelected text:\n{{text}}",
   },
+  voice: {
+    start: "Dictate (speech to text)",
+    stop: "Stop and transcribe (Esc discards)",
+    transcribing: "Transcribing…",
+  },
   screenshot: {
     take: "Screenshot for a question",
     alt: "Screenshot",
@@ -226,6 +231,8 @@ export const en = {
       hideOnBlurHint: "Unless Cephi is pinned.",
       summarize: "Summarize web searches with AI",
       summarizeHint: "Off: only the results are shown, no AI needed.",
+      voiceSend: "Send dictation right away",
+      voiceSendHint: "Off: the recognized text lands in the input field first.",
       moreInFile: "Models, providers and window sizes are set in settings.json.",
     },
     hotkey: {

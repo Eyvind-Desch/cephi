@@ -20,6 +20,7 @@ mod services;
 mod state;
 mod tools;
 mod translate;
+mod voice;
 
 use tauri::{Manager, RunEvent, WindowEvent};
 use tauri_plugin_log::{Target, TargetKind};
@@ -63,6 +64,9 @@ pub fn run() {
             commands::mcp_remove_server,
             commands::agent_send,
             commands::screenshot_capture,
+            commands::voice_start,
+            commands::voice_stop,
+            commands::voice_cancel,
             commands::agent_continue,
             commands::agent_preload,
             commands::agent_cancel,

@@ -264,6 +264,15 @@ pub async fn new_chat(state: &AppState) -> AppResult<()> {
     state.chats.archive().map_err(AppError::from)
 }
 
+/// Stops the recording and turns it into text. An empty result means nothing was understood.
+pub async fn dictate(state: &AppState) -> AppResult<String> {
+    let wav = state.recorder.stop().map_err(AppError::msg)?;
+    let config = state.config();
+    crate::voice::transcribe(&state.http, &config.settings.voice, wav)
+        .await
+        .map_err(AppError::msg)
+}
+
 /// Time for the window to disappear before the picture is taken.
 const HIDE_BEFORE_CAPTURE: Duration = Duration::from_millis(180);
 

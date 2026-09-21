@@ -18,14 +18,15 @@
 │ tools/        manifest format, validation, templates, execution                 │
 │ agent/        loop: model → tools → model, confirmations, cancellation          │
 │ llm/          providers: Ollama, Anthropic, OpenAI-compatible (streaming, tools)│
-│ secrets/      Windows Credential Manager + key catalog for the settings page        │
+│ secrets/      Windows Credential Manager + key catalog for the settings page    │
 │ launcher/ integrations/  app index, Spotify, media/volume, radios, selection     │
-│ search/       SearXNG client, excerpts for the model                            │
+│ search/       SearXNG client, excerpts for the model, page reader (fetch_page)  │
 │ translate/    LibreTranslate client, automatic direction                        │
+│ voice/        Whisper client; recording itself: integrations/record.rs (WASAPI) │
 │ services/     starts the local containers (compose config is shipped in the app) │
 │ history.rs    current chat on disk (UI messages + model history), archive       │
 │ mcp/          MCP client: servers from mcp.json, their tools, calls             │
-│ desktop/      window placement, web tab (child webview), tray, global hotkey     │
+│ desktop/      window placement, web tab (child webview), tray, hotkey, capture  │
 └─────────────────────────────────────────────────────────────────────────────────┘
           │                       │                          │
     Ollama :11434      SearXNG :8888, LibreTranslate :8890   %APPDATA%\Cephi\ (settings.json, tools/)

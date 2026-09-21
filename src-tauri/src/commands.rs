@@ -73,6 +73,24 @@ pub async fn agent_send(
     agent::run(&app, &state, input, profile_id, on_event).await
 }
 
+/// Starts recording the microphone for dictation.
+#[tauri::command]
+pub fn voice_start(state: State<'_, AppState>) -> AppResult<()> {
+    state.recorder.start().map_err(AppError::msg)
+}
+
+/// Stops the recording and returns the recognized text.
+#[tauri::command]
+pub async fn voice_stop(state: State<'_, AppState>) -> AppResult<String> {
+    crate::app::dictate(&state).await
+}
+
+/// Throws the recording away (e.g. Escape while recording).
+#[tauri::command]
+pub fn voice_cancel(state: State<'_, AppState>) {
+    state.recorder.cancel();
+}
+
 /// Takes a screenshot of the monitor the mouse is on (without Cephi itself) for a question about it.
 #[tauri::command]
 pub async fn screenshot_capture(app: AppHandle) -> AppResult<Screenshot> {

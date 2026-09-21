@@ -5,6 +5,7 @@ use crate::config::{Config, ConfigPaths};
 use crate::desktop::web::WebController;
 use crate::desktop::window::WindowController;
 use crate::history::ChatStore;
+use crate::integrations::record::Recorder;
 use crate::integrations::spotify::SpotifyClient;
 use crate::launcher::AppIndex;
 use crate::mcp::McpManager;
@@ -25,6 +26,8 @@ pub struct AppState {
     /// The current conversation on disk.
     pub chats: ChatStore,
     pub spotify: SpotifyClient,
+    /// Microphone recording for dictation.
+    pub recorder: Recorder,
     config: RwLock<Arc<Config>>,
     hotkey_error: Mutex<Option<String>>,
 }
@@ -47,6 +50,7 @@ impl AppState {
             launcher,
             chats,
             spotify: SpotifyClient::default(),
+            recorder: Recorder::default(),
             config: RwLock::new(Arc::new(config)),
             hotkey_error: Mutex::new(None),
         }

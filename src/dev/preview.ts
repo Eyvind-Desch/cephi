@@ -52,7 +52,13 @@ const config: ConfigSnapshot = {
       cwd: null, url: null, headers: {}, disabled: false, permission: "confirm", autoApprove: [],
     },
   },
-  general: { language: "system", selectionHotkey: "Ctrl+Alt+T", hideOnBlur: true, summarizeSearch: true },
+  general: {
+    language: "system",
+    selectionHotkey: "Ctrl+Alt+T",
+    hideOnBlur: true,
+    summarizeSearch: true,
+    voiceSendDirectly: false,
+  },
   diagnostics: [],
 };
 
@@ -272,6 +278,7 @@ export function installPreview() {
           return [
             { id: "search", title: "Websuche", running: true },
             { id: "translate", title: "Übersetzer", running: params.get("service") !== "stopped" },
+            { id: "voice", title: "Spracherkennung", running: params.get("service") !== "stopped" },
           ];
         case "autostart_state":
           return { enabled: false, available: true };

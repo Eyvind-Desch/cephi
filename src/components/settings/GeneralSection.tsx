@@ -115,6 +115,17 @@ export function GeneralSection() {
             onChange={(summarize) => save("search", { search: { summarize } })}
           />
         </Row>
+        <Row
+          label={t("settings.general.voiceSend")}
+          hint={t("settings.general.voiceSendHint")}
+          error={errorFor("voice")}
+        >
+          <Toggle
+            label={t("settings.general.voiceSend")}
+            checked={general.voiceSendDirectly}
+            onChange={(sendDirectly) => save("voice", { voice: { sendDirectly } })}
+          />
+        </Row>
       </Card>
 
       <div className="flex items-center justify-between gap-3 px-1">

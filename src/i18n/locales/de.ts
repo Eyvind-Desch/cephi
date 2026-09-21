@@ -63,6 +63,11 @@ export const de: Locale = {
     explainPrompt: "Erkläre das kurz:\n\n{{text}}",
     withContext: "{{question}}\n\nMarkierter Text:\n{{text}}",
   },
+  voice: {
+    start: "Diktieren (Sprache zu Text)",
+    stop: "Stoppen und umwandeln (Esc verwirft)",
+    transcribing: "Wird umgewandelt…",
+  },
   screenshot: {
     take: "Screenshot für eine Frage",
     alt: "Screenshot",
@@ -224,6 +229,8 @@ export const de: Locale = {
       hideOnBlurHint: "Außer Cephi ist angeheftet.",
       summarize: "Websuche mit KI zusammenfassen",
       summarizeHint: "Aus: nur die Ergebnisse, ganz ohne KI.",
+      voiceSend: "Diktat sofort senden",
+      voiceSendHint: "Aus: Der erkannte Text landet erst im Eingabefeld.",
       moreInFile: "Modelle, Anbieter und Fenstergrößen stehen in der settings.json.",
     },
     hotkey: {

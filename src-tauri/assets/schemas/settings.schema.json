@@ -90,6 +90,16 @@
         "foreignLanguage": { "type": "string", "default": "en", "description": "The language to translate into from nativeLanguage. Must be loaded in LibreTranslate (LT_LOAD_ONLY)." }
       }
     },
+    "voice": {
+      "description": "Dictation through a local Whisper service (start it with infra/start.ps1 or the button in Cephi).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "whisperUrl": { "type": "string", "default": "http://127.0.0.1:8891" },
+        "language": { "type": "string", "default": "auto", "description": "Language of the dictation: \"auto\" or a code such as \"de\"." },
+        "sendDirectly": { "type": "boolean", "default": false, "description": "Send the recognized text right away instead of putting it in the input field." }
+      }
+    },
     "providers": {
       "description": "Cloud AI providers. The API key is entered in Cephi under Keys (stored as <id>_api_key in the Windows Credential Manager).",
       "type": "array",

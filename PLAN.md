@@ -120,7 +120,7 @@ request. Unambiguous commands ("open X") run through the quick action path witho
    confirmation unless approved, keys via `{{secret:…}}`, status in `/tools` → [docs/MCP.md](docs/MCP.md)
 5. **Polish** – ✅ save chat history (restored on start, archived on "new chat") · ✅ start with Windows · ✅ installer
    (NSIS, per-user, own icon) · ✅ slash commands + tools overview · ✅ settings page (general, keys, MCP servers by form) · ✅ code highlighting
-6. **Extras** – ✅ pick up selected text (`Ctrl+Alt+T`, clipboard is restored) · ✅ ask about a screenshot (camera button/`/screenshot`, needs a vision model) · voice
+6. **Extras** – ✅ pick up selected text (`Ctrl+Alt+T`, clipboard is restored) · ✅ ask about a screenshot (camera button/`/screenshot`, needs a vision model) · ✅ dictation (microphone button, local Whisper in Docker)
 
 ## Approach
 

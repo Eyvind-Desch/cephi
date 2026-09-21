@@ -7,6 +7,7 @@ import { useChat } from "../../store/chat";
 import { useUi } from "../../store/ui";
 import { IconButton } from "../ui/IconButton";
 import { CommandMenu, type CommandItem } from "./CommandMenu";
+import { VoiceButton } from "./VoiceButton";
 
 interface ComposerProps {
   /** Compact bar: single line, no border. */
@@ -142,6 +143,7 @@ export function Composer({ compact = false }: ComposerProps) {
               : "max-h-40 min-h-7 flex-1 resize-none bg-transparent py-1 text-[14px] leading-6 text-fg outline-none placeholder:text-subtle"
           }
         />
+        {!running && <VoiceButton />}
         {/* A screenshot is a question about the screen: only useful with the panel open. */}
         {!compact && !running && (
           <IconButton

@@ -135,6 +135,7 @@ impl ConfigSnapshot {
                 selection_hotkey: settings.selection_hotkey.clone(),
                 hide_on_blur: settings.window.hide_on_blur,
                 summarize_search: settings.search.summarize,
+                voice_send_directly: settings.voice.send_directly,
             },
             diagnostics: config
                 .diagnostics
@@ -155,4 +156,6 @@ pub struct GeneralSettings {
     pub selection_hotkey: Option<String>,
     pub hide_on_blur: bool,
     pub summarize_search: bool,
+    /// Dictation is sent right away instead of landing in the input field.
+    pub voice_send_directly: bool,
 }

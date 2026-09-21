@@ -30,5 +30,22 @@ services:
       LT_DISABLE_WEB_UI: "true"
       LT_THREADS: "2"
 
+  # Speech to text for the microphone button (faster-whisper, CPU only).
+  whisper:
+    image: onerahmet/openai-whisper-asr-webservice:v1.10.0
+    container_name: cephi-whisper
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8891:9000"
+    volumes:
+      # The downloaded model survives container updates.
+      - whisper-models:/root/.cache
+    environment:
+      ASR_ENGINE: faster_whisper
+      # "small" understands German dictation well and still runs on the CPU.
+      ASR_MODEL: small
+      ASR_COMPUTE_TYPE: int8
+
 volumes:
   libretranslate-models:
+  whisper-models:

@@ -3,5 +3,6 @@
 pub mod audio;
 pub mod media;
 pub mod radio;
+pub mod record;
 pub mod selection;
 pub mod spotify;

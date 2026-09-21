@@ -62,7 +62,8 @@ try {
   Write-Host 'Waiting for the services (the first start downloads the translation models, a few minutes):'
   Wait-Http 'SearXNG' 'http://127.0.0.1:8888/search?q=cephi&format=json' 60
   Wait-Http 'LibreTranslate' 'http://127.0.0.1:8890/languages' 600
-  Write-Host 'Cephi services are running: search http://127.0.0.1:8888, translation http://127.0.0.1:8890'
+  Wait-Http 'Whisper' 'http://127.0.0.1:8891/docs' 600
+  Write-Host 'Cephi services are running: search http://127.0.0.1:8888, translation http://127.0.0.1:8890, speech http://127.0.0.1:8891'
 } finally {
   Pop-Location
 }
