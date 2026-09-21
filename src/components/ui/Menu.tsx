@@ -136,7 +136,7 @@ export function Menu({ trigger, entries, width = "w-60" }: MenuProps) {
                 return (
                   <div
                     key={`label-${index}`}
-                    className="px-2.5 pt-2 pb-1 text-[10.5px] font-medium tracking-wider text-subtle uppercase"
+                    className="px-2.5 pt-2 pb-1 text-caption font-medium tracking-wider text-subtle uppercase"
                   >
                     {entry.text}
                   </div>
@@ -154,20 +154,20 @@ export function Menu({ trigger, entries, width = "w-60" }: MenuProps) {
                   onPointerEnter={() => !entry.disabled && setActive(index)}
                   onClick={() => select(index)}
                   className={clsx(
-                    "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left text-[13px] disabled:opacity-40",
+                    "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left text-body disabled:opacity-40",
                     active === index && !entry.disabled ? "bg-sunken text-fg" : "text-muted",
                   )}
                 >
-                  {Icon && <Icon size={15} className="shrink-0" />}
+                  {Icon && <Icon size={14} className="shrink-0" />}
                   <span className="min-w-0 flex-1">
                     <span className="block truncate">{entry.label}</span>
                     {entry.description && (
-                      <span className="block truncate text-[11px] text-subtle">{entry.description}</span>
+                      <span className="block truncate text-caption text-subtle">{entry.description}</span>
                     )}
                   </span>
-                  {entry.hint && <span className="shrink-0 text-[11px] text-subtle">{entry.hint}</span>}
+                  {entry.hint && <span className="shrink-0 text-caption text-subtle">{entry.hint}</span>}
                   {entry.checked && <Check size={14} className="shrink-0 text-accent" />}
-                  {entry.shortcut && <span className="shrink-0 text-[11px] text-subtle">{entry.shortcut}</span>}
+                  {entry.shortcut && <span className="shrink-0 text-caption text-subtle">{entry.shortcut}</span>}
                 </button>
               );
             })}

@@ -24,25 +24,25 @@ function CodeBlock({ code, fence }: { code: string; fence: string | null }) {
   return (
     <div className="overflow-hidden rounded-xl border border-line bg-sunken">
       <div className="flex h-7 items-center justify-between border-b border-line pr-1 pl-3">
-        <span className="text-[11px] text-subtle">{label}</span>
+        <span className="text-caption text-subtle">{label}</span>
         <button
           type="button"
           onClick={copy}
           title={t("common.copy")}
-          className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] text-subtle transition-colors hover:bg-raised hover:text-fg"
+          className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-caption text-subtle transition-colors hover:bg-raised hover:text-fg"
         >
-          {copied ? <Check size={12} /> : <Copy size={12} />}
+          {copied ? <Check size={13} /> : <Copy size={13} />}
           {copied ? t("common.copied") : t("common.copy")}
         </button>
       </div>
       {highlighted ? (
         // highlight.js escapes the code; the markup only adds its own `hljs-*` spans.
         <pre
-          className="hljs overflow-x-auto px-3.5 py-3 font-mono text-[12.5px] leading-relaxed"
+          className="hljs overflow-x-auto px-3.5 py-3 font-mono text-body leading-relaxed"
           dangerouslySetInnerHTML={{ __html: highlighted.html }}
         />
       ) : (
-        <pre className="overflow-x-auto px-3.5 py-3 font-mono text-[12.5px] leading-relaxed">{text}</pre>
+        <pre className="overflow-x-auto px-3.5 py-3 font-mono text-body leading-relaxed">{text}</pre>
       )}
     </div>
   );
@@ -64,7 +64,7 @@ const components: Components = {
     return block ? (
       <CodeBlock code={block.code} fence={block.fence} />
     ) : (
-      <pre className="overflow-x-auto rounded-xl border border-line bg-sunken px-3.5 py-3 font-mono text-[12.5px]">
+      <pre className="overflow-x-auto rounded-xl border border-line bg-sunken px-3.5 py-3 font-mono text-body">
         {children}
       </pre>
     );

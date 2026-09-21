@@ -33,8 +33,8 @@ export function EmptyState() {
         <CephiMark size={56} />
       </motion.div>
       <div className="space-y-1.5">
-        <h1 className="text-[17px] font-medium">{t("emptyState.title")}</h1>
-        <p className="text-[13px] text-muted">
+        <h1 className="text-hero font-medium">{t("emptyState.title")}</h1>
+        <p className="text-body text-muted">
           {t("emptyState.toolsReady", { count: toolCount })}
           {hotkey && (
             <>
@@ -55,7 +55,7 @@ export function EmptyState() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.05 * i }}
               onClick={() => void send(suggestion)}
-              className="rounded-xl border border-line bg-raised px-3.5 py-2.5 text-left text-[13px] text-muted transition-colors hover:border-accent/40 hover:text-fg"
+              className="rounded-xl border border-line bg-raised px-3.5 py-2.5 text-left text-body text-muted transition-colors hover:border-accent/40 hover:text-fg"
             >
               {suggestion}
             </motion.button>
@@ -69,7 +69,7 @@ export function EmptyState() {
               key={chat.id}
               type="button"
               onClick={() => void openArchived(chat.id)}
-              className="flex w-full items-center gap-2 rounded-lg px-2 py-1 text-[12.5px] text-subtle transition-colors hover:bg-sunken hover:text-fg"
+              className="flex w-full items-center gap-2 rounded-lg px-2 py-1 text-body text-subtle transition-colors hover:bg-sunken hover:text-fg"
             >
               <History size={13} className="shrink-0" />
               <span className="truncate">{chat.title || t("history.untitled")}</span>
@@ -78,7 +78,7 @@ export function EmptyState() {
           <button
             type="button"
             onClick={() => setView("history")}
-            className="px-2 text-[12px] text-subtle underline-offset-2 hover:text-fg hover:underline"
+            className="px-2 text-hint text-subtle underline-offset-2 hover:text-fg hover:underline"
           >
             {t("history.showAll")} →
           </button>
@@ -90,7 +90,7 @@ export function EmptyState() {
 
 export function Kbd({ children }: { children: ReactNode }) {
   return (
-    <kbd className="rounded-md border border-line bg-raised px-1.5 py-0.5 font-sans text-[11px] text-muted">
+    <kbd className="rounded-md border border-line bg-raised px-1.5 py-0.5 font-sans text-caption text-muted">
       {children}
     </kbd>
   );

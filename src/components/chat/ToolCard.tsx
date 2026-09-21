@@ -46,7 +46,7 @@ export function ToolCard({ part }: { part: ToolPart }) {
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       className={clsx(
-        "overflow-hidden rounded-xl border bg-raised text-[13px]",
+        "overflow-hidden rounded-xl border bg-raised text-body",
         awaiting ? "border-warning/50" : "border-line",
       )}
     >
@@ -69,10 +69,10 @@ export function ToolCard({ part }: { part: ToolPart }) {
           {pageUrl && <Globe size={13} className="shrink-0 text-subtle" />}
           {translation && <Languages size={13} className="shrink-0 text-subtle" />}
           {part.durationMs != null && (
-            <span className="shrink-0 text-[11.5px] text-subtle">{formatDuration(part.durationMs)}</span>
+            <span className="shrink-0 text-hint text-subtle">{formatDuration(part.durationMs)}</span>
           )}
           <span title={t(`toolCard.status.${part.status}`)} className={clsx("shrink-0", status.className)}>
-            <StatusIcon size={15} className={clsx(status.spin && "animate-spin")} />
+            <StatusIcon size={14} className={clsx(status.spin && "animate-spin")} />
           </span>
         </button>
         <button
@@ -131,7 +131,7 @@ export function ToolCard({ part }: { part: ToolPart }) {
       {open && (
         <div className="space-y-2 border-t border-line px-3 py-2.5">
           <Detail label={t("toolCard.details.tool")}>
-            <span className="font-mono text-[12px]">{part.name}</span>
+            <span className="font-mono text-hint">{part.name}</span>
           </Detail>
           {hasArgs && (
             <Detail label={t("toolCard.details.arguments")}>
@@ -152,7 +152,7 @@ export function ToolCard({ part }: { part: ToolPart }) {
 function Detail({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="space-y-1">
-      <div className="text-[11px] font-medium tracking-wide text-subtle uppercase">{label}</div>
+      <div className="text-caption font-medium tracking-wide text-subtle uppercase">{label}</div>
       {children}
     </div>
   );
@@ -160,7 +160,7 @@ function Detail({ label, children }: { label: string; children: ReactNode }) {
 
 function CodeText({ children }: { children: string }) {
   return (
-    <pre className="max-h-48 overflow-auto rounded-lg bg-sunken px-2.5 py-2 font-mono text-[12px] leading-relaxed whitespace-pre-wrap select-text">
+    <pre className="max-h-48 overflow-auto rounded-lg bg-sunken px-2.5 py-2 font-mono text-hint leading-relaxed whitespace-pre-wrap select-text">
       {children}
     </pre>
   );

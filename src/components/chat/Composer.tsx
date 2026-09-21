@@ -138,8 +138,8 @@ export function Composer({ compact = false }: ComposerProps) {
           }}
           className={
             compact
-              ? "h-7 min-w-0 flex-1 resize-none overflow-hidden bg-transparent text-[16px] leading-7 text-fg outline-none placeholder:text-subtle"
-              : "max-h-40 min-h-7 flex-1 resize-none bg-transparent py-1 text-[14px] leading-6 text-fg outline-none placeholder:text-subtle"
+              ? "h-7 min-w-0 flex-1 resize-none overflow-hidden bg-transparent text-bar leading-7 text-fg outline-none placeholder:text-subtle"
+              : "max-h-40 min-h-7 flex-1 resize-none bg-transparent py-1 text-input leading-6 text-fg outline-none placeholder:text-subtle"
           }
         />
         {/* Dictation is the only extra button here; the screenshot lives in the ⋯ menu

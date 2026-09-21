@@ -20,7 +20,7 @@ export function VoiceError() {
     >
       <div className="flex items-start gap-2">
         <AlertTriangle size={13} className="mt-0.5 shrink-0 text-warning" />
-        <p className="min-w-0 flex-1 text-[12.5px] leading-snug text-muted select-text">{error}</p>
+        <p className="min-w-0 flex-1 text-body leading-snug text-muted select-text">{error}</p>
         <button
           type="button"
           onClick={dismiss}

@@ -29,10 +29,10 @@ export function ScreenshotChip() {
           className="h-14 w-24 shrink-0 rounded-lg border border-line object-cover object-top"
         />
         <div className="min-w-0 flex-1 space-y-1.5">
-          <p className="text-[12.5px] text-muted">{t("screenshot.ready")}</p>
+          <p className="text-body text-muted">{t("screenshot.ready")}</p>
           {blind ? (
-            <p className="flex items-start gap-1.5 text-[11.5px] leading-snug text-warning">
-              <AlertTriangle size={12} className="mt-0.5 shrink-0" />
+            <p className="flex items-start gap-1.5 text-hint leading-snug text-warning">
+              <AlertTriangle size={13} className="mt-0.5 shrink-0" />
               <span>{t("screenshot.noVision", { model: profile?.label })}</span>
             </p>
           ) : (
@@ -40,7 +40,7 @@ export function ScreenshotChip() {
               type="button"
               disabled={running}
               onClick={() => void send(t("screenshot.describePrompt"))}
-              className="flex items-center gap-1.5 rounded-lg border border-line px-2.5 py-1 text-[12.5px] text-muted select-none hover:bg-sunken hover:text-fg disabled:opacity-40"
+              className="flex items-center gap-1.5 rounded-lg border border-line px-2.5 py-1 text-body text-muted select-none hover:bg-sunken hover:text-fg disabled:opacity-40"
             >
               <Sparkles size={13} /> {t("screenshot.describe")}
             </button>

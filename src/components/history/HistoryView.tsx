@@ -47,7 +47,7 @@ export function HistoryView() {
           type="button"
           onClick={() => setView("chat")}
           title={t("keys.backTitle")}
-          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12.5px] text-muted transition-colors hover:bg-sunken hover:text-fg"
+          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-body text-muted transition-colors hover:bg-sunken hover:text-fg"
         >
           <ArrowLeft size={14} /> {t("keys.back")}
         </button>
@@ -59,22 +59,22 @@ export function HistoryView() {
             spellCheck={false}
             placeholder={t("history.search")}
             onChange={(e) => setQuery(e.target.value)}
-            className="h-8 w-full rounded-lg border border-line bg-sunken pr-2.5 pl-8 text-[12.5px] text-fg outline-none placeholder:text-subtle focus:border-accent/40"
+            className="h-8 w-full rounded-lg border border-line bg-sunken pr-2.5 pl-8 text-body text-fg outline-none placeholder:text-subtle focus:border-accent/40"
           />
         </div>
       </div>
 
       <div className="flex-1 space-y-2 overflow-y-auto px-4 pt-3 pb-5">
-        <h2 className="px-1 text-[15px] font-medium text-fg">{t("history.title")}</h2>
-        {error && <p className="px-1 text-[12px] text-danger select-text">{error}</p>}
-        {running && <p className="px-1 text-[12px] text-subtle">{t("history.busy")}</p>}
+        <h2 className="px-1 text-title font-medium text-fg">{t("history.title")}</h2>
+        {error && <p className="px-1 text-hint text-danger select-text">{error}</p>}
+        {running && <p className="px-1 text-hint text-subtle">{t("history.busy")}</p>}
         {chats?.length === 0 && (
-          <p className="rounded-xl border border-dashed border-line px-3 py-3 text-[12.5px] text-muted">
+          <p className="rounded-xl border border-dashed border-line px-3 py-3 text-body text-muted">
             {t("history.empty")}
           </p>
         )}
         {chats && chats.length > 0 && visible.length === 0 && (
-          <p className="px-1 text-[12.5px] text-muted">{t("history.noMatch")}</p>
+          <p className="px-1 text-body text-muted">{t("history.noMatch")}</p>
         )}
         {visible.length > 0 && (
           <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-raised">
@@ -123,8 +123,8 @@ function ChatRow({
         className="flex min-w-0 flex-1 items-center gap-2.5 py-2.5 pl-3 text-left disabled:opacity-50"
       >
         <MessageSquare size={14} className="shrink-0 text-subtle" />
-        <span className="min-w-0 flex-1 truncate text-[13px] text-fg">{chat.title || t("history.untitled")}</span>
-        <span className="shrink-0 text-[11.5px] text-subtle">{formatWhen(chat.savedAt, i18n.language)}</span>
+        <span className="min-w-0 flex-1 truncate text-body text-fg">{chat.title || t("history.untitled")}</span>
+        <span className="shrink-0 text-hint text-subtle">{formatWhen(chat.savedAt, i18n.language)}</span>
       </button>
       <button
         type="button"
@@ -132,7 +132,7 @@ function ChatRow({
         title={t("history.delete")}
         aria-label={t("history.delete")}
         className={clsx(
-          "mx-1.5 flex h-7 shrink-0 items-center gap-1 rounded-md px-1.5 text-[12px] transition-colors",
+          "mx-1.5 flex h-7 shrink-0 items-center gap-1 rounded-md px-1.5 text-hint transition-colors",
           confirmDelete
             ? "text-danger"
             : "text-subtle opacity-0 group-hover:opacity-100 hover:text-danger focus-visible:opacity-100",

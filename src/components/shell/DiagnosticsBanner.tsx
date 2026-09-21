@@ -16,7 +16,7 @@ export function DiagnosticsBanner() {
   if (diagnostics.length === 0) return null;
 
   return (
-    <div className="mx-3 mt-2 overflow-hidden rounded-xl border border-warning/40 bg-warning/10 text-[12.5px]">
+    <div className="mx-3 mt-2 overflow-hidden rounded-xl border border-warning/40 bg-warning/10 text-body">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -32,7 +32,7 @@ export function DiagnosticsBanner() {
         <div className="space-y-2 border-t border-warning/30 px-3 py-2.5">
           {diagnostics.map((d, i) => (
             <div key={i} className="select-text">
-              <div className="font-mono text-[11.5px] text-muted">{d.source}</div>
+              <div className="font-mono text-hint text-muted">{d.source}</div>
               <div className="text-fg">{d.message}</div>
             </div>
           ))}

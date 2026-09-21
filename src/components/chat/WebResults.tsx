@@ -33,7 +33,7 @@ export const WebResults = memo(function WebResults({ results }: { results: WebRe
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="mt-1 flex items-center gap-1 rounded-md px-1.5 py-1 text-[12px] text-subtle hover:text-fg"
+          className="mt-1 flex items-center gap-1 rounded-md px-1.5 py-1 text-hint text-subtle hover:text-fg"
         >
           <ChevronDown size={13} className={clsx("transition-transform", expanded && "rotate-180")} />
           {expanded ? t("webResults.less") : t("webResults.more", { count: hidden })}
@@ -57,8 +57,8 @@ function SourceCard({ result, number }: { result: WebResult; number: number }) {
       }}
       className="flex h-full flex-col gap-1 rounded-xl border border-line bg-raised px-2.5 py-2 transition-colors hover:bg-sunken"
     >
-      <span className="line-clamp-2 text-[12.5px] leading-snug text-fg">{result.title}</span>
-      <span className="mt-auto flex items-center gap-1.5 text-[11px] text-subtle">
+      <span className="line-clamp-2 text-body leading-snug text-fg">{result.title}</span>
+      <span className="mt-auto flex items-center gap-1.5 text-caption text-subtle">
         <Favicon host={host} />
         <span className="min-w-0 flex-1 truncate">{host}</span>
         <span className="shrink-0 tabular-nums">{number}</span>
@@ -72,7 +72,7 @@ function SourceCard({ result, number }: { result: WebResult; number: number }) {
  * from an icon service would tell that service every site your local search turned up.
  */
 function Favicon({ host }: { host: string }) {
-  if (!host) return <Globe size={12} className="shrink-0" />;
+  if (!host) return <Globe size={13} className="shrink-0" />;
   const name = host.replace(/^www\./, "");
   // Same host, same colour, every time.
   const hue = [...name].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) % 360, 7);

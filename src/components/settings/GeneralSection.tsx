@@ -132,7 +132,7 @@ export function GeneralSection() {
       <ServicesCard />
 
       <div className="flex items-center justify-between gap-3 px-1">
-        <p className="text-[11.5px] leading-snug text-subtle">{t("settings.general.moreInFile")}</p>
+        <p className="text-hint leading-snug text-subtle">{t("settings.general.moreInFile")}</p>
         <button
           type="button"
           onClick={() => void api.configOpenFolder()}

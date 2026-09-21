@@ -147,7 +147,7 @@ function AddressBar() {
             inputRef.current?.blur();
           }
         }}
-        className="min-w-0 flex-1 bg-transparent text-[12.5px] text-fg outline-none placeholder:text-subtle"
+        className="min-w-0 flex-1 bg-transparent text-body text-fg outline-none placeholder:text-subtle"
       />
       {loading && (
         <span className="absolute inset-x-0 bottom-0 h-0.5 overflow-hidden">
@@ -164,8 +164,8 @@ function EmptyPage() {
     <div className="grid h-full place-items-center p-6 text-center select-none">
       <div className="space-y-2">
         <Globe size={28} className="mx-auto text-subtle" />
-        <p className="text-[14px] text-fg">{t("web.emptyTitle")}</p>
-        <p className="text-[12.5px] text-subtle">{t("web.emptyHint")}</p>
+        <p className="text-input text-fg">{t("web.emptyTitle")}</p>
+        <p className="text-body text-subtle">{t("web.emptyHint")}</p>
       </div>
     </div>
   );

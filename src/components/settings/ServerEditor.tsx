@@ -92,7 +92,7 @@ export function ServerEditor({
       }}
     >
       <div className="flex items-center gap-2">
-        <h3 className="flex-1 text-[13.5px] font-medium text-fg">
+        <h3 className="flex-1 text-title font-medium text-fg">
           {initial ? t("settings.mcp.editTitle", { name: initial.name }) : t("settings.mcp.addTitle")}
         </h3>
         <button
@@ -106,7 +106,7 @@ export function ServerEditor({
 
       {snippetOpen && (
         <div className="space-y-1.5 rounded-lg bg-sunken p-2">
-          <p className="text-[11.5px] leading-snug text-subtle">{t("settings.mcp.snippetHint")}</p>
+          <p className="text-hint leading-snug text-subtle">{t("settings.mcp.snippetHint")}</p>
           <textarea
             value={snippet}
             autoFocus
@@ -117,10 +117,10 @@ export function ServerEditor({
               setSnippetError(false);
             }}
             placeholder={'{ "mcpServers": { "github": { "command": "npx", "args": [...] } } }'}
-            className="w-full resize-y rounded-md border border-line bg-raised px-2 py-1.5 font-mono text-[11.5px] text-fg outline-none placeholder:text-subtle focus:border-accent/40"
+            className="w-full resize-y rounded-md border border-line bg-raised px-2 py-1.5 font-mono text-hint text-fg outline-none placeholder:text-subtle focus:border-accent/40"
           />
           <div className="flex items-center justify-end gap-2">
-            {snippetError && <span className="flex-1 text-[12px] text-danger">{t("settings.mcp.snippetInvalid")}</span>}
+            {snippetError && <span className="flex-1 text-hint text-danger">{t("settings.mcp.snippetInvalid")}</span>}
             <button type="button" onClick={applySnippet} disabled={!snippet.trim()} className={primaryButtonClass}>
               {t("settings.mcp.snippetApply")}
             </button>
@@ -146,7 +146,7 @@ export function ServerEditor({
             type="button"
             onClick={() => patch({ kind })}
             className={clsx(
-              "rounded-md py-1 text-[12.5px] transition-colors",
+              "rounded-md py-1 text-body transition-colors",
               form.kind === kind ? "bg-raised text-fg shadow-sm" : "text-muted hover:text-fg",
             )}
           >
@@ -199,15 +199,15 @@ export function ServerEditor({
 
       <label className="flex items-center gap-3 rounded-lg bg-sunken px-2.5 py-2">
         <span className="min-w-0 flex-1">
-          <span className="block text-[12.5px] text-fg">{t("settings.mcp.confirm")}</span>
-          <span className="block text-[11.5px] leading-snug text-subtle">{t("settings.mcp.confirmHint")}</span>
+          <span className="block text-body text-fg">{t("settings.mcp.confirm")}</span>
+          <span className="block text-hint leading-snug text-subtle">{t("settings.mcp.confirmHint")}</span>
         </span>
         <Toggle label={t("settings.mcp.confirm")} checked={form.confirm} onChange={(confirm) => patch({ confirm })} />
       </label>
 
-      {error && <p className="text-[12px] leading-snug text-danger select-text">{error}</p>}
+      {error && <p className="text-hint leading-snug text-danger select-text">{error}</p>}
       {missing.length > 0 && (
-        <p className="text-[12px] text-warning">{t("settings.mcp.secretMissing", { names: missing.join(", ") })}</p>
+        <p className="text-hint text-warning">{t("settings.mcp.secretMissing", { names: missing.join(", ") })}</p>
       )}
 
       <div className="flex justify-end gap-2">
@@ -235,12 +235,12 @@ function Field({
 }) {
   return (
     <label className="block space-y-1">
-      <span className="block text-[12px] text-muted">{label}</span>
+      <span className="block text-hint text-muted">{label}</span>
       {children}
       {error ? (
-        <span className="block text-[11.5px] text-danger">{error}</span>
+        <span className="block text-hint text-danger">{error}</span>
       ) : (
-        hint && <span className="block text-[11.5px] leading-snug text-subtle">{hint}</span>
+        hint && <span className="block text-hint leading-snug text-subtle">{hint}</span>
       )}
     </label>
   );
@@ -268,13 +268,13 @@ function PairList({
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between">
-        <span className="text-[12px] text-muted">{label}</span>
+        <span className="text-hint text-muted">{label}</span>
         <button
           type="button"
           onClick={() => onChange([...rows, emptyRow()])}
           className={clsx(textButtonClass, "flex items-center gap-1")}
         >
-          <Plus size={12} /> {t("settings.mcp.addPair")}
+          <Plus size={13} /> {t("settings.mcp.addPair")}
         </button>
       </div>
       {rows.map((row, index) => (
@@ -286,7 +286,7 @@ function PairList({
             aria-label={t("settings.mcp.pairName")}
             // Credentials go to the vault by default.
             onChange={(e) => update(index, { key: e.target.value, secret: row.secret || SENSITIVE_KEY.test(e.target.value) })}
-            className={clsx(inputClass, "w-[38%] shrink-0 font-mono text-[12px]")}
+            className={clsx(inputClass, "w-[38%] shrink-0 font-mono text-hint")}
           />
           <input
             value={row.value}
@@ -296,7 +296,7 @@ function PairList({
             placeholder={row.stored ? t("settings.mcp.secretKept") : t("settings.mcp.pairValue")}
             aria-label={t("settings.mcp.pairValue")}
             onChange={(e) => update(index, { value: e.target.value })}
-            className={clsx(inputClass, "min-w-0 flex-1 font-mono text-[12px] placeholder:font-sans")}
+            className={clsx(inputClass, "min-w-0 flex-1 font-mono text-hint placeholder:font-sans")}
           />
           {row.secret && row.value && (
             <button
@@ -335,7 +335,7 @@ function PairList({
           </button>
         </div>
       ))}
-      <span className="block text-[11.5px] leading-snug text-subtle">{hint}</span>
+      <span className="block text-hint leading-snug text-subtle">{hint}</span>
     </div>
   );
 }

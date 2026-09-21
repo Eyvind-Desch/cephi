@@ -22,7 +22,7 @@ export function SettingsView() {
           type="button"
           onClick={() => setView("chat")}
           title={t("keys.backTitle")}
-          className="-ml-1 flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[12.5px] text-muted transition-colors hover:bg-sunken hover:text-fg"
+          className="-ml-1 flex items-center gap-1.5 rounded-md px-1.5 py-1 text-body text-muted transition-colors hover:bg-sunken hover:text-fg"
         >
           <ArrowLeft size={14} /> {t("keys.back")}
         </button>
@@ -36,7 +36,7 @@ export function SettingsView() {
               aria-selected={tab === id}
               onClick={() => openSettings(id)}
               className={clsx(
-                "rounded-md py-1 text-[12.5px] transition-colors",
+                "rounded-md py-1 text-body transition-colors",
                 tab === id ? "bg-raised text-fg shadow-sm" : "text-muted hover:text-fg",
               )}
             >

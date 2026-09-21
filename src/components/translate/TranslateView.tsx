@@ -76,7 +76,7 @@ export function TranslateView() {
             aria-checked={direction === d.id}
             onClick={() => useTranslate.setState({ direction: d.id })}
             className={clsx(
-              "h-7 rounded-md px-2.5 text-[12.5px] transition-colors",
+              "h-7 rounded-md px-2.5 text-body transition-colors",
               direction === d.id ? "bg-raised text-fg shadow-sm shadow-black/10" : "text-muted hover:text-fg",
             )}
           >
@@ -93,7 +93,7 @@ export function TranslateView() {
           placeholder={t("translate.placeholder")}
           spellCheck={false}
           rows={4}
-          className="block max-h-56 min-h-24 w-full resize-none bg-transparent px-3.5 py-3 pr-10 text-[15px] leading-relaxed text-fg outline-none placeholder:text-subtle"
+          className="block max-h-56 min-h-24 w-full resize-none bg-transparent px-3.5 py-3 pr-10 text-title leading-relaxed text-fg outline-none placeholder:text-subtle"
         />
         {text && (
           <button
@@ -112,10 +112,10 @@ export function TranslateView() {
 
       {(result || loading || error) && (
         <div className="selectable relative rounded-2xl border border-line bg-sunken px-3.5 py-3">
-          {loading && <Loader2 size={12} className="absolute top-3.5 right-3.5 animate-spin text-subtle" />}
+          {loading && <Loader2 size={13} className="absolute top-3.5 right-3.5 animate-spin text-subtle" />}
           {error ? (
             <div className="space-y-2">
-              <p className="text-[13px] leading-relaxed text-danger">{error}</p>
+              <p className="text-body leading-relaxed text-danger">{error}</p>
               <ServiceHint service="translate" onStarted={() => useTranslate.getState().retry()} />
             </div>
           ) : (

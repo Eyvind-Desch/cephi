@@ -22,7 +22,7 @@ export function PageChip() {
       className="mb-2 flex items-center gap-2 rounded-xl border border-line bg-raised py-1.5 pr-1.5 pl-3"
     >
       <Globe size={13} className="shrink-0 text-subtle" />
-      <span className="min-w-0 flex-1 truncate text-[12.5px] text-muted" title={page.url}>
+      <span className="min-w-0 flex-1 truncate text-body text-muted" title={page.url}>
         {page.title || host}
         {page.title && <span className="text-subtle"> · {host}</span>}
       </span>
@@ -33,7 +33,7 @@ export function PageChip() {
           setPageContext(null);
           void send(t("pageChip.summarizePrompt", { url: page.url, title: page.title || host }));
         }}
-        className="flex shrink-0 items-center gap-1.5 rounded-lg border border-line px-2.5 py-1 text-[12.5px] text-muted select-none hover:bg-sunken hover:text-fg disabled:opacity-40"
+        className="flex shrink-0 items-center gap-1.5 rounded-lg border border-line px-2.5 py-1 text-body text-muted select-none hover:bg-sunken hover:text-fg disabled:opacity-40"
       >
         <FileText size={13} /> {t("pageChip.summarize")}
       </button>

@@ -38,13 +38,13 @@ export function ServiceStartButton({ service, onStarted }: ServiceStartButtonPro
         type="button"
         disabled={starting}
         onClick={() => void start()}
-        className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-[12.5px] font-medium text-accent-fg select-none hover:brightness-110 disabled:opacity-60"
+        className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-body font-medium text-accent-fg select-none hover:brightness-110 disabled:opacity-60"
       >
         {starting ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />}
         {starting ? t("services.starting") : t("services.start")}
       </button>
-      {starting && <p className="text-[11.5px] text-subtle">{t("services.startingHint")}</p>}
-      {error && <p className="text-[12px] leading-snug text-danger">{error}</p>}
+      {starting && <p className="text-hint text-subtle">{t("services.startingHint")}</p>}
+      {error && <p className="text-hint leading-snug text-danger">{error}</p>}
     </div>
   );
 }

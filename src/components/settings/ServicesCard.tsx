@@ -31,8 +31,8 @@ export function ServicesCard() {
             className={clsx("size-2 shrink-0 rounded-full", service.running ? "bg-success" : "border border-subtle")}
           />
           <div className="min-w-0 flex-1">
-            <div className="text-[13px] text-fg">{service.title}</div>
-            <div className="text-[11.5px] text-subtle">
+            <div className="text-body text-fg">{service.title}</div>
+            <div className="text-hint text-subtle">
               {t(service.running ? "settings.services.running" : "settings.services.stopped")}
             </div>
           </div>
@@ -40,7 +40,7 @@ export function ServicesCard() {
         </div>
       ))}
       <div className="flex items-center justify-between gap-3 px-3 py-2">
-        <p className="text-[11.5px] leading-snug text-subtle">{t("settings.services.hint")}</p>
+        <p className="text-hint leading-snug text-subtle">{t("settings.services.hint")}</p>
         <button
           type="button"
           disabled={checking}

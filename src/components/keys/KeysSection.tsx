@@ -19,15 +19,15 @@ export function KeysSection() {
 
   return (
     <div className="space-y-5">
-      <p className="px-1 text-[12px] text-subtle">{t("keys.storageNote")}</p>
-      {groups?.length === 0 && <p className="px-1 text-[12.5px] text-muted">{t("keys.empty")}</p>}
+      <p className="px-1 text-hint text-subtle">{t("keys.storageNote")}</p>
+      {groups?.length === 0 && <p className="px-1 text-body text-muted">{t("keys.empty")}</p>}
 
       {SECTIONS.map((section) => {
         const items = groups?.filter((g) => g.category === section) ?? [];
         if (items.length === 0) return null;
         return (
           <section key={section} className="space-y-1.5">
-            <h3 className="px-1 text-[10.5px] font-medium tracking-wider text-subtle uppercase">
+            <h3 className="px-1 text-caption font-medium tracking-wider text-subtle uppercase">
               {t(`keys.sections.${section}`)}
             </h3>
             <div className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-raised">

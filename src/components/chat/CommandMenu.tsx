@@ -30,7 +30,7 @@ export function CommandMenu({ items, active, onHover }: CommandMenuProps) {
     >
       <div className="max-h-64 overflow-y-auto">
         {items.length === 0 ? (
-          <p className="px-2.5 py-2 text-[12.5px] text-subtle">{t("commands.unknown")}</p>
+          <p className="px-2.5 py-2 text-body text-subtle">{t("commands.unknown")}</p>
         ) : (
           items.map((item, index) => (
             <button
@@ -48,16 +48,16 @@ export function CommandMenu({ items, active, onHover }: CommandMenuProps) {
                 index === active ? "bg-sunken" : "",
               )}
             >
-              <span className="shrink-0 font-mono text-[12.5px] text-fg">{item.title}</span>
-              {item.hint && <span className="shrink-0 text-[12px] text-subtle">{item.hint}</span>}
+              <span className="shrink-0 font-mono text-body text-fg">{item.title}</span>
+              {item.hint && <span className="shrink-0 text-hint text-subtle">{item.hint}</span>}
               {item.description && (
-                <span className="min-w-0 flex-1 truncate text-right text-[12px] text-muted">{item.description}</span>
+                <span className="min-w-0 flex-1 truncate text-right text-hint text-muted">{item.description}</span>
               )}
             </button>
           ))
       )}
       </div>
-      <p className="border-t border-line px-2.5 pt-1.5 pb-1 text-[11px] text-subtle">{t("commands.keysHint")}</p>
+      <p className="border-t border-line px-2.5 pt-1.5 pb-1 text-caption text-subtle">{t("commands.keysHint")}</p>
     </div>
   );
 }

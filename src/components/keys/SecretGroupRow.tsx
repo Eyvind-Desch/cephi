@@ -47,10 +47,10 @@ export function SecretGroupRow({ group, open, onToggle, onChange }: SecretGroupR
         className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-sunken"
       >
         <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-sunken text-muted">
-          <BrandIcon name={group.icon} size={15} />
+          <BrandIcon name={group.icon} size={14} />
         </span>
-        <span className="min-w-0 flex-1 truncate text-[13px] text-fg">{group.title}</span>
-        <span className={clsx("flex shrink-0 items-center gap-1.5 text-[12px]", complete ? "text-muted" : "text-subtle")}>
+        <span className="min-w-0 flex-1 truncate text-body text-fg">{group.title}</span>
+        <span className={clsx("flex shrink-0 items-center gap-1.5 text-hint", complete ? "text-muted" : "text-subtle")}>
           <span
             className={clsx(
               "size-1.5 rounded-full",
@@ -69,7 +69,7 @@ export function SecretGroupRow({ group, open, onToggle, onChange }: SecretGroupR
       {/* Expands instantly: faster to use than an animated accordion. */}
       {open && (
             <div className="space-y-3 pt-0.5 pr-3 pb-3.5 pl-[52px]">
-              <p className="text-[12px] leading-relaxed text-subtle">{group.description}</p>
+              <p className="text-hint leading-relaxed text-subtle">{group.description}</p>
 
               {Guide && <Guide />}
 
@@ -80,7 +80,7 @@ export function SecretGroupRow({ group, open, onToggle, onChange }: SecretGroupR
               </div>
 
               {(group.testable || group.docsUrl) && (
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px]">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-hint">
                   {group.testable && (
                     <button
                       type="button"
@@ -88,7 +88,7 @@ export function SecretGroupRow({ group, open, onToggle, onChange }: SecretGroupR
                       onClick={() => void runTest()}
                       className="flex items-center gap-1 text-muted transition-colors hover:text-fg disabled:pointer-events-none disabled:opacity-40"
                     >
-                      {test.status === "testing" && <Loader2 size={12} className="animate-spin" />}
+                      {test.status === "testing" && <Loader2 size={13} className="animate-spin" />}
                       {t("keys.group.testConnection")}
                     </button>
                   )}
@@ -98,7 +98,7 @@ export function SecretGroupRow({ group, open, onToggle, onChange }: SecretGroupR
                       onClick={() => void api.openExternal(group.docsUrl!)}
                       className="flex items-center gap-0.5 text-muted transition-colors hover:text-fg"
                     >
-                      {t("keys.group.getKey")} <ArrowUpRight size={12} strokeWidth={1.75} />
+                      {t("keys.group.getKey")} <ArrowUpRight size={13} strokeWidth={1.75} />
                     </button>
                   )}
                   {(test.status === "ok" || test.status === "error") && (

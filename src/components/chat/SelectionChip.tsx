@@ -28,7 +28,7 @@ export function SelectionChip() {
     >
       <div className="flex items-start gap-2">
         <Quote size={13} className="mt-1 shrink-0 text-subtle" />
-        <p className="line-clamp-3 min-w-0 flex-1 text-[12.5px] leading-snug text-muted select-text">{selection}</p>
+        <p className="line-clamp-3 min-w-0 flex-1 text-body leading-snug text-muted select-text">{selection}</p>
         <button
           type="button"
           onClick={() => setSelection(null)}
@@ -73,7 +73,7 @@ function Action({ icon: Icon, label, disabled, onClick }: ActionProps) {
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className="flex items-center gap-1.5 rounded-lg border border-line px-2.5 py-1 text-[12.5px] text-muted select-none hover:bg-sunken hover:text-fg disabled:opacity-40"
+      className="flex items-center gap-1.5 rounded-lg border border-line px-2.5 py-1 text-body text-muted select-none hover:bg-sunken hover:text-fg disabled:opacity-40"
     >
       <Icon size={13} /> {label}
     </button>

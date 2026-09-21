@@ -46,7 +46,7 @@ export function CompactBar() {
         />
       )}
       {profile && !flash && (
-        <span title={profile.model} className="rounded-md bg-sunken px-2 py-1 text-[11.5px] font-medium text-muted">
+        <span title={profile.model} className="rounded-md bg-sunken px-2 py-1 text-hint font-medium text-muted">
           {profile.label}
         </span>
       )}
@@ -62,7 +62,7 @@ function FlashRow({ flash }: { flash: Flash }) {
     <motion.div
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex min-w-0 flex-1 items-center gap-2 text-[15px]"
+      className="flex min-w-0 flex-1 items-center gap-2 text-title"
       role="status"
     >
       {!flash.sticky && <Icon size={18} className={clsx("shrink-0", flash.ok ? "text-success" : "text-danger")} />}
@@ -86,7 +86,7 @@ function VolumeRow({ percent, muted }: { percent: number; muted: boolean }) {
       role="status"
       aria-label={muted ? t("volume.muted", { percent }) : t("volume.level", { percent })}
     >
-      <Icon size={19} className={clsx("shrink-0", muted ? "text-subtle" : "text-fg")} />
+      <Icon size={18} className={clsx("shrink-0", muted ? "text-subtle" : "text-fg")} />
       <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-sunken ring-1 ring-line ring-inset">
         <motion.div
           initial={false}
@@ -95,7 +95,7 @@ function VolumeRow({ percent, muted }: { percent: number; muted: boolean }) {
           className={clsx("h-full rounded-full", muted ? "bg-subtle" : "bg-accent")}
         />
       </div>
-      <span className="w-10 shrink-0 text-right text-[14px] tabular-nums text-muted">{percent}</span>
+      <span className="w-10 shrink-0 text-right text-input tabular-nums text-muted">{percent}</span>
     </motion.div>
   );
 }

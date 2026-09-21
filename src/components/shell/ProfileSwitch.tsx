@@ -63,7 +63,7 @@ export function ProfileSwitch() {
           aria-controls={id}
           title={`${t("profile.label")}: ${current.providerLabel} · ${current.model}`}
           className={clsx(
-            "flex h-7 items-center gap-1.5 rounded-lg pr-1.5 pl-2 text-[12.5px] transition-colors hover:bg-sunken hover:text-fg",
+            "flex h-7 items-center gap-1.5 rounded-lg pr-1.5 pl-2 text-body transition-colors hover:bg-sunken hover:text-fg",
             open ? "bg-sunken text-fg" : "text-muted",
           )}
         >

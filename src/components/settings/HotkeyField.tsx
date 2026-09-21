@@ -62,7 +62,7 @@ export function HotkeyField({
         onBlur={() => setRecording(false)}
         onKeyDown={onKeyDown}
         className={clsx(
-          "h-8 min-w-32 rounded-lg border px-2.5 font-mono text-[12px] transition-colors outline-none",
+          "h-8 min-w-32 rounded-lg border px-2.5 font-mono text-hint transition-colors outline-none",
           recording ? "border-accent/60 bg-accent-soft text-accent" : "border-line bg-sunken text-fg hover:border-accent/30",
         )}
       >

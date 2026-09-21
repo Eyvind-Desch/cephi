@@ -22,14 +22,14 @@ export function ToolsView() {
           type="button"
           onClick={() => setView("chat")}
           title={t("keys.backTitle")}
-          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12.5px] text-muted transition-colors hover:bg-sunken hover:text-fg"
+          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-body text-muted transition-colors hover:bg-sunken hover:text-fg"
         >
           <ArrowLeft size={14} /> {t("keys.back")}
         </button>
         <button
           type="button"
           onClick={() => void api.configOpenFolder()}
-          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[12.5px] text-muted transition-colors hover:bg-sunken hover:text-fg"
+          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-body text-muted transition-colors hover:bg-sunken hover:text-fg"
         >
           <FolderCog size={14} /> {t("tools.openFolder")}
         </button>
@@ -38,8 +38,8 @@ export function ToolsView() {
       <div className="selectable flex-1 space-y-5 overflow-y-auto px-4 pt-3 pb-5">
         <section className="space-y-2">
           <div className="space-y-0.5 px-1">
-            <h2 className="text-[15px] font-medium text-fg">{t("tools.title", { count: own.length })}</h2>
-            <p className="text-[12px] text-subtle">{t("tools.hint")}</p>
+            <h2 className="text-title font-medium text-fg">{t("tools.title", { count: own.length })}</h2>
+            <p className="text-hint text-subtle">{t("tools.hint")}</p>
           </div>
           <ul className="space-y-1.5">
             {own.map((tool) => (
@@ -50,13 +50,13 @@ export function ToolsView() {
 
         <section className="space-y-2">
           <div className="space-y-0.5 px-1">
-            <h2 className="flex items-center gap-1.5 text-[15px] font-medium text-fg">
-              <Plug size={15} /> {t("tools.mcpTitle")}
+            <h2 className="flex items-center gap-1.5 text-title font-medium text-fg">
+              <Plug size={14} /> {t("tools.mcpTitle")}
             </h2>
-            <p className="text-[12px] text-subtle">{t("tools.mcpHint")}</p>
+            <p className="text-hint text-subtle">{t("tools.mcpHint")}</p>
           </div>
           {servers.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-line px-3 py-3 text-[12.5px] text-muted">
+            <p className="rounded-xl border border-dashed border-line px-3 py-3 text-body text-muted">
               {t("tools.mcpEmpty")}
             </p>
           ) : (
@@ -85,15 +85,15 @@ function ServerBlock({ server, tools }: { server: McpServerStatus; tools: ToolIn
   const { t } = useTranslation();
   return (
     <div className="space-y-1.5">
-      <div className="flex items-center gap-2 px-1 text-[13px]">
+      <div className="flex items-center gap-2 px-1 text-body">
         <span className={clsx("size-2 shrink-0 rounded-full", STATE_STYLE[server.state])} />
         <span className="font-medium text-fg">{server.name}</span>
-        <span className="text-[12px] text-subtle">
+        <span className="text-hint text-subtle">
           {t(`tools.serverState.${server.state}`)}
           {server.state === "running" && ` · ${t("tools.title", { count: server.tools })}`}
         </span>
       </div>
-      {server.error && <p className="px-1 text-[12px] leading-snug text-danger">{server.error}</p>}
+      {server.error && <p className="px-1 text-hint leading-snug text-danger">{server.error}</p>}
       <ul className="space-y-1.5">
         {tools.map((tool) => (
           <ToolRow key={tool.name} tool={tool} />
@@ -110,29 +110,29 @@ function ToolRow({ tool }: { tool: ToolInfo }) {
   return (
     <li className="rounded-xl border border-line bg-raised px-3 py-2">
       <div className="flex items-center gap-2">
-        <span className="min-w-0 flex-1 truncate text-[13px] text-fg">{tool.title}</span>
+        <span className="min-w-0 flex-1 truncate text-body text-fg">{tool.title}</span>
         <span
           title={confirm ? t("tools.confirm") : t("tools.auto")}
           className={clsx("shrink-0", confirm ? "text-warning" : "text-subtle")}
         >
           <ShieldCheck size={13} />
         </span>
-        <span className="shrink-0 font-mono text-[11px] text-subtle">{tool.name}</span>
+        <span className="shrink-0 font-mono text-caption text-subtle">{tool.name}</span>
       </div>
-      <p className="mt-0.5 line-clamp-2 text-[12px] leading-snug text-muted" title={tool.description}>
+      <p className="mt-0.5 line-clamp-2 text-hint leading-snug text-muted" title={tool.description}>
         {tool.description}
       </p>
       {tool.triggers.length > 0 && (
         <div className="mt-1.5 flex flex-wrap items-center gap-1">
-          <Zap size={11} className="shrink-0 text-accent" />
+          <Zap size={13} className="shrink-0 text-accent" />
           {tool.triggers.map((trigger) => (
-            <code key={trigger} className="rounded bg-sunken px-1.5 py-0.5 font-mono text-[11px] text-muted">
+            <code key={trigger} className="rounded bg-sunken px-1.5 py-0.5 font-mono text-caption text-muted">
               {trigger}
             </code>
           ))}
         </div>
       )}
-      {tool.kind !== "mcp" && <p className="mt-1 truncate text-[11px] text-subtle">{tool.source}</p>}
+      {tool.kind !== "mcp" && <p className="mt-1 truncate text-caption text-subtle">{tool.source}</p>}
     </li>
   );
 }

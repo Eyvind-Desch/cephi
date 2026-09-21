@@ -59,7 +59,7 @@ export const MessageView = memo(function MessageView({ message, isLast }: { mess
       {waitingForModel && <TypingIndicator />}
 
       {message.notice && (
-        <p className="flex items-start gap-1.5 text-[12px] leading-snug text-subtle">
+        <p className="flex items-start gap-1.5 text-hint leading-snug text-subtle">
           <Info size={13} className="mt-px shrink-0" /> <span>{message.notice}</span>
         </p>
       )}
@@ -68,21 +68,21 @@ export const MessageView = memo(function MessageView({ message, isLast }: { mess
         <button
           type="button"
           onClick={() => void summarize(message.id)}
-          className="flex items-center gap-1.5 rounded-lg border border-line bg-raised px-2.5 py-1.5 text-[12.5px] text-muted select-none hover:bg-sunken hover:text-fg"
+          className="flex items-center gap-1.5 rounded-lg border border-line bg-raised px-2.5 py-1.5 text-body text-muted select-none hover:bg-sunken hover:text-fg"
         >
           <Sparkles size={13} /> {t("webResults.summarize")}
         </button>
       )}
 
       {message.status === "cancelled" && (
-        <p className="flex items-center gap-1.5 text-[12px] text-subtle select-none">
+        <p className="flex items-center gap-1.5 text-hint text-subtle select-none">
           <CircleSlash size={13} /> {t("chat.cancelled")}
         </p>
       )}
 
       {message.status === "error" && (
-        <div className="flex gap-2 rounded-xl border border-danger/30 bg-danger/10 px-3 py-2 text-[13px] text-danger">
-          <AlertCircle size={15} className="mt-0.5 shrink-0" />
+        <div className="flex gap-2 rounded-xl border border-danger/30 bg-danger/10 px-3 py-2 text-body text-danger">
+          <AlertCircle size={14} className="mt-0.5 shrink-0" />
           <span>{message.error}</span>
         </div>
       )}
@@ -110,7 +110,7 @@ function CopyButton({ text }: { text: string }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 1500);
       }}
-      className="-mt-1 flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[12px] text-subtle opacity-0 transition-opacity select-none group-hover:opacity-100 hover:text-fg focus-visible:opacity-100"
+      className="-mt-1 flex items-center gap-1.5 rounded-md px-1.5 py-1 text-hint text-subtle opacity-0 transition-opacity select-none group-hover:opacity-100 hover:text-fg focus-visible:opacity-100"
     >
       {copied ? <Check size={13} className="text-success" /> : <Copy size={13} />}
       {copied ? t("common.copied") : t("common.copy")}

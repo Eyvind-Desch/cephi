@@ -34,7 +34,7 @@ export function ViewTabs() {
               selected ? "bg-raised text-fg shadow-sm shadow-black/10" : "text-subtle hover:text-fg",
             )}
           >
-            <Icon size={15} />
+            <Icon size={14} />
           </button>
         );
       })}

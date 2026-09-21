@@ -4,19 +4,19 @@ import type { ReactNode } from "react";
 /** Shared building blocks of the settings page. */
 
 export const inputClass =
-  "h-8 w-full rounded-lg border border-line bg-sunken px-2.5 text-[12.5px] text-fg outline-none transition-colors placeholder:text-subtle focus:border-accent/40";
+  "h-8 w-full rounded-lg border border-line bg-sunken px-2.5 text-body text-fg outline-none transition-colors placeholder:text-subtle focus:border-accent/40";
 
 export const textButtonClass =
-  "rounded-md px-2 py-1 text-[12px] text-muted transition-colors hover:bg-sunken hover:text-fg disabled:opacity-40";
+  "rounded-md px-2 py-1 text-hint text-muted transition-colors hover:bg-sunken hover:text-fg disabled:opacity-40";
 
 export const primaryButtonClass =
-  "rounded-lg bg-accent px-3 py-1.5 text-[12.5px] font-medium text-accent-fg transition hover:brightness-110 disabled:opacity-50";
+  "rounded-lg bg-accent px-3 py-1.5 text-body font-medium text-accent-fg transition hover:brightness-110 disabled:opacity-50";
 
 export function Card({ title, children }: { title?: string; children: ReactNode }) {
   return (
     <section className="space-y-1.5">
       {title && (
-        <h3 className="px-1 text-[10.5px] font-medium tracking-wider text-subtle uppercase">{title}</h3>
+        <h3 className="px-1 text-caption font-medium tracking-wider text-subtle uppercase">{title}</h3>
       )}
       <div className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-raised">{children}</div>
     </section>
@@ -39,12 +39,12 @@ export function Row({
     <div className="px-3 py-2">
       <div className="flex items-center gap-3">
         <div className="min-w-0 flex-1">
-          <div className="text-[13px] text-fg">{label}</div>
-          {hint && <div className="mt-0.5 text-[11px] leading-snug text-subtle">{hint}</div>}
+          <div className="text-body text-fg">{label}</div>
+          {hint && <div className="mt-0.5 text-caption leading-snug text-subtle">{hint}</div>}
         </div>
         <div className="shrink-0">{children}</div>
       </div>
-      {error && <p className="mt-1 text-[12px] leading-snug text-danger select-text">{error}</p>}
+      {error && <p className="mt-1 text-hint leading-snug text-danger select-text">{error}</p>}
     </div>
   );
 }
@@ -100,7 +100,7 @@ export function Select<T extends string>({
       value={value}
       aria-label={label}
       onChange={(e) => onChange(e.target.value as T)}
-      className="h-8 max-w-44 rounded-lg border border-line bg-sunken px-2 text-[12.5px] text-fg outline-none focus:border-accent/40"
+      className="h-8 max-w-44 rounded-lg border border-line bg-sunken px-2 text-body text-fg outline-none focus:border-accent/40"
     >
       {options.map((option) => (
         <option key={option.value} value={option.value}>

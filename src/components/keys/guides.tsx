@@ -29,7 +29,7 @@ function SpotifyGuide() {
 
 function Guide({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <details className="group text-[12px] leading-relaxed">
+    <details className="group text-hint leading-relaxed">
       <summary className="cursor-pointer text-muted select-none marker:text-subtle hover:text-fg">{title}</summary>
       <ol className="mt-1.5 list-decimal space-y-1 pl-4 text-subtle [&_b]:font-medium [&_b]:text-muted">
         {children}
@@ -44,7 +44,7 @@ function CopyValue({ value }: { value: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <span className="inline-flex items-center gap-1 rounded-md border border-line bg-raised py-px pr-0.5 pl-1.5 align-middle">
-      <code className="font-mono text-[11.5px] text-fg">{value}</code>
+      <code className="font-mono text-hint text-fg">{value}</code>
       <button
         type="button"
         title={t("common.copy")}
@@ -55,7 +55,7 @@ function CopyValue({ value }: { value: string }) {
         }}
         className="grid size-5 place-items-center rounded text-subtle hover:bg-sunken hover:text-fg"
       >
-        {copied ? <Check size={12} className="text-success" /> : <Copy size={12} />}
+        {copied ? <Check size={13} className="text-success" /> : <Copy size={13} />}
       </button>
     </span>
   );

@@ -72,7 +72,7 @@ export function Header() {
   return (
     <header className="flex items-center gap-1.5 border-b border-line py-2 pr-2 pl-3">
       <CephiMark size={22} active={running} />
-      <span className="mr-1.5 text-[13.5px] font-medium tracking-tight">Cephi</span>
+      <span className="mr-1.5 text-title font-medium tracking-tight">Cephi</span>
       {pinned && (
         <span title={t("header.pinned")} className="text-accent">
           <Pin size={13} className="fill-current" />

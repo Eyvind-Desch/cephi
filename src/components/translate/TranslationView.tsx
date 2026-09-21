@@ -15,19 +15,19 @@ export function TranslationView({ translation, dimmed }: { translation: Translat
 
   return (
     <div className={clsx("transition-opacity", dimmed && "opacity-60")}>
-      <div className="mb-1 flex items-center gap-1.5 text-[11.5px] text-subtle select-none">
-        {languageName(translation.from)} <ArrowRight size={11} /> {languageName(translation.to)}
+      <div className="mb-1 flex items-center gap-1.5 text-hint text-subtle select-none">
+        {languageName(translation.from)} <ArrowRight size={13} /> {languageName(translation.to)}
       </div>
 
       {failed ? (
         <div className="space-y-2">
-          <p className="text-[13px] text-muted">{t("translate.notFound", { text: translation.source })}</p>
+          <p className="text-body text-muted">{t("translate.notFound", { text: translation.source })}</p>
           <AskAiButton translation={translation} />
         </div>
       ) : (
         <>
           <div className="flex items-start gap-2">
-            <p className="min-w-0 flex-1 text-[15px] leading-relaxed whitespace-pre-wrap text-fg">{translation.text}</p>
+            <p className="min-w-0 flex-1 text-title leading-relaxed whitespace-pre-wrap text-fg">{translation.text}</p>
             <CopyButton text={translation.text} />
           </div>
           {translation.alternatives.length > 0 && <Alternatives items={translation.alternatives} />}
@@ -52,7 +52,7 @@ function AskAiButton({ translation }: { translation: Translation }) {
         setView("chat");
         void send(t("translate.aiPrompt", { text: translation.source, language: languageName(translation.to) }));
       }}
-      className="flex items-center gap-1.5 rounded-lg border border-line bg-raised px-2.5 py-1.5 text-[12.5px] text-muted select-none hover:bg-sunken hover:text-fg disabled:opacity-40"
+      className="flex items-center gap-1.5 rounded-lg border border-line bg-raised px-2.5 py-1.5 text-body text-muted select-none hover:bg-sunken hover:text-fg disabled:opacity-40"
     >
       <Sparkles size={13} /> {t("translate.askAi")}
     </button>
@@ -63,7 +63,7 @@ function Alternatives({ items }: { items: string[] }) {
   const { t } = useTranslation();
   return (
     <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-      <span className="text-[11.5px] text-subtle select-none">{t("translate.alternatives")}</span>
+      <span className="text-hint text-subtle select-none">{t("translate.alternatives")}</span>
       {items.map((item) => (
         <CopyChip key={item} text={item} />
       ))}
@@ -83,9 +83,9 @@ function CopyChip({ text }: { text: string }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 1200);
       }}
-      className="inline-flex items-center gap-1 rounded-md border border-line bg-raised px-2 py-0.5 text-[12.5px] text-muted hover:text-fg"
+      className="inline-flex items-center gap-1 rounded-md border border-line bg-raised px-2 py-0.5 text-body text-muted hover:text-fg"
     >
-      {copied && <Check size={12} className="text-success" />}
+      {copied && <Check size={13} className="text-success" />}
       {text}
     </button>
   );

@@ -33,7 +33,7 @@ export function McpSection() {
 
   return (
     <div className="space-y-4">
-      <p className="px-1 text-[12px] leading-snug text-subtle">{t("settings.mcp.intro")}</p>
+      <p className="px-1 text-hint leading-snug text-subtle">{t("settings.mcp.intro")}</p>
 
       {editing === "" ? (
         <ServerEditor initial={null} onDone={() => setEditing(null)} />
@@ -41,7 +41,7 @@ export function McpSection() {
         <button
           type="button"
           onClick={() => setEditing("")}
-          className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-line py-2.5 text-[12.5px] text-muted transition-colors hover:border-accent/40 hover:text-fg"
+          className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-line py-2.5 text-body text-muted transition-colors hover:border-accent/40 hover:text-fg"
         >
           <Plus size={14} /> {t("settings.mcp.add")}
         </button>
@@ -158,8 +158,8 @@ function ServerRow({
           className="flex min-w-0 flex-1 items-center gap-2.5 py-2.5 pl-3 text-left"
         >
           <span className={clsx("size-2 shrink-0 rounded-full", STATE_STYLE[state])} />
-          <span className="min-w-0 flex-1 truncate text-[13px] text-fg">{name}</span>
-          <span className="shrink-0 text-[12px] text-subtle">{summary}</span>
+          <span className="min-w-0 flex-1 truncate text-body text-fg">{name}</span>
+          <span className="shrink-0 text-hint text-subtle">{summary}</span>
           <ChevronRight size={14} className={clsx("shrink-0 text-subtle transition-transform", open && "rotate-90")} />
         </button>
         <Toggle
@@ -171,17 +171,17 @@ function ServerRow({
 
       {(open || error) && (
         <div className="space-y-2.5 border-t border-line px-3 py-2.5">
-          {error && <p className="text-[12px] leading-snug text-danger select-text">{error}</p>}
-          {open && status?.error && <p className="text-[12px] leading-snug text-danger select-text">{status.error}</p>}
+          {error && <p className="text-hint leading-snug text-danger select-text">{error}</p>}
+          {open && status?.error && <p className="text-hint leading-snug text-danger select-text">{status.error}</p>}
           {open && (
             <>
-              <p className="truncate font-mono text-[11.5px] text-subtle" title={describe(server)}>
+              <p className="truncate font-mono text-hint text-subtle" title={describe(server)}>
                 {describe(server)}
               </p>
 
               {tools.length > 0 && (
                 <div className="space-y-1">
-                  <div className="text-[11px] font-medium tracking-wide text-subtle uppercase">
+                  <div className="text-caption font-medium tracking-wide text-subtle uppercase">
                     {server.permission === "auto" ? t("settings.mcp.toolsAuto") : t("settings.mcp.toolsApprove")}
                   </div>
                   <ul className="space-y-0.5">
@@ -190,8 +190,8 @@ function ServerRow({
                       return (
                         <li key={tool.name} className="flex items-center gap-2 py-0.5">
                           <span className="min-w-0 flex-1">
-                            <span className="block truncate text-[12.5px] text-fg">{tool.title}</span>
-                            <span className="block truncate text-[11.5px] text-subtle" title={tool.description}>
+                            <span className="block truncate text-body text-fg">{tool.title}</span>
+                            <span className="block truncate text-hint text-subtle" title={tool.description}>
                               {tool.description.replace(/^\[[^\]]+\]\s*/, "")}
                             </span>
                           </span>
