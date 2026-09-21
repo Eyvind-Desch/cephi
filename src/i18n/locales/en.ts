@@ -235,6 +235,13 @@ export const en = {
       voiceSendHint: "Off: the recognized text lands in the input field first.",
       moreInFile: "Models, providers and window sizes are set in settings.json.",
     },
+    services: {
+      title: "Local services",
+      running: "running",
+      stopped: "not running",
+      refresh: "Check",
+      hint: "Web search, translator and dictation run in Docker containers on this PC.",
+    },
     hotkey: {
       press: "Press keys…",
       off: "Off",

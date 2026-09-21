@@ -6,6 +6,7 @@ import { api, type AutostartState, type GeneralSettings } from "../../lib/ipc";
 import { useUi } from "../../store/ui";
 import { Card, Row, Select, textButtonClass, Toggle } from "./controls";
 import { HotkeyField } from "./HotkeyField";
+import { ServicesCard } from "./ServicesCard";
 
 /** Settings → General: the everyday options; everything else stays in settings.json. */
 export function GeneralSection() {
@@ -127,6 +128,8 @@ export function GeneralSection() {
           />
         </Row>
       </Card>
+
+      <ServicesCard />
 
       <div className="flex items-center justify-between gap-3 px-1">
         <p className="text-[11.5px] leading-snug text-subtle">{t("settings.general.moreInFile")}</p>

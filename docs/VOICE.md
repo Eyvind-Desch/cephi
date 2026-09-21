@@ -9,7 +9,8 @@ prompt, and the audio never leaves the app.
 
 ## Setup
 
-Cephi starts the container itself: if speech recognition is not running, the message comes with a
+Cephi starts the container itself: ⋯ → *Settings* → *Local services* shows all three with a start button, and
+when speech recognition is not running the message comes with a
 **Start service** button (the first start pulls the image and the model, a few minutes). Manually:
 
 ```powershell

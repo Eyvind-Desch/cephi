@@ -233,6 +233,13 @@ export const de: Locale = {
       voiceSendHint: "Aus: Der erkannte Text landet erst im Eingabefeld.",
       moreInFile: "Modelle, Anbieter und Fenstergrößen stehen in der settings.json.",
     },
+    services: {
+      title: "Lokale Dienste",
+      running: "läuft",
+      stopped: "läuft nicht",
+      refresh: "Prüfen",
+      hint: "Websuche, Übersetzer und Diktat laufen in Docker-Containern auf diesem PC.",
+    },
     hotkey: {
       press: "Tasten drücken…",
       off: "Aus",

@@ -36,7 +36,7 @@ export const useVoice = create<VoiceState>()((set, get) => ({
         await api.voiceStart();
         set({ phase: "recording" });
       } catch (error) {
-        set({ error: errorText(error) });
+        fail(set, error);
       }
       return;
     }
@@ -55,8 +55,9 @@ export const useVoice = create<VoiceState>()((set, get) => ({
         chat.setDraft(draft ? `${draft} ${text}` : text);
       }
     } catch (error) {
-      set({ phase: "idle", error: errorText(error) });
-      // Only the button can tell whether the container is simply not running.
+      set({ phase: "idle" });
+      fail(set, error);
+      // Whether the container is simply not running decides if a start button is offered.
       api
         .servicesStatus()
         .then((services) => set({ serviceDown: services.some((s) => s.id === "voice" && !s.running) }))
@@ -72,3 +73,9 @@ export const useVoice = create<VoiceState>()((set, get) => ({
 
   dismissError: () => set({ error: null, serviceDown: false }),
 }));
+
+/** Shows the problem above the composer; the compact bar has no room for it. */
+function fail(set: (partial: Partial<VoiceState>) => void, error: unknown) {
+  set({ error: errorText(error) });
+  useUi.getState().expand();
+}

@@ -6,7 +6,7 @@ Only German and English are loaded (about 1.6 GB RAM in the container, no CPU lo
 
 ## Setup
 
-Cephi starts the container itself: if the translator is not running, the error message comes with a
+Cephi starts the container itself (⋯ → *Settings* → *Local services*): if the translator is not running, the error comes with a
 **Start service** button (the first start pulls the image, which takes a few minutes). Manually:
 
 ```powershell
