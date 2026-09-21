@@ -77,6 +77,17 @@ tool directly (`ToolCall { fast: true }`) and is recorded in the history like a 
 **Display data:** besides the text for the model, a tool may return `ToolDisplay` (e.g. web results).
 It travels only in the `ToolResult` event, so the UI can render cards without parsing text.
 
+**What the model gets to read** is capped in two places, because everything sent is read again before
+every answer — on a local model on the CPU that is most of the wait:
+
+| | Local | Cloud |
+|---|---|---|
+| Tool definitions (`tools::select`) | the 8 that fit the request | 64 |
+| Conversation (`agent::context`) | ~24 000 characters | ~200 000 |
+
+The chat is cut at the start of a user turn, so a tool call never loses its result, and the newest turn
+is always sent in full. Everything stays in `AgentController`; only what travels to the model is trimmed.
+
 ## Web tab
 
 The web tab is a second, native webview (`web`) inside the Cephi window (`tauri` feature `unstable`,

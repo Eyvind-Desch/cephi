@@ -1,5 +1,6 @@
 //! The agent loop: model → tool calls → results → model, until the model answers.
 
+mod context;
 mod events;
 
 use std::collections::{HashMap, HashSet};
@@ -207,17 +208,15 @@ impl Run<'_> {
             Err(error) if answer_is_optional => return Ok(self.skip_answer(&error)),
             Err(error) => return Err(error.to_string()),
         };
+        // A local model reads everything it is sent before it answers, and on the CPU that is most
+        // of the wait — so it gets less of both the tools and the chat than a cloud model does.
+        let local = profile.provider == LOCAL_PROVIDER_ID;
         let tool_definitions = if profile.tools {
-            // Cephi's own tools and the MCP tools share one budget. A local model reads every
-            // definition before it answers (~1500 tokens for all of them), so it only gets the ones
-            // that fit the request; a cloud model gets everything (see `tools::select`).
+            // Cephi's own tools and the MCP tools share one budget: only the ones that fit the
+            // request are offered (~1500 tokens for all of them, see `tools::select`).
             let mut offered = self.config.tools.offered();
             offered.extend(self.state.mcp.offered());
-            let limit = if profile.provider == LOCAL_PROVIDER_ID {
-                select::LOCAL_LIMIT
-            } else {
-                select::CLOUD_LIMIT
-            };
+            let limit = if local { select::LOCAL_LIMIT } else { select::CLOUD_LIMIT };
             let chosen = select::relevant(
                 offered,
                 |(definition, context)| select::Candidate {
@@ -234,11 +233,16 @@ impl Run<'_> {
             Vec::new()
         };
         let system_prompt = self.system_prompt();
+        let budget = if local { context::LOCAL_BUDGET } else { context::CLOUD_BUDGET };
 
         for _ in 0..settings.agent.max_tool_rounds {
+            let messages = context::within_budget(history, budget);
+            if messages.len() < history.len() {
+                log::info!("history trimmed: {} of {} messages sent", messages.len(), history.len());
+            }
             let request = LlmRequest {
                 system: &system_prompt,
-                messages: history,
+                messages,
                 tools: &tool_definitions,
                 profile,
             };
