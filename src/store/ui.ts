@@ -60,8 +60,10 @@ interface UiState {
   setSelection: (text: string | null) => void;
   setPageContext: (page: PageContext | null) => void;
   setScreenshot: (shot: Screenshot | null) => void;
-  /** Takes a screenshot and puts it above the composer. */
+  /** Freezes the screen and opens the overlay to pick a region out of it. */
   captureScreenshot: () => Promise<void>;
+  /** The picked region: lands above the composer, in the chat. */
+  useScreenshot: (shot: Screenshot) => void;
   toggleWebLarge: () => void;
 }
 
@@ -141,14 +143,19 @@ export const useUi = create<UiState>()((set, get) => {
       if (get().capturing) return;
       set({ capturing: true, flash: null });
       try {
-        set({ screenshot: await api.screenshotCapture() });
-        get().setView("chat");
-        get().expand();
+        // The overlay takes over from here; the region comes back as an event (`useScreenshotSync`).
+        await api.screenshotRegion();
       } catch (error) {
         set({ flash: { ok: false, text: errorText(error) } });
       } finally {
         set({ capturing: false });
       }
+    },
+
+    useScreenshot: (screenshot) => {
+      set({ screenshot });
+      get().setView("chat");
+      get().expand();
     },
 
     setOverlay: (open) => set((s) => ({ overlays: Math.max(0, s.overlays + (open ? 1 : -1)) })),

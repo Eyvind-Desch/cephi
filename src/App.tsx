@@ -6,6 +6,7 @@ import {
   useConfigSync,
   useKeyboardShortcuts,
   useNativeContextMenu,
+  useScreenshotSync,
   useSelectionSync,
   useWebSync,
 } from "./hooks/useAppLifecycle";
@@ -18,6 +19,7 @@ export function App() {
   useChatRestore();
   useWebSync();
   useSelectionSync();
+  useScreenshotSync();
   useKeyboardShortcuts();
   useNativeContextMenu();
 

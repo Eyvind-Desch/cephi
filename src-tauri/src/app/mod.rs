@@ -9,7 +9,7 @@ mod settings;
 
 pub use chats::{load_chat, new_chat, open_archived_chat, save_chat};
 pub use keys::{secret_overview, test_secret_group, update_secret};
-pub use media::{dictate, screenshot};
+pub use media::{dictate, screenshot, screenshot_region};
 pub use settings::{mcp_login, mcp_logout, remove_mcp_server, save_mcp_server, update_settings};
 
 use std::time::Duration;
@@ -19,7 +19,7 @@ use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_opener::OpenerExt;
 
 use crate::config::{self, ConfigPaths, ConfigSnapshot, Diagnostic};
-use crate::desktop::{autostart, hotkey, tray, window};
+use crate::desktop::{autostart, hotkey, region, tray, window};
 use crate::error::{AppError, AppResult};
 use crate::history::ChatStore;
 use crate::launcher::AppIndex;
@@ -62,6 +62,7 @@ pub fn setup(app: &AppHandle) -> AppResult<()> {
     let saved_history = chats.load().map(|chat| chat.history);
 
     app.manage(AppState::new(paths, config, http, launcher, chats));
+    app.manage(region::Pending::default());
     if let Some(history) = saved_history {
         log::info!("chat restored: {} messages", history.len());
         app.state::<AppState>().agent.restore(history);

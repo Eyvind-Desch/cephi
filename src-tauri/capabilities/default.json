@@ -2,6 +2,6 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Cephi's own webview: core IPC and events only. All system access goes through Cephi's own Rust commands. Listed by webview (not window) so the web tab in the same window gets nothing.",
-  "webviews": ["main"],
+  "webviews": ["main", "shot"],
   "permissions": ["core:default"]
 }

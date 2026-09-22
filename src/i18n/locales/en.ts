@@ -80,6 +80,7 @@ export const en = {
     describePrompt: "What can you see on this screenshot?",
     noVision: "{{model}} cannot look at pictures.",
     switchModel: "Use {{model}} instead",
+    regionHint: "Drag to select · Enter for the whole monitor · Esc cancels",
   },
   pageChip: {
     summarize: "Summarize",

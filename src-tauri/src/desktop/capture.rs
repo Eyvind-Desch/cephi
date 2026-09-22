@@ -31,9 +31,19 @@ pub struct Screenshot {
     pub height: u32,
 }
 
+/// Where a monitor sits in the virtual desktop, in physical pixels. The region overlay is placed
+/// exactly over it, so the frozen picture lines up with what was on screen.
+#[derive(Clone, Copy, Debug)]
+pub struct MonitorArea {
+    pub left: i32,
+    pub top: i32,
+    pub width: u32,
+    pub height: u32,
+}
+
 /// What the frontend gets: the picture as base64 PNG, ready for a preview and for the model.
 /// Mirrored in `src/lib/ipc.ts` (`Screenshot`).
-#[derive(Clone, Debug, serde::Serialize)]
+#[derive(Clone, Debug, serde::Deserialize, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ScreenshotImage {
     /// Base64 PNG, without the `data:` prefix.
@@ -68,9 +78,9 @@ fn to_base64(bytes: &[u8]) -> String {
     out
 }
 
-/// Grabs the monitor the mouse pointer is on.
+/// Grabs the monitor the mouse pointer is on, scaled down for the model.
 pub fn monitor_at_cursor() -> Result<Screenshot, String> {
-    let (pixels, width, height) = grab()?;
+    let (pixels, width, height, _) = grab()?;
     let (target_width, target_height) = scaled(width, height, MAX_EDGE);
     let png = encode_png(&pixels, width, height, target_width, target_height)?;
     Ok(Screenshot {
@@ -80,8 +90,17 @@ pub fn monitor_at_cursor() -> Result<Screenshot, String> {
     })
 }
 
-/// Raw BGRA pixels of the monitor under the cursor, top-down.
-fn grab() -> Result<(Vec<u8>, u32, u32), String> {
+/// The same monitor at its real size, together with where it sits. Picking a region out of a
+/// scaled-down picture would throw away exactly the detail the region is meant to keep; the cut-out
+/// is small enough afterwards that it never needs scaling.
+pub fn monitor_at_cursor_unscaled() -> Result<(Screenshot, MonitorArea), String> {
+    let (pixels, width, height, area) = grab()?;
+    let png = encode_png(&pixels, width, height, width, height)?;
+    Ok((Screenshot { png, width, height }, area))
+}
+
+/// Raw BGRA pixels of the monitor under the cursor, top-down, and the monitor's place on the desktop.
+fn grab() -> Result<(Vec<u8>, u32, u32, MonitorArea), String> {
     // SAFETY: Win32 calls with owned handles; every handle is released below, also on the error paths.
     unsafe {
         let mut cursor = POINT { x: 0, y: 0 };
@@ -149,7 +168,13 @@ fn grab() -> Result<(Vec<u8>, u32, u32), String> {
                 Ok(pixels)
             };
             SelectObject(memory_dc, previous);
-            pixels.map(|pixels| (pixels, width as u32, height as u32))
+            let placed = MonitorArea {
+                left: area.left,
+                top: area.top,
+                width: width as u32,
+                height: height as u32,
+            };
+            pixels.map(|pixels| (pixels, width as u32, height as u32, placed))
         };
 
         if !bitmap.is_null() {

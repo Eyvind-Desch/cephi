@@ -11,6 +11,7 @@ use crate::agent::{self, AgentEvent, Input};
 use crate::config::ConfigSnapshot;
 use crate::desktop::autostart::{self, AutostartState};
 use crate::desktop::capture::ScreenshotImage as Screenshot;
+use crate::desktop::region;
 use crate::desktop::web::{self, WebState};
 use crate::desktop::window::{self, WindowMode};
 use crate::error::{AppError, AppResult};
@@ -105,6 +106,36 @@ pub fn voice_cancel(state: State<'_, AppState>) {
 #[tauri::command]
 pub async fn screenshot_capture(app: AppHandle) -> AppResult<Screenshot> {
     crate::app::screenshot(&app).await
+}
+
+/// Opens the overlay that lets the user drag a region out of the frozen screen.
+#[tauri::command]
+pub async fn screenshot_region(app: AppHandle) -> AppResult<()> {
+    crate::app::screenshot_region(&app).await
+}
+
+/// Overlay: the frozen picture to pick from.
+#[tauri::command]
+pub fn screenshot_region_image(app: AppHandle) -> Option<Screenshot> {
+    region::pending(&app)
+}
+
+/// Overlay: the picture is on screen, the window may be shown.
+#[tauri::command]
+pub fn screenshot_region_ready(app: AppHandle) -> AppResult<()> {
+    region::ready(&app)
+}
+
+/// Overlay: this is the cut-out.
+#[tauri::command]
+pub fn screenshot_region_done(app: AppHandle, image: Screenshot) -> AppResult<()> {
+    region::finish(&app, image)
+}
+
+/// Overlay: nothing was picked.
+#[tauri::command]
+pub fn screenshot_region_cancel(app: AppHandle) -> AppResult<()> {
+    region::cancel(&app)
 }
 
 /// Lets the model answer from the latest tool results (e.g. summarize search results).

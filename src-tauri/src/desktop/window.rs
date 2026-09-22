@@ -207,7 +207,7 @@ fn current_rect(window: &Window) -> AppResult<Rect> {
 
 /// Whether Cephi is the active app. Unlike `is_focused`, this stays true while the keyboard focus is in a
 /// child webview (the web tab): focus moving *inside* the window must not count as clicking elsewhere.
-fn is_foreground(window: &Window) -> bool {
+pub(super) fn is_foreground(window: &Window) -> bool {
     // SAFETY: plain query without arguments.
     let foreground = unsafe { GetForegroundWindow() };
     window.hwnd().is_ok_and(|hwnd| std::ptr::eq(foreground, hwnd.0))
@@ -217,7 +217,7 @@ fn is_foreground(window: &Window) -> bool {
 /// Started from a terminal or by autostart, Cephi isn't that app, and `set_focus` leaves it behind.
 /// Sharing the input state with the current foreground window for a moment lifts the lock; this is
 /// only done when the user asked Cephi to show up (hotkey, tray, start).
-fn force_foreground(window: &Window) {
+pub(super) fn force_foreground(window: &Window) {
     let Ok(hwnd) = window.hwnd() else { return };
     let hwnd = hwnd.0 as windows_sys::Win32::Foundation::HWND;
     // SAFETY: plain window and thread queries; `hwnd` belongs to a live window owned by this process,

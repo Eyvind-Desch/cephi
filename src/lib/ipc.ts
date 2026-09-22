@@ -241,6 +241,16 @@ export const api = {
   },
   /** Screenshot of the monitor the mouse is on; Cephi hides itself for the shot. */
   screenshotCapture: () => invoke<Screenshot>("screenshot_capture"),
+  /** Freezes the monitor and opens the overlay to drag a region out of it. */
+  screenshotRegion: () => invoke<void>("screenshot_region"),
+  /** Overlay only: the frozen picture to pick from. */
+  screenshotRegionImage: () => invoke<Screenshot | null>("screenshot_region_image"),
+  /** Overlay only: the picture is on screen, the window may be shown. */
+  screenshotRegionReady: () => invoke<void>("screenshot_region_ready"),
+  /** Overlay only: hands the cut-out back to the chat. */
+  screenshotRegionDone: (image: Screenshot) => invoke<void>("screenshot_region_done", { image }),
+  /** Overlay only: nothing was picked. */
+  screenshotRegionCancel: () => invoke<void>("screenshot_region_cancel"),
   /** Starts recording the microphone for dictation. */
   voiceStart: () => invoke<void>("voice_start"),
   /** Stops the recording and returns the recognized text. */
@@ -318,3 +328,7 @@ export const onWebOpen = (handler: () => void): Promise<UnlistenFn> => listen("c
 
 export const onConfigChanged = (handler: (snapshot: ConfigSnapshot) => void): Promise<UnlistenFn> =>
   listen<ConfigSnapshot>("cephi://config-changed", (event) => handler(event.payload));
+
+/** The region picked in the overlay, on its way to the composer. */
+export const onScreenshotRegion = (handler: (image: Screenshot) => void): Promise<UnlistenFn> =>
+  listen<Screenshot>("cephi://screenshot-region", (event) => handler(event.payload));

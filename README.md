@@ -41,8 +41,9 @@ selection for that moment and **restores your clipboard afterwards**. The normal
 **Dictation:** the microphone button next to the input records what you say and writes it into the input field
 (offline via a local Whisper container, [setup](docs/VOICE.md)). `Esc` throws the recording away.
 
-**Screenshot:** ⋯ → *Screenshot* (or `/screenshot`) takes a picture of the monitor the mouse is on —
-Cephi hides itself for the shot — and puts it above the input: *What is on it?* or your own question about it.
+**Screenshot:** ⋯ → *Screenshot* (or `/screenshot`) freezes the monitor the mouse is on — Cephi hides itself
+for the shot — and lays it over the screen: drag a rectangle to pick a part, `Enter` takes the whole monitor,
+`Esc` throws it away. The cut-out lands above the input: *What is on it?* or your own question about it.
 You can also paste a picture from the clipboard (Snipping Tool, a copied image) into the input. This all
 needs a model that can read pictures — Cephi knows which ones (cloud models, and local vision models
 like `llava` or `…vl`), and the attached screenshot offers to switch to one. Pictures stay in the session: a saved chat never keeps a screenshot.

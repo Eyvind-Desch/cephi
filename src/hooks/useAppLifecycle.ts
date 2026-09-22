@@ -1,5 +1,13 @@
 import { useEffect } from "react";
-import { api, onConfigChanged, onSelection, onWebOpen, onWebShortcut, onWebState } from "../lib/ipc";
+import {
+  api,
+  onConfigChanged,
+  onScreenshotRegion,
+  onSelection,
+  onWebOpen,
+  onWebShortcut,
+  onWebState,
+} from "../lib/ipc";
 import { useChat } from "../store/chat";
 import { useUi } from "../store/ui";
 import { useWeb } from "../store/web";
@@ -132,5 +140,13 @@ export function useNativeContextMenu() {
     };
     window.addEventListener("contextmenu", onContextMenu);
     return () => window.removeEventListener("contextmenu", onContextMenu);
+  }, []);
+}
+
+/** The region picked in the screenshot overlay arrives here, once the window is back. */
+export function useScreenshotSync() {
+  useEffect(() => {
+    const unlisten = onScreenshotRegion((image) => useUi.getState().useScreenshot(image));
+    return () => void unlisten.then((fn) => fn());
   }, []);
 }

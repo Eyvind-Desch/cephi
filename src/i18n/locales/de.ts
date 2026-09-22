@@ -78,6 +78,7 @@ export const de: Locale = {
     describePrompt: "Was siehst du auf diesem Screenshot?",
     noVision: "{{model}} kann keine Bilder ansehen.",
     switchModel: "Stattdessen {{model}} nehmen",
+    regionHint: "Ziehen zum Auswählen · Enter ganzer Monitor · Esc abbrechen",
   },
   pageChip: {
     summarize: "Zusammenfassen",
