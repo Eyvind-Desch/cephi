@@ -19,16 +19,21 @@ One hotkey, one input field: answer, search, or action ("öffne die Bluetooth-Ei
 
 | Key | Action |
 |---|---|
-| `Ctrl+Alt+Space` | Show/hide Cephi (configurable under ⋯ → *Settings*) |
+| `Ctrl+Alt+Space` | Show/hide Cephi (configurable under ⋯ → *Settings* → *Shortcuts*) |
 | `Ctrl+Alt+T` | Pick up the text selected in any app (translate, explain, ask about it) |
 | `Enter` / `Shift+Enter` | Send / new line |
 | `Ctrl+E` | Compact bar ↔ large panel |
 | `Ctrl+N` | New chat (the previous one is archived) |
 | `Esc` | Back to the chat, in the chat: hide (also works inside a web page that doesn't use Esc itself) |
 | `Ctrl+L` | Web tab: address bar |
-| `/` | Commands: `/clear`, `/web …`, `/translate …`, `/model …`, `/history`, `/screenshot`, `/tools`, `/settings`, `/keys`, `/mcp`, `/pin`, `/config`, `/reload` |
+| `/` | Commands: `/clear`, `/web …`, `/translate …`, `/model …`, `/history`, `/screenshot`, `/tools`, `/settings`, `/shortcuts`, `/keys`, `/mcp`, `/pin`, `/config`, `/reload` |
 
 Clicking outside hides Cephi, unless it's pinned (⋯ menu). Tray icon: open, configuration, quit.
+
+**Your own shortcuts:** ⋯ → *Settings* → *Shortcuts* lists everything above and lets you add global
+key combinations of your own — open Cephi, new chat, screenshot, translator, web tab, earlier chats, or
+*send a message*. A message that is also a quick phrase (`pause`, `? weather`, `tr word`) runs straight
+away, without the AI, so a shortcut can drive anything Cephi's tools can do.
 
 The chat is saved after every answer and is still there after a restart; *New chat* archives it (the last 50
 chats are kept in `%APPDATA%\io.github.eyvind-desch.cephi\chats\`). ⋯ → *Settings* → *Start with Windows* makes Cephi wait in the tray
@@ -73,7 +78,7 @@ Everything lives in **`%APPDATA%\Cephi\`** and is reloaded immediately on change
 
 ```
 Cephi/
-├── settings.json   language, hotkey, model profiles, AI providers, window, agent
+├── settings.json   language, shortcuts, model profiles, AI providers, window, agent
 ├── tools/          custom tools as JSON → docs/TOOLS.md
 ├── mcp.json        MCP servers (tools from other apps) → docs/MCP.md
 └── schemas/        for editor autocompletion (generated automatically)

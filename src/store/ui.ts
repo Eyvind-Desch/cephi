@@ -4,7 +4,7 @@ import { errorText } from "../lib/errors";
 import { api, type ConfigSnapshot, type Screenshot, type WindowMode } from "../lib/ipc";
 
 export type PanelView = "chat" | "history" | "settings" | "tools" | "web" | "translate";
-export type SettingsTab = "general" | "keys" | "mcp";
+export type SettingsTab = "general" | "shortcuts" | "keys" | "mcp";
 
 export interface PageContext {
   url: string;

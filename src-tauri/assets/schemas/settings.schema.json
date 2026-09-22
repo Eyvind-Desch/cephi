@@ -22,6 +22,26 @@
       "type": ["string", "null"],
       "default": "Ctrl+Alt+T"
     },
+    "shortcuts": {
+      "description": "Your own global shortcuts, on top of \"hotkey\" and \"selectionHotkey\". Edited under ⋯ → Settings → Shortcuts.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["key", "action"],
+        "properties": {
+          "key": { "type": "string", "minLength": 1, "description": "Key combination, e.g. \"Ctrl+Alt+S\"." },
+          "action": {
+            "enum": ["show", "newChat", "screenshot", "translate", "web", "history", "prompt"],
+            "description": "show = bring Cephi up, prompt = send \"text\"."
+          },
+          "text": {
+            "type": "string",
+            "description": "Only for \"prompt\": what is sent. A quick phrase (e.g. \"pause\", \"? weather\") runs straight away, without the AI."
+          }
+        }
+      }
+    },
     "defaultProfile": {
       "description": "id of the profile selected at startup.",
       "type": "string",

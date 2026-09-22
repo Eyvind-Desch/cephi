@@ -3,6 +3,7 @@ import {
   api,
   onConfigChanged,
   onScreenshotRegion,
+  onShortcut,
   onSelection,
   onWebOpen,
   onWebShortcut,
@@ -147,6 +148,38 @@ export function useNativeContextMenu() {
 export function useScreenshotSync() {
   useEffect(() => {
     const unlisten = onScreenshotRegion((image) => useUi.getState().useScreenshot(image));
+    return () => void unlisten.then((fn) => fn());
+  }, []);
+}
+
+/** Carries out a shortcut the user bound to an action. Cephi is already in front by now. */
+export function useShortcutActions() {
+  useEffect(() => {
+    const unlisten = onShortcut((shortcut) => {
+      const ui = useUi.getState();
+      switch (shortcut.action) {
+        case "show":
+          ui.setView("chat");
+          break;
+        case "newChat":
+          void useChat.getState().reset();
+          ui.setView("chat");
+          break;
+        case "screenshot":
+          void ui.captureScreenshot();
+          break;
+        case "translate":
+        case "web":
+        case "history":
+          ui.setView(shortcut.action === "history" ? "history" : shortcut.action);
+          ui.expand();
+          break;
+        case "prompt":
+          // A quick phrase runs without the model; everything else goes to the AI.
+          if (shortcut.text) void useChat.getState().send(shortcut.text);
+          break;
+      }
+    });
     return () => void unlisten.then((fn) => fn());
   }, []);
 }

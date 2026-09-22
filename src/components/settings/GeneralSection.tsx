@@ -5,7 +5,7 @@ import { errorText } from "../../lib/errors";
 import { api, type AutostartState, type GeneralSettings } from "../../lib/ipc";
 import { useUi } from "../../store/ui";
 import { Card, Row, Select, textButtonClass, Toggle } from "./controls";
-import { HotkeyField } from "./HotkeyField";
+
 import { ServicesCard } from "./ServicesCard";
 
 /** Settings → General: the everyday options; everything else stays in settings.json. */
@@ -81,28 +81,6 @@ export function GeneralSection() {
         </Row>
       </Card>
 
-      <Card title={t("settings.general.hotkeys")}>
-        <Row label={t("settings.general.hotkey")} error={errorFor("hotkey")}>
-          <HotkeyField
-            label={t("settings.general.hotkey")}
-            value={config.hotkey}
-            onChange={(hotkey) => hotkey && save("hotkey", { hotkey })}
-          />
-        </Row>
-        <Row
-          label={t("settings.general.selectionHotkey")}
-          hint={t("settings.general.selectionHotkeyHint")}
-          error={errorFor("selectionHotkey")}
-        >
-          <HotkeyField
-            label={t("settings.general.selectionHotkey")}
-            value={general.selectionHotkey || null}
-            clearable
-            // An empty value turns it off (a missing one would bring back the default).
-            onChange={(selectionHotkey) => save("selectionHotkey", { selectionHotkey: selectionHotkey ?? "" })}
-          />
-        </Row>
-      </Card>
 
       <Card title={t("settings.general.behavior")}>
         <Row

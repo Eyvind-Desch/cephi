@@ -7,6 +7,7 @@ import {
   useKeyboardShortcuts,
   useNativeContextMenu,
   useScreenshotSync,
+  useShortcutActions,
   useSelectionSync,
   useWebSync,
 } from "./hooks/useAppLifecycle";
@@ -20,6 +21,7 @@ export function App() {
   useWebSync();
   useSelectionSync();
   useScreenshotSync();
+  useShortcutActions();
   useKeyboardShortcuts();
   useNativeContextMenu();
 

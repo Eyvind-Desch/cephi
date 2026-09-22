@@ -21,6 +21,7 @@ export interface SlashCommand {
     | "commands.model"
     | "commands.tools"
     | "commands.settings"
+    | "commands.shortcuts"
     | "commands.keys"
     | "commands.mcp"
     | "commands.pin"
@@ -81,6 +82,11 @@ export const COMMANDS: SlashCommand[] = [
   },
   { name: "tools", description: "commands.tools", run: () => useUi.getState().setView("tools") },
   { name: "settings", description: "commands.settings", run: () => useUi.getState().openSettings("general") },
+  {
+    name: "shortcuts",
+    description: "commands.shortcuts",
+    run: () => useUi.getState().openSettings("shortcuts"),
+  },
   { name: "keys", description: "commands.keys", run: () => useUi.getState().openSettings("keys") },
   { name: "mcp", description: "commands.mcp", run: () => useUi.getState().openSettings("mcp") },
   { name: "pin", description: "commands.pin", run: () => useUi.getState().togglePinned() },

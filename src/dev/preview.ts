@@ -58,6 +58,10 @@ const config: ConfigSnapshot = {
     hideOnBlur: true,
     summarizeSearch: true,
     voiceSendDirectly: false,
+    shortcuts: [
+      { key: "Ctrl+Alt+S", action: "screenshot" },
+      { key: "Ctrl+Alt+P", action: "prompt", text: "pause" },
+    ],
   },
   diagnostics: [],
 };

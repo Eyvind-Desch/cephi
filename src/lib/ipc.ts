@@ -101,6 +101,19 @@ export interface GeneralSettings {
   summarizeSearch: boolean;
   /** Dictation is sent right away instead of landing in the input field. */
   voiceSendDirectly: boolean;
+  /** The shortcuts the user added on top of the two built-in ones. */
+  shortcuts: Shortcut[];
+}
+
+/** `src-tauri/src/config/settings.rs`. What a global key combination does. */
+export type ShortcutAction = "show" | "newChat" | "screenshot" | "translate" | "web" | "history" | "prompt";
+
+export interface Shortcut {
+  /** Key combination, e.g. "Ctrl+Alt+S". */
+  key: string;
+  action: ShortcutAction;
+  /** `prompt` only: what is sent. A quick phrase runs straight away, without the AI. */
+  text?: string | null;
 }
 
 /** `src-tauri/src/mcp/mod.rs` */
@@ -332,3 +345,7 @@ export const onConfigChanged = (handler: (snapshot: ConfigSnapshot) => void): Pr
 /** The region picked in the overlay, on its way to the composer. */
 export const onScreenshotRegion = (handler: (image: Screenshot) => void): Promise<UnlistenFn> =>
   listen<Screenshot>("cephi://screenshot-region", (event) => handler(event.payload));
+
+/** A shortcut the user pressed; Cephi is already in front when this arrives. */
+export const onShortcut = (handler: (shortcut: Shortcut) => void): Promise<UnlistenFn> =>
+  listen<Shortcut>("cephi://shortcut", (event) => handler(event.payload));

@@ -191,7 +191,10 @@
     "unknown_provider": "Profile \"%{profile}\" uses the unknown provider \"%{provider}\".",
     "invalid_searxng_url": "search.searxngUrl \"%{url}\" is not a valid URL.",
     "invalid_libretranslate_url": "translate.libretranslateUrl \"%{url}\" is not a valid URL.",
-    "max_results": "search.maxResults must be between 1 and 20."
+    "max_results": "search.maxResults must be between 1 and 20.",
+    "shortcut_without_key": "shortcuts[%{index}]: \"key\" must not be empty.",
+    "duplicate_shortcut": "The shortcut \"%{key}\" is used more than once.",
+    "shortcut_without_text": "The shortcut \"%{key}\" sends a message and needs \"text\"."
   },
   "translate": {
     "empty": "What should I translate?",

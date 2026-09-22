@@ -134,7 +134,8 @@ pub fn reload_config(app: &AppHandle) -> ConfigSnapshot {
     let previous = state.config();
     let next = config::load(&state.paths, Some(&previous.settings));
     let hotkey_changed = previous.settings.hotkey != next.settings.hotkey
-        || previous.settings.selection_hotkey != next.settings.selection_hotkey;
+        || previous.settings.selection_hotkey != next.settings.selection_hotkey
+        || previous.settings.shortcuts != next.settings.shortcuts;
     let language_changed = previous.settings.language != next.settings.language;
     state.replace_config(next);
 
@@ -181,7 +182,12 @@ pub fn open_config_folder(app: &AppHandle) -> AppResult<()> {
 fn register_hotkey(app: &AppHandle) {
     let state = app.state::<AppState>();
     let settings = &state.config().settings;
-    let result = hotkey::register(app, &settings.hotkey, settings.selection_hotkey.as_deref());
+    let result = hotkey::register(
+        app,
+        &settings.hotkey,
+        settings.selection_hotkey.as_deref(),
+        &settings.shortcuts,
+    );
     if let Err(message) = &result {
         log::error!("{message}");
     }

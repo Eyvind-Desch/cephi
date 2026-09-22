@@ -5,8 +5,9 @@ import { BackButton } from "../ui/BackButton";
 import { KeysSection } from "../keys/KeysSection";
 import { GeneralSection } from "./GeneralSection";
 import { McpSection } from "./McpSection";
+import { ShortcutsSection } from "./ShortcutsSection";
 
-const TABS: SettingsTab[] = ["general", "keys", "mcp"];
+const TABS: SettingsTab[] = ["general", "shortcuts", "keys", "mcp"];
 
 /** Settings: general options, API keys and MCP servers, all without editing JSON. */
 export function SettingsView() {
@@ -19,7 +20,7 @@ export function SettingsView() {
       <div className="space-y-2 px-2 pt-2">
         <BackButton />
         {/* One row across the whole width: calmer than a second cluster of tabs next to the header. */}
-        <div role="tablist" className="grid grid-cols-3 gap-0.5 rounded-lg bg-sunken p-0.5">
+        <div role="tablist" className="grid grid-cols-4 gap-0.5 rounded-lg bg-sunken p-0.5">
           {TABS.map((id) => (
             <button
               key={id}
@@ -40,6 +41,7 @@ export function SettingsView() {
 
       <div className="selectable flex-1 overflow-y-auto px-3 pt-3 pb-5">
         {tab === "general" && <GeneralSection />}
+        {tab === "shortcuts" && <ShortcutsSection />}
         {tab === "keys" && <KeysSection />}
         {tab === "mcp" && <McpSection />}
       </div>

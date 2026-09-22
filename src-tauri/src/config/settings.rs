@@ -29,6 +29,43 @@ pub struct Settings {
     pub voice: VoiceSettings,
     pub agent: AgentSettings,
     pub window: WindowSettings,
+    /// Shortcuts the user added, on top of [`Settings::hotkey`] and [`Settings::selection_hotkey`].
+    #[serde(default)]
+    pub shortcuts: Vec<Shortcut>,
+}
+
+/// A key combination the user bound to something Cephi can do.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct Shortcut {
+    /// Like the main hotkey, e.g. "Ctrl+Alt+S".
+    pub key: String,
+    pub action: ShortcutAction,
+    /// `prompt` only: what is sent. A phrase that is also a quick action (e.g. "pause") runs
+    /// straight away, without the model — the same fast path the input field uses.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub text: Option<String>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub enum ShortcutAction {
+    /// Show Cephi (without hiding it again, unlike the main hotkey).
+    Show,
+    NewChat,
+    /// Freeze the screen and pick a region to ask about.
+    Screenshot,
+    Translate,
+    Web,
+    History,
+    /// Send [`Shortcut::text`].
+    Prompt,
+}
+
+impl Shortcut {
+    fn key(&self) -> &str {
+        self.key.trim()
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -298,6 +335,22 @@ impl Settings {
         if !(1..=20).contains(&self.search.max_results) {
             return Err(t!("settings.max_results").into());
         }
+        // A shortcut that silently does nothing is worse than a message on start.
+        let taken = [Some(self.hotkey.trim()), self.selection_hotkey.as_deref().map(str::trim)];
+        for (index, shortcut) in self.shortcuts.iter().enumerate() {
+            if shortcut.key().is_empty() {
+                return Err(t!("settings.shortcut_without_key", index = index).into());
+            }
+            let earlier = self.shortcuts[..index].iter().map(Shortcut::key);
+            if taken.into_iter().flatten().chain(earlier).any(|key| key == shortcut.key()) {
+                return Err(t!("settings.duplicate_shortcut", key = shortcut.key()).into());
+            }
+            if shortcut.action == ShortcutAction::Prompt
+                && shortcut.text.as_deref().is_none_or(|text| text.trim().is_empty())
+            {
+                return Err(t!("settings.shortcut_without_text", key = shortcut.key()).into());
+            }
+        }
         if self.agent.max_tool_rounds == 0 {
             return Err(t!("settings.max_tool_rounds").into());
         }
@@ -425,6 +478,7 @@ impl Default for Settings {
             voice: VoiceSettings::default(),
             agent: AgentSettings::default(),
             window: WindowSettings::default(),
+            shortcuts: Vec::new(),
         }
     }
 }
@@ -590,5 +644,41 @@ mod tests {
     #[test]
     fn unknown_keys_are_rejected() {
         assert!(serde_json::from_str::<Settings>(r#"{ "hotkeyy": "Alt+O" }"#).is_err());
+    }
+
+    fn with_shortcuts(json: &str) -> Result<(), String> {
+        serde_json::from_str::<Settings>(&format!(r#"{{ "shortcuts": {json} }}"#))
+            .expect("valid JSON")
+            .validate()
+    }
+
+    #[test]
+    fn a_shortcut_that_could_not_work_is_reported() {
+        with_shortcuts(r#"[{ "key": "Ctrl+Alt+S", "action": "screenshot" }]"#).unwrap();
+        with_shortcuts(r#"[{ "key": "Ctrl+Alt+P", "action": "prompt", "text": "pause" }]"#).unwrap();
+
+        assert!(with_shortcuts(r#"[{ "key": " ", "action": "show" }]"#).is_err(), "no key");
+        assert!(
+            with_shortcuts(r#"[{ "key": "Ctrl+Alt+P", "action": "prompt" }]"#).is_err(),
+            "a message without a text"
+        );
+        assert!(
+            with_shortcuts(r#"[{ "key": "Ctrl+Alt+P", "action": "prompt", "text": "  " }]"#).is_err(),
+            "a message that is only spaces"
+        );
+        assert!(
+            with_shortcuts(r#"[{ "key": "Ctrl+Alt+S", "action": "show" }, { "key": "Ctrl+Alt+S", "action": "web" }]"#)
+                .is_err(),
+            "the same combination twice"
+        );
+        // The two built-in hotkeys are taken as well; only one of them can win.
+        assert!(
+            with_shortcuts(r#"[{ "key": "Ctrl+Alt+Space", "action": "web" }]"#).is_err(),
+            "the main hotkey"
+        );
+        assert!(
+            with_shortcuts(r#"[{ "key": "Ctrl+Alt+T", "action": "web" }]"#).is_err(),
+            "the selection hotkey"
+        );
     }
 }

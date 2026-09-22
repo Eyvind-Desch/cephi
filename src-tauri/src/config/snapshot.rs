@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use serde::Serialize;
 
-use super::{Config, Diagnostic};
+use super::{Config, Diagnostic, Shortcut};
 use crate::i18n::LanguageSetting;
 use crate::mcp::config::ServerConfig;
 use crate::mcp::{McpManager, ServerState, ServerStatus};
@@ -136,6 +136,7 @@ impl ConfigSnapshot {
                 hide_on_blur: settings.window.hide_on_blur,
                 summarize_search: settings.search.summarize,
                 voice_send_directly: settings.voice.send_directly,
+                shortcuts: settings.shortcuts.clone(),
             },
             diagnostics: config
                 .diagnostics
@@ -158,4 +159,6 @@ pub struct GeneralSettings {
     pub summarize_search: bool,
     /// Dictation is sent right away instead of landing in the input field.
     pub voice_send_directly: bool,
+    /// The shortcuts the user added on top of the two built-in ones.
+    pub shortcuts: Vec<Shortcut>,
 }
