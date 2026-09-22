@@ -11,6 +11,7 @@ import {
 } from "../lib/ipc";
 import { useChat } from "../store/chat";
 import { useUi } from "../store/ui";
+import { useVoice } from "../store/voice";
 import { useWeb } from "../store/web";
 import i18n from "../i18n";
 
@@ -168,16 +169,24 @@ export function useShortcutActions() {
         case "screenshot":
           void ui.captureScreenshot();
           break;
+        case "dictate":
+          void useVoice.getState().toggle();
+          break;
+        case "settings":
+          ui.openSettings("general");
+          break;
         case "translate":
         case "web":
         case "history":
-          ui.setView(shortcut.action === "history" ? "history" : shortcut.action);
+        case "tools":
+          ui.setView(shortcut.action);
           ui.expand();
           break;
         case "prompt":
           // A quick phrase runs without the model; everything else goes to the AI.
           if (shortcut.text) void useChat.getState().send(shortcut.text);
           break;
+        // `selection` never reaches the UI: it is done before the window takes the focus.
       }
     });
     return () => void unlisten.then((fn) => fn());

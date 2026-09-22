@@ -264,12 +264,16 @@ export const de: Locale = {
       inApp: "In Cephi",
       actions: {
         show: "Cephi öffnen",
-        newChat: "Neuer Chat",
+        selection: "Markierten Text holen",
         screenshot: "Screenshot",
+        dictate: "Diktieren",
+        newChat: "Neuer Chat",
+        prompt: "Nachricht schicken",
         translate: "Übersetzer",
         web: "Web-Tab",
         history: "Frühere Chats",
-        prompt: "Nachricht schicken",
+        tools: "Tools",
+        settings: "Einstellungen",
       },
       keys: {
         send: "Senden",

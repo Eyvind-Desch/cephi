@@ -106,7 +106,18 @@ export interface GeneralSettings {
 }
 
 /** `src-tauri/src/config/settings.rs`. What a global key combination does. */
-export type ShortcutAction = "show" | "newChat" | "screenshot" | "translate" | "web" | "history" | "prompt";
+export type ShortcutAction =
+  | "show"
+  | "selection"
+  | "screenshot"
+  | "dictate"
+  | "newChat"
+  | "prompt"
+  | "translate"
+  | "web"
+  | "history"
+  | "tools"
+  | "settings";
 
 export interface Shortcut {
   /** Key combination, e.g. "Ctrl+Alt+S". */

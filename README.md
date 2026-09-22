@@ -30,10 +30,11 @@ One hotkey, one input field: answer, search, or action ("öffne die Bluetooth-Ei
 
 Clicking outside hides Cephi, unless it's pinned (⋯ menu). Tray icon: open, configuration, quit.
 
-**Your own shortcuts:** ⋯ → *Settings* → *Shortcuts* lists everything above and lets you add global
-key combinations of your own — open Cephi, new chat, screenshot, translator, web tab, earlier chats, or
-*send a message*. A message that is also a quick phrase (`pause`, `? weather`, `tr word`) runs straight
-away, without the AI, so a shortcut can drive anything Cephi's tools can do.
+**Your own shortcuts:** ⋯ → *Settings* → *Shortcuts* lists everything above and lets you add global key
+combinations of your own: open Cephi, pick up the selected text, screenshot, dictate, new chat, translator,
+web tab, earlier chats, tools, settings — or *send a message*. A message that is also a quick phrase
+(`pause`, `? weather`, `tr word`) runs straight away, without the AI, so a shortcut can drive anything
+Cephi's tools can do.
 
 The chat is saved after every answer and is still there after a restart; *New chat* archives it (the last 50
 chats are kept in `%APPDATA%\io.github.eyvind-desch.cephi\chats\`). ⋯ → *Settings* → *Start with Windows* makes Cephi wait in the tray

@@ -32,8 +32,20 @@
         "properties": {
           "key": { "type": "string", "minLength": 1, "description": "Key combination, e.g. \"Ctrl+Alt+S\"." },
           "action": {
-            "enum": ["show", "newChat", "screenshot", "translate", "web", "history", "prompt"],
-            "description": "show = bring Cephi up, prompt = send \"text\"."
+            "enum": [
+              "show",
+              "selection",
+              "screenshot",
+              "dictate",
+              "newChat",
+              "prompt",
+              "translate",
+              "web",
+              "history",
+              "tools",
+              "settings"
+            ],
+            "description": "show = bring Cephi up, selection = pick up the text marked in the foreground app, dictate = start/stop dictation, prompt = send \"text\"."
           },
           "text": {
             "type": "string",

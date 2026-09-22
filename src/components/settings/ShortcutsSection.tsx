@@ -8,7 +8,19 @@ import { Card, inputClass, Row, Select, textButtonClass } from "./controls";
 import { HotkeyField } from "./HotkeyField";
 
 /** Everything a shortcut can be bound to; `prompt` additionally needs a text. */
-const ACTIONS: ShortcutAction[] = ["show", "newChat", "screenshot", "translate", "web", "history", "prompt"];
+const ACTIONS: ShortcutAction[] = [
+  "show",
+  "selection",
+  "screenshot",
+  "dictate",
+  "newChat",
+  "prompt",
+  "translate",
+  "web",
+  "history",
+  "tools",
+  "settings",
+];
 
 /** The keys that work inside Cephi. They are part of how the app is operated, not settings. */
 const IN_APP = [

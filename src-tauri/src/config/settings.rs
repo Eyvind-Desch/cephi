@@ -52,14 +52,20 @@ pub struct Shortcut {
 pub enum ShortcutAction {
     /// Show Cephi (without hiding it again, unlike the main hotkey).
     Show,
-    NewChat,
+    /// Pick up the text selected in the foreground app, like [`Settings::selection_hotkey`].
+    Selection,
     /// Freeze the screen and pick a region to ask about.
     Screenshot,
+    /// Start dictating, or stop and insert what was said.
+    Dictate,
+    NewChat,
+    /// Send [`Shortcut::text`].
+    Prompt,
     Translate,
     Web,
     History,
-    /// Send [`Shortcut::text`].
-    Prompt,
+    Tools,
+    Settings,
 }
 
 impl Shortcut {

@@ -3,7 +3,7 @@ use tauri::{AppHandle, Emitter};
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
 
 use super::window::{self, MAIN_LABEL};
-use crate::config::Shortcut;
+use crate::config::{Shortcut, ShortcutAction};
 use crate::integrations::selection;
 
 /// Selected text picked up by the selection hotkey (`None` = nothing was selected).
@@ -93,6 +93,12 @@ fn register_custom(app: &AppHandle, shortcuts: &[Shortcut]) -> Result<(), String
 /// Brings Cephi up and lets the UI carry the action out: everything a shortcut can do, the UI can
 /// already do (open a view, take a screenshot, send a message), including the fast path for `prompt`.
 fn run(app: &AppHandle, shortcut: &Shortcut) {
+    // The selection has to be copied while the other app still has the focus, so this one cannot
+    // wait for the window: it takes the same route as the built-in selection hotkey.
+    if shortcut.action == ShortcutAction::Selection {
+        pick_up_selection(app.clone());
+        return;
+    }
     if let Err(e) = window::show(app) {
         log::error!("show window: {e}");
     }

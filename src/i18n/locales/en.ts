@@ -266,12 +266,16 @@ export const en = {
       inApp: "Inside Cephi",
       actions: {
         show: "Open Cephi",
-        newChat: "New chat",
+        selection: "Pick up selected text",
         screenshot: "Screenshot",
+        dictate: "Dictate",
+        newChat: "New chat",
+        prompt: "Send a message",
         translate: "Translator",
         web: "Web tab",
         history: "Earlier chats",
-        prompt: "Send a message",
+        tools: "Tools",
+        settings: "Settings",
       },
       keys: {
         send: "Send",
