@@ -305,7 +305,7 @@ async fn connect(name: &str, server: &ServerConfig, http: &reqwest::Client) -> R
             let (transport, stderr) = TokioChildProcess::builder(cmd)
                 .stderr(Stdio::piped())
                 .spawn()
-                .map_err(|e| t!("mcp.start_failed", error = e).to_string())?;
+                .map_err(|e| t!("mcp.start_failed", error = readable(e)).to_string())?;
             // Servers log to stderr; keep it in Cephi's log instead of a console window.
             if let Some(stderr) = stderr {
                 let server_name = name.to_string();
@@ -318,7 +318,7 @@ async fn connect(name: &str, server: &ServerConfig, http: &reqwest::Client) -> R
             }
             ().serve(transport)
                 .await
-                .map_err(|e| t!("mcp.start_failed", error = e).to_string())?
+                .map_err(|e| t!("mcp.start_failed", error = readable(e)).to_string())?
         }
         Transport::Http { url } => {
             let mut headers = HashMap::new();
@@ -339,13 +339,13 @@ async fn connect(name: &str, server: &ServerConfig, http: &reqwest::Client) -> R
                     let transport = StreamableHttpClientTransport::with_client(authorized, config);
                     ().serve(transport)
                         .await
-                        .map_err(|e| t!("mcp.start_failed", error = e).to_string())?
+                        .map_err(|e| t!("mcp.start_failed", error = readable(e)).to_string())?
                 }
                 None => {
                     let transport = StreamableHttpClientTransport::from_config(config);
                     ().serve(transport)
                         .await
-                        .map_err(|e| t!("mcp.start_failed", error = e).to_string())?
+                        .map_err(|e| t!("mcp.start_failed", error = readable(e)).to_string())?
                 }
             }
         }
@@ -354,7 +354,7 @@ async fn connect(name: &str, server: &ServerConfig, http: &reqwest::Client) -> R
     let listed = client
         .list_all_tools()
         .await
-        .map_err(|e| t!("mcp.list_failed", error = e).to_string())?;
+        .map_err(|e| t!("mcp.list_failed", error = readable(e)).to_string())?;
     let tools = listed
         .into_iter()
         .map(|tool| {
@@ -386,6 +386,51 @@ async fn connect(name: &str, server: &ServerConfig, http: &reqwest::Client) -> R
 }
 
 /// `<server>__<tool>` with characters every model API accepts, at most 64 long.
+/// Turns a transport error into a sentence a person can act on.
+///
+/// The errors from the MCP library carry the whole Rust type of the transport in brackets and end
+/// in wording like "when send initialize request". What actually matters is the HTTP status behind
+/// it, so that is what is reported when there is one.
+fn readable(error: impl std::fmt::Display) -> String {
+    let text = error.to_string();
+    match http_status(&text) {
+        // The login exists but the server does not accept it.
+        Some(401 | 403) => t!("mcp.http_unauthorized").into(),
+        Some(404) => t!("mcp.http_not_found").into(),
+        Some(status) => t!("mcp.http_status", status = status).into(),
+        None => without_type_paths(&text),
+    }
+}
+
+/// The status code of the first `HTTP <code>` in the text.
+fn http_status(text: &str) -> Option<u16> {
+    let digits: String = text
+        .split("HTTP ")
+        .nth(1)?
+        .chars()
+        .take_while(char::is_ascii_digit)
+        .collect();
+    digits.parse().ok()
+}
+
+/// Drops `[rmcp::transport::…]` type names, which say nothing to a reader.
+fn without_type_paths(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    let mut rest = text;
+    while let Some(open) = rest.find('[') {
+        let Some(close) = rest[open..].find(']').map(|end| open + end) else {
+            break;
+        };
+        out.push_str(&rest[..open]);
+        if !rest[open + 1..close].contains("::") {
+            out.push_str(&rest[open..=close]);
+        }
+        rest = &rest[close + 1..];
+    }
+    out.push_str(rest);
+    out.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
 fn exposed_name(server: &str, tool: &str) -> String {
     let clean = |s: &str| -> String {
         s.chars()
@@ -474,5 +519,33 @@ mod tests {
         let manager = McpManager::default();
         tauri::async_runtime::block_on(manager.sync(&McpConfig::default()));
         assert!(manager.tools().is_empty() && manager.servers().is_empty());
+    }
+
+    /// Exactly what the library reports when an online server answers the first request with a 404.
+    const TRANSPORT_ERROR: &str = "Send message error Transport [rmcp::transport::worker::WorkerTransport<rmcp::transport::streamable_http_client::StreamableHttpClientWorker<reqwest::async_impl::client::Client>>] error: unexpected server response: HTTP 404 Not Found: Not Found, when send initialize request";
+
+    #[test]
+    fn an_http_status_becomes_a_sentence_about_the_address() {
+        assert_eq!(readable(TRANSPORT_ERROR), t!("mcp.http_not_found"));
+        assert_eq!(readable("… HTTP 401 Unauthorized …"), t!("mcp.http_unauthorized"));
+        assert_eq!(readable("… HTTP 503 …"), t!("mcp.http_status", status = 503));
+    }
+
+    #[test]
+    fn errors_without_a_status_keep_their_wording_but_lose_the_rust_types() {
+        assert_eq!(
+            readable("Send message error Transport [rmcp::transport::worker::WorkerTransport] error: closed"),
+            "Send message error Transport error: closed"
+        );
+        // Brackets that are not a type path belong to the message.
+        assert_eq!(readable("server [linear] refused"), "server [linear] refused");
+        assert_eq!(readable("no brackets here"), "no brackets here");
+    }
+
+    #[test]
+    fn a_status_is_only_read_where_one_stands() {
+        assert_eq!(http_status(TRANSPORT_ERROR), Some(404));
+        assert_eq!(http_status("connection refused"), None);
+        assert_eq!(http_status("HTTP without a number"), None);
     }
 }
