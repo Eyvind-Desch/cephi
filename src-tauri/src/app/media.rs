@@ -2,6 +2,7 @@
 
 use std::time::Duration;
 
+use rust_i18n::t;
 use tauri::{AppHandle, Manager};
 
 use crate::desktop::{capture, window};
@@ -21,9 +22,15 @@ pub async fn dictate(state: &AppState) -> AppResult<String> {
     tokio::time::sleep(RECORDER_DRAIN).await;
     let wav = state.recorder.take().map_err(AppError::msg)?;
     let config = state.config();
-    crate::voice::transcribe(&state.http, &config.settings.voice, wav)
+    let text = crate::voice::transcribe(&state.http, &config.settings.voice, wav)
         .await
-        .map_err(AppError::msg)
+        .map_err(AppError::msg)?;
+    log::info!("dictation: {} character(s)", text.len());
+    // An empty answer used to reach the composer as "", where nothing happened at all.
+    if text.is_empty() {
+        return Err(AppError::msg(t!("voice.not_understood")));
+    }
+    Ok(text)
 }
 
 /// A screenshot of the monitor the mouse is on. Cephi hides itself first, so the picture shows

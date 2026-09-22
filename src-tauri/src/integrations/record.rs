@@ -23,6 +23,9 @@ const TARGET_RATE: u32 = 16_000;
 const MAX_SECONDS: usize = 120;
 /// How often the buffer is drained.
 const POLL: Duration = Duration::from_millis(20);
+/// A recording whose loudest sample stays below this carries no speech: the wrong input device is
+/// selected in Windows, or it is muted. Quiet speech from a far microphone still reaches ~0.02.
+const SILENCE_PEAK: f32 = 0.004;
 /// Sub-format of plain PCM in an extensible format description (not exported by the bindings).
 const SUBTYPE_PCM: windows::core::GUID = windows::core::GUID::from_u128(0x00000001_0000_0010_8000_00aa00389b71);
 /// Sample rates outside this range mean a broken device description.
@@ -102,6 +105,14 @@ impl Recorder {
         let samples = std::mem::take(&mut *lock(&self.samples));
         if samples.len() < TARGET_RATE as usize / 4 {
             return Err(t!("voice.too_short").into());
+        }
+        let peak = samples.iter().fold(0.0f32, |peak, sample| peak.max(sample.abs()));
+        let seconds = samples.len() as f32 / TARGET_RATE as f32;
+        log::info!("recording: {seconds:.1} s, peak {peak:.3}");
+        // Whisper answers an empty line for silence, which looks like "dictation does nothing".
+        // Saying that the microphone delivered nothing points at the actual problem.
+        if peak < SILENCE_PEAK {
+            return Err(t!("voice.silent").into());
         }
         Ok(wav(&samples, TARGET_RATE))
     }
@@ -341,6 +352,26 @@ mod tests {
             cbSize: 0,
             ..Default::default()
         }
+    }
+
+    /// Fills a recorder with `seconds` of a tone at `amplitude` and asks for the WAV.
+    fn recorded(seconds: f32, amplitude: f32) -> Result<Vec<u8>, String> {
+        let recorder = Recorder::default();
+        let count = (TARGET_RATE as f32 * seconds) as usize;
+        *lock(&recorder.samples) = (0..count).map(|i| amplitude * (i as f32 * 0.1).sin()).collect();
+        recorder.take()
+    }
+
+    #[test]
+    fn a_recording_without_sound_says_so_instead_of_dictating_nothing() {
+        assert!(recorded(2.0, 0.0).is_err(), "complete silence");
+        assert!(
+            recorded(2.0, SILENCE_PEAK / 2.0).is_err(),
+            "a muted or wrongly selected input device"
+        );
+        assert!(recorded(2.0, 0.05).is_ok(), "quiet speech still goes through");
+        // Length is judged first: there is nothing to measure a level on.
+        assert!(recorded(0.1, 0.5).is_err(), "too short");
     }
 
     #[test]
