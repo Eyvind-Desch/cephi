@@ -107,11 +107,18 @@ Requirements: Node 22+, Rust (MSVC), VS C++ Build Tools, Ollama.
 npm install
 npm run app          # dev mode with hot reload
 npm run check        # TypeScript + Clippy + Rust tests
-npm run app:build    # installer (NSIS) → src-tauri/target/release/bundle/
+npm run app:build    # installer (NSIS) → <build folder>/release/bundle/
+npm run clean        # throws the whole build folder away
 ```
 
 Custom config folder for testing: `$env:CEPHI_CONFIG_DIR = "X:\tmp\cephi-config"`.
 Logs: `%LOCALAPPDATA%\io.github.eyvind-desch.cephi\logs\`.
+
+**Build folder.** Debug builds are large and Cargo never prunes them, so dependencies are built
+without debug information (`[profile.dev]` in `src-tauri/Cargo.toml`) — our own code keeps line
+numbers, so panics stay readable. The folder is `src-tauri/target` unless a machine puts it
+elsewhere with `src-tauri/.cargo/config.toml` (not in the repository, it is a per-machine path).
+`npm run clean` empties it; the next build then takes a few minutes.
 
 ## Docs
 

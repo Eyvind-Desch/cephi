@@ -12,7 +12,8 @@
     "app": "tauri dev",
     "app:build": "tauri build",
     "typecheck": "tsc --noEmit",
-    "check": "tsc --noEmit && cd src-tauri && cargo clippy --all-targets -- -D warnings && cargo test"
+    "check": "tsc --noEmit && cd src-tauri && cargo clippy --all-targets -- -D warnings && cargo test",
+    "clean": "cd src-tauri && cargo clean"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",

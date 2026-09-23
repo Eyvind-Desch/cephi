@@ -52,6 +52,15 @@ rust-i18n = "4.2.2"
 async-trait = "0.1"
 rmcp = { version = "3.4", default-features = false, features = ["auth", "client", "transport-child-process", "transport-streamable-http-client-reqwest", "reqwest-native-tls", "which-command"] }
 
+# Debug builds carry debug symbols for every dependency, which is what makes the build folder tens
+# of gigabytes. Cephi is diagnosed through its log, not by stepping through tokio: dependencies get
+# no debug info at all, and our own code keeps line numbers so panics stay readable.
+[profile.dev]
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+debug = false
+
 # https://tauri.app/concept/size/#cargo-configuration
 [profile.release]
 codegen-units = 1
