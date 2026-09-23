@@ -27,5 +27,3 @@ obj/
 # Logs
 *.log
 
-# Machine-specific build location (see src-tauri/.cargo/config.toml)
-.cargo/
