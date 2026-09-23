@@ -15,8 +15,11 @@ pub const CLOUD_LIMIT: usize = 64;
 
 /// Words shorter than this carry no meaning for matching ("a", "to", "in", "der", …).
 const MIN_WORD: usize = 3;
-/// Words match when they share this many leading characters ("issues" ↔ "issue", "Dateien" ↔ "Datei").
-const STEM: usize = 5;
+/// Shortest word that may stand for a longer one ("song" ↔ "songs", "Datei" ↔ "Dateien").
+const STEM: usize = 4;
+/// How much longer the other word may be. Enough for a plural or a German ending, not enough for
+/// a different word that happens to start the same ("play" ↔ "playlist").
+const MAX_ENDING: usize = 3;
 
 /// What a tool is matched by. `context` is the MCP server or the tool's title in the user's
 /// language — the strongest hint, because that is the word people actually use ("Websuche").
@@ -79,12 +82,18 @@ fn score(tool: &Candidate<'_>, request: &[String], used: &HashSet<String>) -> us
         .sum()
 }
 
+/// Whether two words mean the same thing for matching: equal, or one the beginning of the other.
+///
+/// People ask in the plural ("songs", "Dateien") while the tool file has the singular, so a shorter
+/// word that the longer one starts with counts as a hit. The ending may only grow by a little,
+/// otherwise unrelated words would meet ("play" and "playlist").
 fn similar(a: &str, b: &str) -> bool {
     if a == b {
         return true;
     }
-    let stem = |w: &str| w.chars().take(STEM).collect::<String>();
-    a.chars().count() >= STEM && b.chars().count() >= STEM && stem(a) == stem(b)
+    let (short, long) = if a.chars().count() < b.chars().count() { (a, b) } else { (b, a) };
+    let (short_len, long_len) = (short.chars().count(), long.chars().count());
+    short_len >= STEM && long_len - short_len <= MAX_ENDING && long.starts_with(short)
 }
 
 /// Frequent English and German words that would match almost every description.
@@ -167,8 +176,10 @@ mod tests {
         assert_eq!(names(&picked)[0], "github__create_issue");
         assert!(picked.iter().all(|e| e.1 == "github"), "{:?}", names(&picked));
 
+        // "file" also reaches the server name "files", so both of its tools are offered.
         let picked = pick(mcp_catalog(), "lies die Datei notes.txt (read file)", 2);
-        assert_eq!(names(&picked), ["files__read_file"]);
+        assert_eq!(names(&picked)[0], "files__read_file");
+        assert!(picked.iter().all(|e| e.1 == "files"), "{:?}", names(&picked));
     }
 
     /// The German title is what a German request names, not the English description.
@@ -232,5 +243,59 @@ mod tests {
         let used = HashSet::from(["notion__create_page".to_string()]);
         let picked = relevant(mcp_catalog(), describe, "and now rename it", &used, 3);
         assert_eq!(names(&picked), ["notion__create_page"]);
+    }
+
+    /// Two connected servers bring about ninety tools, against Cephi's own nineteen. They must not
+    /// bury the tool the question is actually about.
+    fn crowded_catalog() -> Vec<Entry> {
+        let mut catalog = vec![
+            ("spotify_play", "Spotify spotify musik lied song album playlist künstler", "Plays music on Spotify: a song, an album, an artist or a playlist."),
+            ("media_control", "Medien & Lautstärke lautstärke lauter leiser stumm pause abspielen nächster lied musik", "Controls playback and volume."),
+            ("web_search", "Websuche internet nachrichten aktuell", "Searches the web."),
+            ("open_app", "App öffnen starte programm", "Starts an installed application."),
+        ];
+        for name in [
+            "list_issues", "create_issue", "update_issue", "list_projects", "create_project", "list_teams",
+            "get_issue", "search_issues", "list_comments", "create_comment", "list_cycles", "list_users",
+        ] {
+            catalog.push((
+                Box::leak(format!("linear-tickets__{name}").into_boxed_str()),
+                "linear-tickets",
+                "Work with Linear issues, projects, playlists of work and their ids.",
+            ));
+        }
+        for name in ["read_file", "write_file", "list_directory", "search_files", "move_file", "get_file_info"] {
+            catalog.push((
+                Box::leak(format!("dateien__{name}").into_boxed_str()),
+                "dateien",
+                "Read, write and search files in the file system.",
+            ));
+        }
+        catalog
+    }
+
+    #[test]
+    fn a_question_about_music_finds_the_music_tools_among_ninety() {
+        for question in [
+            "hey kannst du mir meine lieblings songs abspielen?",
+            "spiel mal musik",
+            "kannst du spotify starten und mir die playlist zeigen?",
+        ] {
+            let chosen = pick(crowded_catalog(), question, LOCAL_LIMIT);
+            let picked = names(&chosen);
+            assert!(picked.contains(&"spotify_play"), "{question:?} → {picked:?}");
+        }
+    }
+
+    /// Plurals are how people ask ("songs", "Dateien"); the singular is in the tool file.
+    #[test]
+    fn a_plural_finds_the_singular() {
+        assert!(similar("song", "songs"));
+        assert!(similar("songs", "song"));
+        assert!(similar("datei", "dateien"));
+        assert!(similar("issue", "issues"));
+        // Different words that merely start alike stay apart.
+        assert!(!similar("song", "sonne"));
+        assert!(!similar("mail", "main"));
     }
 }
