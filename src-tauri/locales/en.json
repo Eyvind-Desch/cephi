@@ -219,7 +219,7 @@
   "voice": {
     "no_microphone": "No microphone available: %{error}",
     "too_short": "Nothing recorded. Speak a little longer.",
-    "silent": "The microphone delivered nothing. Check in Windows which input device is selected and whether it is muted.",
+    "silent": "The input device \"%{device}\" delivered nothing. Check in Windows whether it is the right one and not muted.",
     "not_understood": "Nothing understood. Speak a little closer to the microphone.",
     "unreachable": "Speech recognition is not running (Whisper at %{url}).",
     "failed": "Speech recognition failed: %{error}"

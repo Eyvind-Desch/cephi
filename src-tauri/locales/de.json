@@ -219,7 +219,7 @@
   "voice": {
     "no_microphone": "Kein Mikrofon verfügbar: %{error}",
     "too_short": "Nichts aufgenommen. Sprich etwas länger.",
-    "silent": "Das Mikrofon hat nichts geliefert. Prüfe in Windows, welches Eingabegerät ausgewählt ist und ob es stummgeschaltet ist.",
+    "silent": "Das Eingabegerät „%{device}“ hat nichts geliefert. Prüfe in Windows, ob es das richtige ist und nicht stummgeschaltet.",
     "not_understood": "Nichts verstanden. Sprich etwas näher am Mikrofon.",
     "unreachable": "Die Spracherkennung läuft nicht (Whisper unter %{url}).",
     "failed": "Spracherkennung fehlgeschlagen: %{error}"

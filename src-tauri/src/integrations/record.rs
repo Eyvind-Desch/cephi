@@ -9,13 +9,17 @@ use std::sync::{Arc, Mutex, MutexGuard};
 use std::time::Duration;
 
 use rust_i18n::t;
+use windows::Win32::Devices::FunctionDiscovery::PKEY_Device_FriendlyName;
 use windows::Win32::Media::Audio::{
-    eCapture, eConsole, IAudioCaptureClient, IAudioClient, IMMDeviceEnumerator, MMDeviceEnumerator,
+    eCapture, eConsole, IAudioCaptureClient, IAudioClient, IMMDevice, IMMDeviceEnumerator, MMDeviceEnumerator,
     AUDCLNT_BUFFERFLAGS_SILENT, AUDCLNT_SHAREMODE_SHARED, WAVEFORMATEX, WAVEFORMATEXTENSIBLE, WAVE_FORMAT_PCM,
 };
+
 use windows::Win32::Media::KernelStreaming::WAVE_FORMAT_EXTENSIBLE;
 use windows::Win32::Media::Multimedia::{KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, WAVE_FORMAT_IEEE_FLOAT};
-use windows::Win32::System::Com::{CoCreateInstance, CoInitializeEx, CoTaskMemFree, CLSCTX_ALL, COINIT_MULTITHREADED};
+use windows::Win32::System::Com::{
+    CoCreateInstance, CoInitializeEx, CoTaskMemFree, CLSCTX_ALL, COINIT_MULTITHREADED, STGM_READ,
+};
 
 /// What the speech service gets; Whisper works at 16 kHz anyway.
 const TARGET_RATE: u32 = 16_000;
@@ -40,6 +44,8 @@ pub struct Recorder {
     samples: Arc<Mutex<Vec<f32>>>,
     /// A problem that hit the recording after it started (e.g. the microphone was unplugged).
     failure: Arc<Mutex<Option<String>>>,
+    /// What Windows handed over as the input device; named in the message when it stays silent.
+    device: Arc<Mutex<Option<String>>>,
 }
 
 /// A poisoned lock only means a thread panicked while holding it; the data itself stays usable.
@@ -60,6 +66,7 @@ impl Recorder {
         let current = self.generation.clone();
         let samples = self.samples.clone();
         let failure = self.failure.clone();
+        let device = self.device.clone();
         let (ready_tx, ready_rx) = std::sync::mpsc::channel::<Result<(), String>>();
         std::thread::spawn(move || {
             let context = Capture {
@@ -67,6 +74,7 @@ impl Recorder {
                 current: &current,
                 running: &running,
                 samples: &samples,
+                device: &device,
             };
             if let Err(error) = capture(&context, &ready_tx) {
                 log::warn!("recording: {error}");
@@ -112,7 +120,8 @@ impl Recorder {
         // Whisper answers an empty line for silence, which looks like "dictation does nothing".
         // Saying that the microphone delivered nothing points at the actual problem.
         if peak < SILENCE_PEAK {
-            return Err(t!("voice.silent").into());
+            let device = lock(&self.device).clone().unwrap_or_else(|| "?".into());
+            return Err(t!("voice.silent", device = device).into());
         }
         Ok(wav(&samples, TARGET_RATE))
     }
@@ -130,6 +139,7 @@ struct Capture<'a> {
     current: &'a AtomicU64,
     running: &'a AtomicBool,
     samples: &'a Mutex<Vec<f32>>,
+    device: &'a Mutex<Option<String>>,
 }
 
 impl Capture<'_> {
@@ -150,6 +160,12 @@ fn capture(context: &Capture<'_>, ready: &std::sync::mpsc::Sender<Result<(), Str
             let device = enumerator
                 .GetDefaultAudioEndpoint(eCapture, eConsole)
                 .map_err(device_error)?;
+            // Which device Windows picked decides everything: "Stereo Mix" as the default records
+            // the speakers and hands over silence when nothing plays, which looks like a broken
+            // microphone. Worth knowing before every recording, and worth naming in the message.
+            let name = device_name(&device);
+            log::info!("recording from: {name}");
+            *lock(context.device) = Some(name);
             let client: IAudioClient = device.Activate(CLSCTX_ALL, None).map_err(device_error)?;
             let mix = client.GetMixFormat().map_err(device_error)?;
             let format = Format::read(mix);
@@ -305,6 +321,21 @@ impl Format {
             mono.push(sum / self.channels as f32);
         }
         mono
+    }
+}
+
+/// The name Windows shows for the device, for the log. Never fails the recording: without a name
+/// the recording still works, only the log line is less useful.
+fn device_name(device: &IMMDevice) -> String {
+    // SAFETY: the property store and the returned string are released before returning.
+    unsafe {
+        let Ok(store) = device.OpenPropertyStore(STGM_READ) else {
+            return "?".into();
+        };
+        let Ok(value) = store.GetValue(&PKEY_Device_FriendlyName) else {
+            return "?".into();
+        };
+        value.to_string()
     }
 }
 
