@@ -455,9 +455,13 @@ impl Run<'_> {
             "de" => "German",
             _ => "English",
         };
+        // A keyword or a fragment ("whats this app") is not a language choice, and an answer that
+        // starts in one language and finishes in another reads like a mistake.
         format!(
-            "{}\n\nCurrent date and time: {now}.\nThe user's language is {language}: answer in {language} \
-             unless the user writes full sentences in another language.",
+            "{}\n\nCurrent date and time: {now}.\nThe user's language is {language}. Answer in {language}, \
+             also when the question itself is written in another language. Only when the user writes \
+             several full sentences in another language, answer in that one — and then write the whole \
+             answer in it. Never change language part-way through an answer.",
             self.config.settings.agent.system_prompt
         )
     }

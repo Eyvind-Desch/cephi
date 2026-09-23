@@ -444,8 +444,24 @@ fn exposed_name(server: &str, tool: &str) -> String {
             .collect()
     };
     let mut name = format!("{}{SEPARATOR}{}", clean(server), clean(tool));
-    name.truncate(MAX_TOOL_NAME);
+    if name.len() > MAX_TOOL_NAME {
+        // Cutting alone would let two long names of one server end up the same, and the model would
+        // then call whichever came first. A fingerprint of the full name keeps them apart.
+        let suffix = format!("_{:08x}", fingerprint(&name));
+        name.truncate(MAX_TOOL_NAME - suffix.len());
+        name.push_str(&suffix);
+    }
     name
+}
+
+/// FNV-1a. It only has to tell names apart, not to be cryptographic.
+pub(super) fn fingerprint(text: &str) -> u32 {
+    let mut hash: u32 = 0x811c_9dc5;
+    for byte in text.as_bytes() {
+        hash ^= u32::from(*byte);
+        hash = hash.wrapping_mul(0x0100_0193);
+    }
+    hash
 }
 
 /// Text for the model: text blocks as they are, other content summarized.
@@ -475,6 +491,20 @@ mod tests {
         assert_eq!(exposed_name("github", "search_code"), "github__search_code");
         assert_eq!(exposed_name("my server", "do.thing"), "my_server__do_thing");
         assert_eq!(exposed_name("s", &"x".repeat(100)).len(), 64);
+    }
+
+    /// A server with many long tool names (Linear offers ~70) must not hand the model two tools
+    /// under one name — it would call whichever was listed first.
+    #[test]
+    fn long_names_of_one_server_stay_apart() {
+        let prefix = "a_very_long_tool_name_that_goes_past_the_limit_on_its_own";
+        let first = exposed_name("linear-tickets", &format!("{prefix}_one"));
+        let second = exposed_name("linear-tickets", &format!("{prefix}_two"));
+        assert_eq!(first.len(), MAX_TOOL_NAME);
+        assert_eq!(second.len(), MAX_TOOL_NAME);
+        assert_ne!(first, second);
+        // The same tool always gets the same name; the model may call it in a later round.
+        assert_eq!(first, exposed_name("linear-tickets", &format!("{prefix}_one")));
     }
 
     /// Starts `tests/fixtures/echo-mcp-server.js` (needs Node.js), lists its tool and calls it.

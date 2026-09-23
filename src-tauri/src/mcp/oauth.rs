@@ -15,6 +15,8 @@ use rust_i18n::t;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
 
+use super::fingerprint;
+
 /// How long the browser has to finish the login.
 const LOGIN_TIMEOUT: Duration = Duration::from_secs(300);
 /// A credential entry holds at most 2560 bytes, tokens can be longer: they are stored in pieces.
@@ -40,16 +42,6 @@ fn secret_name(server: &str, index: usize) -> String {
         .take(30)
         .collect();
     format!("mcp_oauth_{clean}_{:08x}_p{index}", fingerprint(server))
-}
-
-/// FNV-1a over the server name; it only has to separate names, not to be cryptographic.
-fn fingerprint(server: &str) -> u32 {
-    let mut hash: u32 = 0x811c_9dc5;
-    for byte in server.as_bytes() {
-        hash ^= u32::from(*byte);
-        hash = hash.wrapping_mul(0x0100_0193);
-    }
-    hash
 }
 
 /// Whether a server has been logged in before.
