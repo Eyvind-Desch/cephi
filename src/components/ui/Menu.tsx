@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { Check } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useId, useRef, useState, type ComponentType, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type ComponentType, type KeyboardEvent, type ReactNode } from "react";
 import { useUi } from "../../store/ui";
 
 /** Lucide icons and `BrandIcon` wrappers both fit. */
@@ -34,12 +34,17 @@ interface MenuProps {
   width?: string;
 }
 
+/** Space a popup keeps from the window edge. */
+const EDGE_MARGIN = 8;
+
 const isSelectable = (entry: MenuEntry) => entry.kind !== "separator" && entry.kind !== "label" && !entry.disabled;
 
 /** Lightweight dropdown menu: keyboard navigable, closes on outside click and Escape. */
 export function Menu({ trigger, entries, width = "w-60" }: MenuProps) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
+  /** Pixels the popup moves right so it stays inside the window (it opens right-aligned to the trigger). */
+  const [shift, setShift] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const id = useId();
@@ -52,6 +57,13 @@ export function Menu({ trigger, entries, width = "w-60" }: MenuProps) {
     const { setOverlay } = useUi.getState();
     setOverlay(true);
     return () => setOverlay(false);
+  }, [open]);
+
+  // Measured from the trigger, not the popup: the opening animation scales the popup.
+  useLayoutEffect(() => {
+    if (!open || !rootRef.current || !listRef.current) return setShift(0);
+    const left = rootRef.current.getBoundingClientRect().right - listRef.current.offsetWidth;
+    setShift(Math.max(0, EDGE_MARGIN - left));
   }, [open]);
 
   useEffect(() => {
@@ -122,7 +134,7 @@ export function Menu({ trigger, entries, width = "w-60" }: MenuProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -4 }}
             transition={{ duration: 0.12, ease: "easeOut" }}
-            style={{ transformOrigin: "top right" }}
+            style={{ transformOrigin: "top right", right: -shift }}
             className={clsx(
               "absolute top-full right-0 z-50 mt-1.5 rounded-xl border border-line bg-popover p-1 shadow-xl shadow-black/20 outline-none",
               width,
