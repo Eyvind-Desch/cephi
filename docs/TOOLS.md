@@ -216,6 +216,8 @@ is allowed. If the whole URL comes from the model (`{{url|raw}}`), only `http`/`
 | `radio` | `device` (`bluetooth`/`wlan`/`wifi`), `state` (`on`/`off`/`toggle`/`status`) | Turn Bluetooth/Wi-Fi on or off, toggle it, or check its status |
 | `translate` | `text`, optional `to` (language code or name) | Offline translation via local LibreTranslate, see [TRANSLATE.md](TRANSLATE.md) |
 | `web_search` | `query` | Web search via the local SearXNG (`settings.search`), result cards in the chat, excerpts for the AI, see [SEARCH.md](SEARCH.md) |
+| `note_add` | `text`, optional `title` | Saves a note in the notes tab |
+| `notes_search` | optional `query` | Reads the notes (all, or those containing `query`) |
 | `fetch_page` | `url` | Reads a public web page as text (article or main part, max. 12,000 characters); local and private addresses are refused |
 
 Numeric parameters also understand `30%`, `30 %`, `30 Prozent` ("30 percent"), and `2,5` (comma as decimal separator).
@@ -224,7 +226,7 @@ Numeric parameters also understand `30%`, `30 %`, `30 Prozent` ("30 percent"), a
 
 ## Many tools, one small model
 
-Every tool definition is part of the prompt: the 19 default tools are about 1500 tokens that a local
+Every tool definition is part of the prompt: the 21 default tools are about 1500 tokens that a local
 model reads before writing a single word — on a slow machine that is half a minute of silence. With a
 local model Cephi therefore offers only the tools that fit the request (at most 8), plus the ones
 already used in the chat. Cloud models get all of them.

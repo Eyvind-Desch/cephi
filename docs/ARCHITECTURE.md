@@ -25,6 +25,7 @@
 │ voice/        Whisper client; recording itself: integrations/record.rs (WASAPI) │
 │ services/     starts the local containers (compose config is shipped in the app) │
 │ history.rs    current chat on disk (UI messages + model history), archive       │
+│ notes.rs      notes tab on disk (notes.json); note_add / notes_search builtins  │
 │ mcp/          MCP client: servers from mcp.json, their tools, calls             │
 │ desktop/      window placement, web tab (child webview), tray, hotkey, capture  │
 └─────────────────────────────────────────────────────────────────────────────────┘
@@ -117,7 +118,7 @@ Rust types and their TypeScript mirrors must stay in sync:
 | `desktop/web.rs` → `WebState` | `WebState` |
 
 Events: `cephi://shown` (window shown), `cephi://config-changed` (hot reload), `cephi://web-state`,
-`cephi://web-open` (web tab).
+`cephi://web-open` (web tab), `cephi://notes-changed` (the agent added a note).
 
 ## New action types / builtins
 

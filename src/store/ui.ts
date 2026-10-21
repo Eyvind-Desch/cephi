@@ -3,7 +3,11 @@ import { setLanguage } from "../i18n";
 import { errorText } from "../lib/errors";
 import { api, type ConfigSnapshot, type Screenshot, type WindowMode } from "../lib/ipc";
 
-export type PanelView = "chat" | "history" | "settings" | "tools" | "web" | "translate";
+export type PanelView = "chat" | "history" | "settings" | "tools" | "web" | "translate" | "notes";
+/** The main views in the header's tab switch, in order (Ctrl+1 … Ctrl+4, Ctrl+Tab). */
+export const TAB_VIEWS = ["chat", "web", "translate", "notes"] as const;
+export type TabView = (typeof TAB_VIEWS)[number];
+
 export type SettingsTab = "general" | "shortcuts" | "keys" | "mcp";
 
 export interface PageContext {
@@ -52,6 +56,8 @@ interface UiState {
   toggleMode: () => void;
   setView: (view: PanelView) => void;
   openSettings: (tab: SettingsTab) => void;
+  /** Next (`1`) or previous (`-1`) tab; from a sub-view like settings it counts from the chat. */
+  cycleTab: (delta: 1 | -1) => void;
   togglePinned: () => void;
   setProfile: (id: string) => void;
   applyConfig: (config: ConfigSnapshot) => void;
@@ -104,6 +110,11 @@ export const useUi = create<UiState>()((set, get) => {
     setView: (view) => {
       set({ view });
       setMode(panelMode(view, get().webLarge));
+    },
+
+    cycleTab: (delta) => {
+      const index = Math.max(0, TAB_VIEWS.indexOf(get().view as TabView));
+      get().setView(TAB_VIEWS[(index + delta + TAB_VIEWS.length) % TAB_VIEWS.length]);
     },
 
     openSettings: (settingsTab) => {

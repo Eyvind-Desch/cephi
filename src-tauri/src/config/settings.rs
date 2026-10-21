@@ -62,6 +62,8 @@ pub enum ShortcutAction {
     /// Send [`Shortcut::text`].
     Prompt,
     Translate,
+    /// Open the notes tab with a new note (quick capture).
+    Notes,
     Web,
     History,
     Tools,

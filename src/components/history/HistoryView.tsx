@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { MessageSquare, Search, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { formatWhen } from "../../lib/dates";
 import { errorText } from "../../lib/errors";
 import { api, type ArchivedChat } from "../../lib/ipc";
 import { useChat } from "../../store/chat";
@@ -134,19 +135,4 @@ function ChatRow({
       </button>
     </li>
   );
-}
-
-/** Today: the time. This year: day and month. Otherwise the full date. */
-function formatWhen(iso: string, language: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "";
-  const now = new Date();
-  if (date.toDateString() === now.toDateString()) {
-    return new Intl.DateTimeFormat(language, { hour: "2-digit", minute: "2-digit" }).format(date);
-  }
-  const options: Intl.DateTimeFormatOptions =
-    date.getFullYear() === now.getFullYear()
-      ? { day: "numeric", month: "short" }
-      : { day: "numeric", month: "short", year: "numeric" };
-  return new Intl.DateTimeFormat(language, options).format(date);
 }

@@ -25,6 +25,7 @@ use crate::history::ChatStore;
 use crate::launcher::AppIndex;
 use crate::llm::{OllamaClient, LOCAL_PROVIDER_ID};
 use crate::migrate;
+use crate::notes::NoteStore;
 use crate::state::AppState;
 
 pub const EVENT_CONFIG_CHANGED: &str = "cephi://config-changed";
@@ -60,8 +61,9 @@ pub fn setup(app: &AppHandle) -> AppResult<()> {
         .map_err(|e| AppError::msg(format!("data directory not found: {e}")))?;
     let chats = ChatStore::new(data_dir.join("chats"));
     let saved_history = chats.load().map(|chat| chat.history);
+    let notes = NoteStore::new(data_dir.clone());
 
-    app.manage(AppState::new(paths, config, http, launcher, chats));
+    app.manage(AppState::new(paths, config, http, launcher, chats, notes));
     app.manage(region::Pending::default());
     if let Some(history) = saved_history {
         log::info!("chat restored: {} messages", history.len());

@@ -124,6 +124,12 @@
     "level_missing": "set_volume needs \"level\" (0–100).",
     "level_out_of_range": "Volume must be between 0 and 100, not %{level}."
   },
+  "notes": {
+    "added": "Saved to your notes.",
+    "empty": "What should I note down?",
+    "save_failed": "Could not save the note: %{error}",
+    "none_found": "No matching notes."
+  },
   "radio": {
     "bluetooth": "Bluetooth",
     "wifi": "Wi-Fi",

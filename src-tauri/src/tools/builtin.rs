@@ -10,6 +10,7 @@ use crate::integrations::media::MediaAction;
 use crate::integrations::radio;
 use crate::integrations::spotify::{self, SearchKind};
 use crate::launcher::{FAST_PATH_MIN_SCORE, TOOL_MIN_SCORE};
+use crate::notes::{self, Note};
 use crate::search;
 use crate::services::Service;
 use crate::state::AppState;
@@ -27,6 +28,8 @@ pub enum Builtin {
     WebSearch,
     FetchPage,
     Translate,
+    NoteAdd,
+    NotesSearch,
 }
 
 impl Builtin {
@@ -42,6 +45,8 @@ impl Builtin {
             Builtin::WebSearch => "web_search",
             Builtin::FetchPage => "fetch_page",
             Builtin::Translate => "translate",
+            Builtin::NoteAdd => "note_add",
+            Builtin::NotesSearch => "notes_search",
         }
     }
 
@@ -53,9 +58,9 @@ impl Builtin {
             Builtin::SpotifyPlay | Builtin::WebSearch => &["query"],
             Builtin::MediaControl => &["action"],
             Builtin::Radio => &["device", "state"],
-            Builtin::Translate => &["text"],
+            Builtin::Translate | Builtin::NoteAdd => &["text"],
             Builtin::FetchPage => &["url"],
-            Builtin::Datetime | Builtin::ClipboardRead => &[],
+            Builtin::Datetime | Builtin::ClipboardRead | Builtin::NotesSearch => &[],
         }
     }
 
@@ -107,6 +112,14 @@ impl Builtin {
             Builtin::Translate => {
                 let to = args.get("to").and_then(|v| v.as_str());
                 return translate(ctx, str_arg(args, "text"), to).await;
+            }
+            Builtin::NoteAdd => {
+                let title = args.get("title").and_then(|v| v.as_str()).unwrap_or_default();
+                note_add(ctx, title, str_arg(args, "text"))
+            }
+            Builtin::NotesSearch => {
+                let query = args.get("query").and_then(|v| v.as_str()).unwrap_or_default();
+                Ok(notes_search(ctx, query))
             }
             Builtin::Datetime => Ok(chrono::Local::now().format("%A, %Y-%m-%d %H:%M:%S (%:z)").to_string()),
             Builtin::ClipboardRead => {
@@ -200,6 +213,40 @@ async fn translate(ctx: &ExecContext<'_>, text: &str, to: Option<&str>) -> Resul
         content,
         display: Some(ToolDisplay::Translation(translation)),
     })
+}
+
+fn note_add(ctx: &ExecContext<'_>, title: &str, text: &str) -> Result<String, String> {
+    let state = ctx.app.state::<AppState>();
+    let note = Note {
+        id: String::new(),
+        title: title.trim().to_string(),
+        text: text.trim().to_string(),
+        checklist: false,
+        items: Vec::new(),
+        color: "default".into(),
+        pinned: false,
+        created_at: String::new(),
+        updated_at: String::new(),
+    };
+    match state.notes.save(note) {
+        Ok(Some(_)) => {
+            notes::notify(ctx.app);
+            Ok(t!("notes.added").into())
+        }
+        Ok(None) => Err(t!("notes.empty").into()),
+        Err(e) => Err(t!("notes.save_failed", error = e).into()),
+    }
+}
+
+fn notes_search(ctx: &ExecContext<'_>, query: &str) -> String {
+    let found = ctx.app.state::<AppState>().notes.search_for_model(query);
+    if found.is_empty() {
+        t!("notes.none_found").into()
+    } else {
+        found.join("
+---
+")
+    }
 }
 
 async fn open_app(ctx: &ExecContext<'_>, name: &str) -> Result<String, String> {

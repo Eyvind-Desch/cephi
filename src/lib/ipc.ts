@@ -33,6 +33,29 @@ export interface ArchivedChat {
   messages: number;
 }
 
+/** `src-tauri/src/notes.rs` */
+export type NoteColor = "default" | "red" | "orange" | "yellow" | "green" | "teal" | "blue" | "purple";
+
+export interface NoteItem {
+  text: string;
+  done: boolean;
+}
+
+export interface Note {
+  /** Empty for a note that was never saved. */
+  id: string;
+  title: string;
+  text: string;
+  /** A checklist note shows `items` instead of `text`. */
+  checklist: boolean;
+  items: NoteItem[];
+  color: NoteColor;
+  pinned: boolean;
+  /** RFC 3339, set by the backend. */
+  createdAt: string;
+  updatedAt: string;
+}
+
 /** `src-tauri/src/desktop/autostart.rs` */
 export interface AutostartState {
   enabled: boolean;
@@ -114,6 +137,7 @@ export type ShortcutAction =
   | "newChat"
   | "prompt"
   | "translate"
+  | "notes"
   | "web"
   | "history"
   | "tools"
@@ -299,6 +323,12 @@ export const api = {
   chatArchiveOpen: (id: string) => invoke<unknown>("chat_archive_open", { id }),
   chatArchiveDelete: (id: string) => invoke<void>("chat_archive_delete", { id }),
 
+  /** Pinned first, then most recently changed. */
+  notesList: () => invoke<Note[]>("notes_list"),
+  /** Creates (empty id) or updates a note; `null` when it was empty and got removed. */
+  notesSave: (note: Note) => invoke<Note | null>("notes_save", { note }),
+  notesDelete: (id: string) => invoke<void>("notes_delete", { id }),
+
   windowSetMode: (mode: WindowMode) => invoke<void>("window_set_mode", { mode }),
   windowHide: () => invoke<void>("window_hide"),
   windowSetPinned: (pinned: boolean) => invoke<void>("window_set_pinned", { pinned }),
@@ -342,12 +372,25 @@ export const onSelection = (handler: (text: string | null) => void): Promise<Unl
   listen<string | null>("cephi://selection", (event) => handler(event.payload));
 
 /** `src-tauri/src/desktop/web.rs` (`SHORTCUT_ACTIONS`): a Cephi shortcut pressed inside the web page. */
-export type WebShortcut = "escape" | "new-chat" | "toggle-mode" | "address";
+export type WebShortcut =
+  | "escape"
+  | "new-chat"
+  | "toggle-mode"
+  | "address"
+  | "tab-next"
+  | "tab-prev"
+  | "tab-1"
+  | "tab-2"
+  | "tab-3"
+  | "tab-4";
 
 export const onWebShortcut = (handler: (action: WebShortcut) => void): Promise<UnlistenFn> =>
   listen<WebShortcut>("cephi://web-shortcut", (event) => handler(event.payload));
 
 /** A tool opened a page in the web tab. */
+/** The agent added a note (`note_add`). */
+export const onNotesChanged = (handler: () => void): Promise<UnlistenFn> => listen("cephi://notes-changed", handler);
+
 export const onWebOpen = (handler: () => void): Promise<UnlistenFn> => listen("cephi://web-open", handler);
 
 export const onConfigChanged = (handler: (snapshot: ConfigSnapshot) => void): Promise<UnlistenFn> =>

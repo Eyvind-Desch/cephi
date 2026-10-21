@@ -9,6 +9,7 @@ use crate::integrations::record::Recorder;
 use crate::integrations::spotify::SpotifyClient;
 use crate::launcher::AppIndex;
 use crate::mcp::McpManager;
+use crate::notes::NoteStore;
 
 /// Global application state, managed by Tauri.
 ///
@@ -25,6 +26,8 @@ pub struct AppState {
     pub launcher: AppIndex,
     /// The current conversation on disk.
     pub chats: ChatStore,
+    /// The notes tab.
+    pub notes: NoteStore,
     pub spotify: SpotifyClient,
     /// Microphone recording for dictation.
     pub recorder: Recorder,
@@ -39,6 +42,7 @@ impl AppState {
         http: reqwest::Client,
         launcher: AppIndex,
         chats: ChatStore,
+        notes: NoteStore,
     ) -> Self {
         Self {
             paths,
@@ -49,6 +53,7 @@ impl AppState {
             web: WebController::default(),
             launcher,
             chats,
+            notes,
             spotify: SpotifyClient::default(),
             recorder: Recorder::default(),
             config: RwLock::new(Arc::new(config)),

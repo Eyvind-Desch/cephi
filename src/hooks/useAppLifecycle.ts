@@ -10,7 +10,8 @@ import {
   onWebState,
 } from "../lib/ipc";
 import { useChat } from "../store/chat";
-import { useUi } from "../store/ui";
+import { emptyNote, useNotes } from "../store/notes";
+import { TAB_VIEWS, useUi } from "../store/ui";
 import { useVoice } from "../store/voice";
 import { useWeb } from "../store/web";
 import i18n from "../i18n";
@@ -69,6 +70,12 @@ function goBackOrHide() {
   else void api.windowHide();
 }
 
+/** Ctrl+1 … Ctrl+4: that tab. */
+function openTab(number: number) {
+  const view = TAB_VIEWS[number - 1];
+  if (view) useUi.getState().setView(view);
+}
+
 function newChat() {
   useUi.getState().setView("chat");
   void useChat.getState().reset();
@@ -92,6 +99,13 @@ export function useKeyboardShortcuts() {
       } else if (ctrl && key === "e") {
         e.preventDefault();
         useUi.getState().toggleMode();
+      } else if (ctrl && e.key === "Tab") {
+        e.preventDefault();
+        useUi.getState().cycleTab(e.shiftKey ? -1 : 1);
+      } else if (ctrl && !e.shiftKey && /^Digit[1-4]$/.test(e.code)) {
+        // `code`, not `key`: the digit row is the same on every keyboard layout.
+        e.preventDefault();
+        openTab(Number(e.code.slice(-1)));
       }
     };
     window.addEventListener("keydown", onKeyDown);
@@ -109,6 +123,14 @@ export function useKeyboardShortcuts() {
         case "address":
           useWeb.setState((s) => ({ addressFocus: s.addressFocus + 1 }));
           break;
+        case "tab-next":
+          useUi.getState().cycleTab(1);
+          break;
+        case "tab-prev":
+          useUi.getState().cycleTab(-1);
+          break;
+        default:
+          openTab(Number(action.slice("tab-".length)));
       }
     });
     return () => {
@@ -174,6 +196,12 @@ export function useShortcutActions() {
           break;
         case "settings":
           ui.openSettings("general");
+          break;
+        case "notes":
+          // Quick capture: straight into a new note.
+          ui.setView("notes");
+          ui.expand();
+          useNotes.getState().open(emptyNote());
           break;
         case "translate":
         case "web":

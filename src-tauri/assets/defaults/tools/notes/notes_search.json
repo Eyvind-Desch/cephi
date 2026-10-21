@@ -1,0 +1,18 @@
+{
+  "$schema": "../../schemas/tool.schema.json",
+  "name": "notes_search",
+  "title": { "en": "Search notes", "de": "Notizen durchsuchen" },
+  "description": "Reads the user's notes from Cephi's notes tab, optionally only those containing a search term. Use this when the user asks what they noted or wrote down.",
+  "keywords": {"en":"notes note find search wrote down list","de":"notizen notiz suche finde aufgeschrieben notiert liste"},
+  "permission": "auto",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "query": { "type": "string", "description": "Word to look for; omit to read all notes" }
+    }
+  },
+  "action": {
+    "type": "builtin",
+    "id": "notes_search"
+  }
+}

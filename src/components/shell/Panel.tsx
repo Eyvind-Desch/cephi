@@ -15,6 +15,7 @@ import { Header } from "./Header";
  * pressed — the chat must not wait for code nobody looked at yet.
  */
 const LAZY_VIEWS: Partial<Record<PanelView, ComponentType>> = {
+  notes: lazy(() => import("../notes/NotesView").then((m) => ({ default: m.NotesView }))),
   history: lazy(() => import("../history/HistoryView").then((m) => ({ default: m.HistoryView }))),
   settings: lazy(() => import("../settings/SettingsView").then((m) => ({ default: m.SettingsView }))),
   tools: lazy(() => import("../tools/ToolsView").then((m) => ({ default: m.ToolsView }))),
@@ -22,7 +23,7 @@ const LAZY_VIEWS: Partial<Record<PanelView, ComponentType>> = {
   web: lazy(() => import("../web/WebView").then((m) => ({ default: m.WebView }))),
 };
 
-/** Expanded mode: header plus the current view (chat, web tab, translator, tools or settings). */
+/** Expanded mode: header plus the current view (chat, web tab, translator, notes, tools or settings). */
 export function Panel() {
   const view = useUi((s) => s.view);
   const View = LAZY_VIEWS[view];

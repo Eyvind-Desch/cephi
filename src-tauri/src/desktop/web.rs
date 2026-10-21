@@ -33,7 +33,18 @@ const SEARCH_URL: &str = "https://www.google.com/search";
 const SHORTCUT_SCRIPT: &str = include_str!("../../assets/web-shortcuts.js");
 const SHORTCUT_SCHEME: &str = "cephi-key";
 /// Mirrored in `src/lib/ipc.ts` (`WebShortcut`).
-const SHORTCUT_ACTIONS: [&str; 4] = ["escape", "new-chat", "toggle-mode", "address"];
+const SHORTCUT_ACTIONS: [&str; 10] = [
+    "escape",
+    "new-chat",
+    "toggle-mode",
+    "address",
+    "tab-next",
+    "tab-prev",
+    "tab-1",
+    "tab-2",
+    "tab-3",
+    "tab-4",
+];
 
 /// Mirrored in `src/lib/ipc.ts` (`WebState`).
 #[derive(Clone, Debug, Default, Serialize)]

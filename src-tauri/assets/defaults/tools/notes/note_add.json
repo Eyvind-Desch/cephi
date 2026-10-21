@@ -1,0 +1,23 @@
+{
+  "$schema": "../../schemas/tool.schema.json",
+  "name": "note_add",
+  "title": { "en": "Add a note", "de": "Notiz anlegen" },
+  "description": "Saves a note in Cephi's notes tab. Use this when the user wants to write something down, remember it for later or keep an idea.",
+  "keywords": {"en":"note notes write down remember idea memo","de":"notiz notizen notiere aufschreiben merken idee merkzettel"},
+  "permission": "auto",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "text": { "type": "string", "description": "The note itself, as the user said it" },
+      "title": { "type": "string", "description": "Optional short title" }
+    },
+    "required": ["text"]
+  },
+  "triggers": [
+    "(notiere|notier|notiz:|notiz|note:|note down|take a note:) {text}"
+  ],
+  "action": {
+    "type": "builtin",
+    "id": "note_add"
+  }
+}

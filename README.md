@@ -24,6 +24,8 @@ One hotkey, one input field: answer, search, or action ("öffne die Bluetooth-Ei
 | `Enter` / `Shift+Enter` | Send / new line |
 | `Ctrl+E` | Compact bar ↔ large panel |
 | `Ctrl+N` | New chat (the previous one is archived) |
+| `Ctrl+1` … `Ctrl+4` | Chat, web tab, translator, notes |
+| `Ctrl+Tab` / `Ctrl+Shift+Tab` | Next / previous tab |
 | `Esc` | Back to the chat, in the chat: hide (also works inside a web page that doesn't use Esc itself) |
 | `Ctrl+L` | Web tab: address bar |
 | `/` | Commands: `/clear`, `/web …`, `/translate …`, `/model …`, `/history`, `/screenshot`, `/tools`, `/settings`, `/shortcuts`, `/keys`, `/mcp`, `/pin`, `/config`, `/reload` |
@@ -32,7 +34,7 @@ Clicking outside hides Cephi, unless it's pinned (⋯ menu). Tray icon: open, co
 
 **Your own shortcuts:** ⋯ → *Settings* → *Shortcuts* lists everything above and lets you add global key
 combinations of your own: open Cephi, pick up the selected text, screenshot, dictate, new chat, translator,
-web tab, earlier chats, tools, settings — or *send a message*. A message that is also a quick phrase
+new note, web tab, earlier chats, tools, settings — or *send a message*. A message that is also a quick phrase
 (`pause`, `? weather`, `tr word`) runs straight away, without the AI, so a shortcut can drive anything
 Cephi's tools can do.
 

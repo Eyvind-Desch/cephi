@@ -2,13 +2,13 @@
  * Design preview: runs the UI in a normal browser with sample data (dev server only).
  *
  * Open http://localhost:1420/?mode=expanded&view=settings&tab=keys&lang=de
- *   mode: compact | expanded | large   view: chat | settings | tools | web | translate   tab: general | keys | mcp   chat: demo | results | code   lang: en | de   keys: some
+ *   mode: compact | expanded | large   view: chat | settings | tools | web | translate | notes   tab: general | keys | mcp   chat: demo | results | code   lang: en | de   keys: some
  *   draft: text in the composer (e.g. "/" shows the commands)   web: page (web tab with a loaded page)   service: stopped (translator container down)   selection: 1 (text picked up from another app)   pageChip: 1 (question about the web tab's page)   flash: volume (level bar in the compact bar)   shot: 1 (screenshot waiting above the composer)
  *
  * Used to review UI changes (and take headless screenshots) without touching the running app.
  */
 import { mockIPC } from "@tauri-apps/api/mocks";
-import type { ConfigSnapshot, SecretGroup } from "../lib/ipc";
+import type { ConfigSnapshot, Note, SecretGroup } from "../lib/ipc";
 import { useChat } from "../store/chat";
 import type { Message } from "../store/chatModel";
 import { useTranslate } from "../store/translate";
@@ -260,13 +260,26 @@ const codeChat: Message[] = [
   },
 ];
 
+function demoNote(fields: Partial<Note>): Note {
+  const updatedAt = new Date().toISOString();
+  return { id: crypto.randomUUID(), title: "", text: "", checklist: false, items: [], color: "default", pinned: false, createdAt: updatedAt, updatedAt, ...fields };
+}
+
+const demoNotes: Note[] = [
+  demoNote({ title: "Einkauf", pinned: true, color: "yellow", checklist: true, items: [{ text: "Hafermilch", done: false }, { text: "Brot", done: false }, { text: "Kaffee", done: true }] }),
+  demoNote({ text: "Tauri: child webview braucht das Feature `unstable`.", color: "blue" }),
+  demoNote({ title: "Spielidee", text: "Ein Oktopus, der acht Dinge gleichzeitig erledigt.\nJeder Arm ist ein Werkzeug.", color: "purple" }),
+  demoNote({ title: "Zahnarzt", text: "Do 14:30" }),
+  demoNote({ text: "Buchtipp: The Overstory", color: "green" }),
+];
+
 function webResult(title: string, url: string, snippet: string) {
   return { title, url, snippet, engines: ["google", "brave"] };
 }
 
 export function installPreview() {
   mockIPC(
-    (cmd) => {
+    (cmd, payload) => {
       switch (cmd) {
         case "config_snapshot":
         case "config_reload":
@@ -302,6 +315,10 @@ export function installPreview() {
           return demoChat;
         case "chat_load":
           return null;
+        case "notes_list":
+          return demoNotes;
+        case "notes_save":
+          return { ...(payload as { note: Note }).note, id: (payload as { note: Note }).note.id || crypto.randomUUID(), updatedAt: new Date().toISOString() };
         case "web_state":
           return params.get("web") === "page"
             ? { url: "https://www.google.com/search?q=tauri+child+webview", title: "tauri child webview - Google Suche", loading: true }

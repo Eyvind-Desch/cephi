@@ -3,6 +3,7 @@
  * They run in the UI and never reach the model.
  */
 import { useChat } from "../store/chat";
+import { emptyNote, useNotes } from "../store/notes";
 import { useTranslate } from "../store/translate";
 import { useUi } from "../store/ui";
 import { api } from "./ipc";
@@ -18,6 +19,7 @@ export interface SlashCommand {
     | "commands.screenshot"
     | "commands.web"
     | "commands.translate"
+    | "commands.notes"
     | "commands.model"
     | "commands.tools"
     | "commands.settings"
@@ -49,6 +51,16 @@ export const COMMANDS: SlashCommand[] = [
     run: (query) => {
       useUi.getState().setView("web");
       if (query) void api.webNavigate(query);
+    },
+  },
+  {
+    name: "notes",
+    aliases: ["note"],
+    arg: "text",
+    description: "commands.notes",
+    run: (text) => {
+      useUi.getState().setView("notes");
+      if (text.trim()) void useNotes.getState().save({ ...emptyNote(), text: text.trim() }).catch(() => undefined);
     },
   },
   {

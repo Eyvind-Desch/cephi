@@ -196,8 +196,8 @@
             "properties": {
               "type": { "const": "builtin" },
               "id": {
-                "enum": ["datetime", "clipboard_read", "clipboard_write", "open_app", "spotify_play", "media_control", "radio", "web_search", "fetch_page", "translate"],
-                "description": "Required parameters: clipboard_write → text · open_app → name · spotify_play → query (optional kind) · media_control → action (optional level, amount) · radio → device, state · web_search → query · fetch_page → url · translate → text (optional to)."
+                "enum": ["datetime", "clipboard_read", "clipboard_write", "open_app", "spotify_play", "media_control", "radio", "web_search", "fetch_page", "translate", "note_add", "notes_search"],
+                "description": "Required parameters: clipboard_write → text · open_app → name · spotify_play → query (optional kind) · media_control → action (optional level, amount) · radio → device, state · web_search → query · fetch_page → url · translate → text (optional to) · note_add → text (optional title) · notes_search → (optional query)."
               }
             }
           }

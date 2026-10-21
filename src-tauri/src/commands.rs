@@ -16,6 +16,7 @@ use crate::desktop::web::{self, WebState};
 use crate::desktop::window::{self, WindowMode};
 use crate::error::{AppError, AppResult};
 use crate::history::ArchivedChat;
+use crate::notes::Note;
 use crate::secrets::SecretGroupInfo;
 use crate::services::{self, Service, ServiceStatus};
 use crate::state::AppState;
@@ -217,6 +218,23 @@ pub async fn chat_archive_open(state: State<'_, AppState>, id: String) -> AppRes
 #[tauri::command]
 pub fn chat_archive_delete(state: State<'_, AppState>, id: String) -> AppResult<()> {
     state.chats.delete_archived(&id).map_err(AppError::from)
+}
+
+/// Notes tab: pinned first, then most recently changed.
+#[tauri::command]
+pub fn notes_list(state: State<'_, AppState>) -> Vec<Note> {
+    state.notes.list()
+}
+
+/// Creates (empty id) or updates a note and returns it; `None` when it was empty and got removed.
+#[tauri::command]
+pub fn notes_save(state: State<'_, AppState>, note: Note) -> AppResult<Option<Note>> {
+    state.notes.save(note).map_err(AppError::from)
+}
+
+#[tauri::command]
+pub fn notes_delete(state: State<'_, AppState>, id: String) -> AppResult<()> {
+    state.notes.delete(&id).map_err(AppError::from)
 }
 
 #[tauri::command]

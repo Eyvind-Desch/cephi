@@ -14,6 +14,7 @@ mod launcher;
 mod llm;
 mod mcp;
 mod migrate;
+mod notes;
 mod search;
 mod secrets;
 mod services;
@@ -84,6 +85,9 @@ pub fn run() {
             commands::chat_archive_list,
             commands::chat_archive_open,
             commands::chat_archive_delete,
+            commands::notes_list,
+            commands::notes_save,
+            commands::notes_delete,
             commands::window_set_mode,
             commands::window_hide,
             commands::window_set_pinned,

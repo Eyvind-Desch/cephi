@@ -41,6 +41,11 @@ pub const TOOLS: &[(&str, &str)] = &[
     ("web/translate.json", asset!("defaults/tools/web/translate.json")),
     ("web/open_website.json", asset!("defaults/tools/web/open_website.json")),
     ("web/weather.json", asset!("defaults/tools/web/weather.json")),
+    ("notes/note_add.json", asset!("defaults/tools/notes/note_add.json")),
+    (
+        "notes/notes_search.json",
+        asset!("defaults/tools/notes/notes_search.json"),
+    ),
     ("system/datetime.json", asset!("defaults/tools/system/datetime.json")),
     (
         "system/clipboard_read.json",

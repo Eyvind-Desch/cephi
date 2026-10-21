@@ -124,6 +124,12 @@
     "level_missing": "Für set_volume fehlt \"level\" (0–100).",
     "level_out_of_range": "Lautstärke muss zwischen 0 und 100 liegen, nicht %{level}."
   },
+  "notes": {
+    "added": "In deinen Notizen gespeichert.",
+    "empty": "Was soll ich notieren?",
+    "save_failed": "Notiz konnte nicht gespeichert werden: %{error}",
+    "none_found": "Keine passenden Notizen."
+  },
   "radio": {
     "bluetooth": "Bluetooth",
     "wifi": "WLAN",

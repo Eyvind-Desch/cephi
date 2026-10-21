@@ -1,6 +1,6 @@
 //! Picks the tools a request needs when there are too many to send all.
 //!
-//! Every tool definition costs context: Cephi's 19 tools are about 1500 tokens, which a small local
+//! Every tool definition costs context: Cephi's 21 tools are about 1500 tokens, which a small local
 //! model has to read before it writes a single word. Above a limit, only the tools whose name, title
 //! or description share words with the request are offered, plus the ones already used in this chat
 //! (for follow-ups like "and close it again").

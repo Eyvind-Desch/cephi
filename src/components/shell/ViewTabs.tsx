@@ -1,13 +1,14 @@
 import clsx from "clsx";
-import { Globe, Languages, MessageSquare, type LucideIcon } from "lucide-react";
+import { Globe, Languages, MessageSquare, StickyNote, type LucideIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useUi, type PanelView } from "../../store/ui";
+import { TAB_VIEWS, useUi, type TabView } from "../../store/ui";
 
-const TABS: { view: PanelView; icon: LucideIcon; label: "tabs.chat" | "tabs.web" | "tabs.translate" }[] = [
-  { view: "chat", icon: MessageSquare, label: "tabs.chat" },
-  { view: "web", icon: Globe, label: "tabs.web" },
-  { view: "translate", icon: Languages, label: "tabs.translate" },
-];
+const TABS: Record<TabView, { icon: LucideIcon; label: `tabs.${TabView}` }> = {
+  chat: { icon: MessageSquare, label: "tabs.chat" },
+  web: { icon: Globe, label: "tabs.web" },
+  translate: { icon: Languages, label: "tabs.translate" },
+  notes: { icon: StickyNote, label: "tabs.notes" },
+};
 
 /** Icon switch between the main views. Sub-views like the keys page select none. */
 export function ViewTabs() {
@@ -17,18 +18,19 @@ export function ViewTabs() {
 
   return (
     <div role="tablist" className="flex items-center rounded-lg bg-sunken p-0.5">
-      {TABS.map((tab) => {
-        const selected = view === tab.view;
+      {TAB_VIEWS.map((tabView, index) => {
+        const tab = TABS[tabView];
+        const selected = view === tabView;
         const Icon = tab.icon;
         return (
           <button
-            key={tab.view}
+            key={tabView}
             type="button"
             role="tab"
             aria-selected={selected}
             aria-label={t(tab.label)}
-            title={t(tab.label)}
-            onClick={() => setView(tab.view)}
+            title={`${t(tab.label)} (Ctrl+${index + 1})`}
+            onClick={() => setView(tabView)}
             className={clsx(
               "grid size-7 place-items-center rounded-md transition-colors",
               selected ? "bg-raised text-fg shadow-sm shadow-black/10" : "text-subtle hover:text-fg",

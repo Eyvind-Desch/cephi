@@ -40,12 +40,13 @@
               "newChat",
               "prompt",
               "translate",
+              "notes",
               "web",
               "history",
               "tools",
               "settings"
             ],
-            "description": "show = bring Cephi up, selection = pick up the text marked in the foreground app, dictate = start/stop dictation, prompt = send \"text\"."
+            "description": "show = bring Cephi up, selection = pick up the text marked in the foreground app, dictate = start/stop dictation, notes = open a new note, prompt = send \"text\"."
           },
           "text": {
             "type": "string",

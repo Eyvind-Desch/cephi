@@ -9,8 +9,13 @@
   window.addEventListener(
     "keydown",
     (e) => {
-      if (!e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
-      const action = { n: "new-chat", e: "toggle-mode", l: "address" }[e.key.toLowerCase()];
+      if (!e.ctrlKey || e.altKey || e.metaKey) return;
+      let action;
+      if (e.key === "Tab") action = e.shiftKey ? "tab-prev" : "tab-next";
+      else if (e.shiftKey) return;
+      // `code`: the digit row is the same on every keyboard layout.
+      else if (/^Digit[1-4]$/.test(e.code)) action = "tab-" + e.code.slice(-1);
+      else action = { n: "new-chat", e: "toggle-mode", l: "address" }[e.key.toLowerCase()];
       if (!action) return;
       e.preventDefault();
       e.stopImmediatePropagation();
