@@ -3,6 +3,7 @@ name = "cephi"
 version = "0.4.0"
 description = "Always-available desktop assistant for Windows, powered by local Ollama models"
 authors = ["Eyvind"]
+license = "MIT"
 edition = "2021"
 publish = false
 

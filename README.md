@@ -56,8 +56,10 @@ You can also paste a picture from the clipboard (Snipping Tool, a copied image) 
 needs a model that can read pictures — Cephi knows which ones (cloud models, and local vision models
 like `llava` or `…vl`), and the attached screenshot offers to switch to one. Pictures stay in the session: a saved chat never keeps a screenshot.
 
-The panel has three tabs (icons top right): **Chat**, **Web** and **Translator**. The web tab shows Google and other pages inside
+The panel has four tabs (icons top right, `Ctrl+1` … `Ctrl+4`): **Chat**, **Web**, **Translator** and **Notes**. The web tab shows Google and other pages inside
 Cephi (address bar: search terms or an address) and can be enlarged; links from the chat and search results open there too.
+The notes tab keeps notes and checklists in the style of Google Keep (colours, pinning, search); "notiere …" /
+"note down …" in the chat saves one, and the AI can look them up.
 
 ### Quick actions (no AI, instant)
 
@@ -74,6 +76,28 @@ Cephi (address bar: search terms or an address) and can be enlarged; links from 
 
 Everything else goes to the AI, which can call the same tools. Custom quick actions: `triggers` in the
 tool JSON files ([docs/TOOLS.md](docs/TOOLS.md)). Settings (⋯ → *Settings*, or `/settings`): general options, API keys and MCP servers, all without editing JSON.
+
+## Getting started
+
+You need **Windows 10 or 11** and [Ollama](https://ollama.com). Everything else is optional.
+
+1. **Install Cephi:** download `Cephi_x.y.z_x64-setup.exe` from the
+   [Releases](../../releases) page (no admin rights needed), or build it yourself (see *Install* below).
+2. **Models:** the default profiles use three model names. Pull public models and give them those names:
+
+   ```powershell
+   ollama pull qwen2.5:3b;  ollama cp qwen2.5:3b assistant-fast   # "Fast"
+   ollama pull qwen3:4b;    ollama cp qwen3:4b assistant          # "Smart": best with tools
+   # "Thorough" (assistant-big) is optional: any large model, e.g. a 20–30B one, if your PC can take it
+   ```
+
+   Or point the profiles at models you already have: `profiles` in `settings.json` ([docs/PROVIDERS.md](docs/PROVIDERS.md)).
+3. **Press `Ctrl+Alt+Space`** and ask something.
+
+Optional extras, each with its own setup page: cloud models with your own API key
+([Claude, Gemini, OpenAI-compatible](docs/PROVIDERS.md)), web search ([SearXNG](docs/SEARCH.md)), offline translation
+([LibreTranslate](docs/TRANSLATE.md)) and dictation ([Whisper](docs/VOICE.md)). The last three run as local Docker
+containers in WSL, and Cephi starts them for you. Plus [Spotify](docs/SPOTIFY.md) and any [MCP server](docs/MCP.md).
 
 ## Configuration
 
@@ -132,3 +156,14 @@ Cargo never prunes it, so dependencies are compiled without debug information (`
 - [docs/VOICE.md](docs/VOICE.md): dictation (local Whisper)
 - [docs/MCP.md](docs/MCP.md): MCP servers (tools from other apps, Claude Desktop format)
 - [docs/PROVIDERS.md](docs/PROVIDERS.md): cloud AI providers (Claude, Gemini, OpenAI-compatible)
+
+## Contributing
+
+Ideas, bug reports and pull requests are welcome. Run `npm run check` before sending a pull request.
+[CLAUDE.md](CLAUDE.md) lists the project's rules (thin IPC layer, translation keys in both languages, …), and
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) shows where things live. New tools often need no Rust at all:
+a JSON file is enough ([docs/TOOLS.md](docs/TOOLS.md)).
+
+## License
+
+[MIT](LICENSE)
