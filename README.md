@@ -6,9 +6,6 @@
 - **Category:** tools
 - **Created:** 2026-09-16
 - **Status:** wip <!-- idea | wip | usable | done | abandoned -->
-- **Name:** from cephalopod, spoken "Kefi". Called *Orbit* until 2026-09-18; on first start Cephi takes over
-  the old settings, tools, chats and keys automatically (`src-tauri/src/migrate.rs`), and old tool files
-  (`$env:ORBIT_ARG_…`, `"target": "orbit"`) keep working.
 
 ## Why
 
