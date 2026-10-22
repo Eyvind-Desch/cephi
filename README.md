@@ -1,16 +1,23 @@
 # Cephi
 
-> Always-available desktop assistant for Windows: ask AI, search the web, and get things done on your PC.
-> Runs locally with Ollama.
+**Your whole PC, one hotkey away.** Press `Ctrl+Alt+Space` anywhere, say what you want, and Cephi does it.
+Runs on your own machine, free and open source.
 
-- **Category:** tools
-- **Created:** 2026-09-16
-- **Status:** wip <!-- idea | wip | usable | done | abandoned -->
+> *"play Another Love by Tom Odell"* · *"open display settings"* · *"turn it down"* ·
+> *"translate Eichhörnchen"* · *"? best budget mechanical keyboard"* · *"note down: call mum tomorrow"*
 
-## Why
+- 🎵 **Plays your music.** Ask for any song on Spotify, then pause, skip or set the volume, all without leaving what you're doing.
+- ⚙️ **Opens anything for you.** "Open Bluetooth settings", "change my wallpaper", "launch Discord": no more clicking through menus.
+- 🧠 **Any AI you like.** Local models with Ollama, so nothing leaves your PC. Or bring your own key for Claude, Gemini
+  or any OpenAI-compatible API. Switch with one click.
+- 🌐 **Search without switching windows.** A built-in browser, Google and YouTube, plus AI answers with their sources,
+  right where you already are.
+- 🌍 **Translate on the spot.** Select text in any app, press `Ctrl+Alt+T`: translate it, explain it, or ask about it.
+- 📝 **Notes and checklists** in the style of Google Keep, and the AI can save and find them for you.
+- 🔌 **Grows with you.** Connect any MCP server, or add your own tool with a single JSON file.
+  Screenshots and offline dictation are built in too.
 
-No need to open a separate browser window just to search for something or ask the AI.
-One hotkey, one input field: answer, search, or action ("öffne die Bluetooth-Einstellungen" / "open Bluetooth settings").
+**[⬇ Download for Windows](../../releases/latest)** · [Getting started](#getting-started) · [What it can do](#usage)
 
 ## Usage
 
