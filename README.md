@@ -118,7 +118,7 @@ the Windows display language). The UI and all messages are localized (English so
 
 ```powershell
 npm run app:build
-.\src-tauri\target\release\bundle\nsis\Cephi_0.4.0_x64-setup.exe
+.\src-tauri\target\release\bundle\nsis\Cephi_0.5.0_x64-setup.exe
 ```
 
 The installer needs no admin rights (installs for the current user, German or English). Settings, tools and
