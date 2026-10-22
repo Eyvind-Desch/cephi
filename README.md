@@ -1,10 +1,12 @@
-# Cephi
+<p align="center"><img src="docs/media/banner.png" alt="Cephi: your local AI assistant for Windows" width="100%"></p>
 
 **Your whole PC, one hotkey away.** Press `Ctrl+Alt+Space` anywhere, say what you want, and Cephi does it.
 Runs on your own machine, free and open source.
 
 > *"play Another Love by Tom Odell"* · *"open display settings"* · *"turn it down"* ·
 > *"translate Eichhörnchen"* · *"? best budget mechanical keyboard"* · *"note down: call mum tomorrow"*
+
+<p align="center"><img src="docs/media/demo.gif" alt="Cephi opening over the desktop, switching models and showing its settings" width="100%"></p>
 
 - 🎵 **Plays your music.** Ask for any song on Spotify, then pause, skip or set the volume, all without leaving what you're doing.
 - ⚙️ **Opens anything for you.** "Open Bluetooth settings", "change my wallpaper", "launch Discord": no more clicking through menus.
