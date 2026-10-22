@@ -159,7 +159,7 @@ Cargo never prunes it, so dependencies are compiled without debug information (`
 
 ## Contributing
 
-Ideas, bug reports and pull requests are welcome. Run `npm run check` before sending a pull request.
+Ideas, bug reports and pull requests are welcome; [CONTRIBUTING.md](CONTRIBUTING.md) explains the setup. Run `npm run check` before sending a pull request.
 [CLAUDE.md](CLAUDE.md) lists the project's rules (thin IPC layer, translation keys in both languages, …), and
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) shows where things live. New tools often need no Rust at all:
 a JSON file is enough ([docs/TOOLS.md](docs/TOOLS.md)).
