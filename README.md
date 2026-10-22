@@ -21,6 +21,12 @@ Runs on your own machine, free and open source.
 
 **[⬇ Download for Windows](../../releases/latest)** · [Getting started](#getting-started) · [What it can do](#usage)
 
+> [!NOTE]
+> **Early days, and looking for contributors!** Cephi is young and built by one person so far. Expect rough
+> edges, and please [report them](../../issues). If you'd like to help, there's plenty to do: new tools
+> (often just a JSON file), more languages, testing on other setups, UI polish. Start with
+> [CONTRIBUTING.md](CONTRIBUTING.md), or open an issue and say hi.
+
 ## Usage
 
 | Key | Action |
