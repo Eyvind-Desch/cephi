@@ -16,8 +16,6 @@ pub const AUTOSTART_ARG: &str = "--autostart";
 
 const RUN_KEY: &str = r"Software\Microsoft\Windows\CurrentVersion\Run";
 const VALUE_NAME: &str = "Cephi";
-/// Entry written before the rename; it points to the old program.
-const LEGACY_VALUE_NAME: &str = "Orbit";
 
 /// Mirrored in `src/lib/ipc.ts` (`AutostartState`).
 #[derive(Clone, Copy, Debug, Serialize)]
@@ -69,16 +67,6 @@ pub fn set(enabled: bool) -> Result<AutostartState, String> {
     }
     log::info!("autostart {}", if enabled { "enabled" } else { "disabled" });
     Ok(state())
-}
-
-/// Removes the entry of the old "Orbit" version, which would start a program that no longer exists.
-pub fn remove_legacy_entry() {
-    let key = wide(RUN_KEY);
-    let name = wide(LEGACY_VALUE_NAME);
-    // SAFETY: both strings are NUL-terminated UTF-16 buffers that outlive the call.
-    if unsafe { RegDeleteKeyValueW(HKEY_CURRENT_USER, key.as_ptr(), name.as_ptr()) } == ERROR_SUCCESS {
-        log::info!("removed the old Orbit autostart entry");
-    }
 }
 
 /// The command line Windows should run: this executable, quoted, plus the autostart flag.

@@ -36,6 +36,7 @@
   "bundle": {
     "active": true,
     "targets": ["nsis"],
+    "publisher": "Cephi",
     "shortDescription": "Always-available desktop assistant",
     "windows": {
       "nsis": {

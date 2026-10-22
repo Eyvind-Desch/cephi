@@ -46,11 +46,6 @@ impl ConfigPaths {
         Ok(Self::from_root(root))
     }
 
-    /// Whether a custom folder was set via the environment (e.g. for testing).
-    pub fn is_overridden() -> bool {
-        std::env::var_os(CONFIG_DIR_ENV).is_some()
-    }
-
     pub fn from_root(root: PathBuf) -> Self {
         Self {
             settings: root.join("settings.json"),

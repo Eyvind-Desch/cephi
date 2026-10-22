@@ -24,7 +24,6 @@ use crate::error::{AppError, AppResult};
 use crate::history::ChatStore;
 use crate::launcher::AppIndex;
 use crate::llm::{OllamaClient, LOCAL_PROVIDER_ID};
-use crate::migrate;
 use crate::notes::NoteStore;
 use crate::state::AppState;
 
@@ -32,9 +31,6 @@ pub const EVENT_CONFIG_CHANGED: &str = "cephi://config-changed";
 
 pub fn setup(app: &AppHandle) -> AppResult<()> {
     let paths = ConfigPaths::resolve(app)?;
-    if !ConfigPaths::is_overridden() {
-        migrate::from_orbit(app, &paths.root);
-    }
     paths.ensure_initialized()?;
     log::info!("config folder: {}", paths.root.display());
 

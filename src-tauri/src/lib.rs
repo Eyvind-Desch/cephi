@@ -13,7 +13,6 @@ mod integrations;
 mod launcher;
 mod llm;
 mod mcp;
-mod migrate;
 mod notes;
 mod search;
 mod secrets;
