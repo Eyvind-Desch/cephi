@@ -38,5 +38,10 @@ The short version lives in [CLAUDE.md](CLAUDE.md); the most important points:
 - **A translation:** translate `src/i18n/locales/en.ts` and `src-tauri/locales/en.json`, then add the language
   next to `en`/`de` in `src/i18n/index.ts`, `src-tauri/src/i18n.rs` and the language setting.
 - **Docs:** anything that confused you while setting up is worth fixing.
+- **Make existing features better:** use Cephi for a day. Whatever felt slow, clumsy or surprising
+  (a tool that misunderstood you, an answer that took too long, a missing option) is worth an issue or a fix.
+- **Improve the UI:** spacing, readability, animations, keyboard handling, accessibility, light/dark details.
+  For visual changes, please add a before/after screenshot to the pull request. `npm run dev` shows the UI
+  in a browser with demo data, so you can work on it without the backend.
 
 Look for issues labelled `good first issue`, or open one to ask before starting something big.

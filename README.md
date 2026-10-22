@@ -23,8 +23,9 @@ Runs on your own machine, free and open source.
 
 > [!NOTE]
 > **Early days, and looking for contributors!** Cephi is young and built by one person so far. Expect rough
-> edges, and please [report them](../../issues). If you'd like to help, there's plenty to do: new tools
-> (often just a JSON file), more languages, testing on other setups, UI polish. Pick a
+> edges, and please [report them](../../issues). If you'd like to help, there's plenty to do: try the
+> existing features and make them better, improve the UI, add new tools (often just a JSON file) or
+> languages, test on other setups. Pick a
 > [good first issue](../../issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22), read
 > [CONTRIBUTING.md](CONTRIBUTING.md), or open an issue and say hi.
 
